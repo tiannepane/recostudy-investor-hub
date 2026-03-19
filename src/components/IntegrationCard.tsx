@@ -9,7 +9,7 @@ interface IntegrationCardProps {
   animateScale?: boolean;
 }
 
-const IntegrationCard = ({ name, logoSrc, buttonState, animateScale }: IntegrationCardProps) => {
+const IntegrationCard = ({ name, logoSrc, buttonState }: IntegrationCardProps) => {
   const buttonStyles: Record<ButtonState, React.CSSProperties> = {
     connect: {
       border: "1px solid hsl(var(--card-border))",
