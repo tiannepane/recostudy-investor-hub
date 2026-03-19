@@ -15,7 +15,7 @@ const agentMessages = [
 const Index = () => {
   const [elapsed, setElapsed] = useState(0);
   const [visitedItems, setVisitedItems] = useState<string[]>([]);
-  const [phase, setPhase] = useState<1 | 2>(1);
+  const [demoStage, setDemoStage] = useState<0 | 1>(0);
 
   const [files, setFiles] = useState<FileItem[]>([
     { name: "6 building inspection photos", detail: "Images · 24.5 MB total", type: "image", visible: false, done: false },
@@ -28,7 +28,7 @@ const Index = () => {
   const reset = useCallback(() => {
     setElapsed(0);
     setVisitedItems([]);
-    setPhase(1);
+    setDemoStage(0);
     setFiles((f) => f.map((file) => ({ ...file, visible: false, done: false })));
     setYardiState("connect");
   }, []);
@@ -57,8 +57,8 @@ const Index = () => {
     if (e >= 4900) setFiles((f) => f.map((file, i) => (i === 2 ? { ...file, visible: true } : file)));
     if (e >= 5900) setFiles((f) => f.map((file, i) => (i === 2 ? { ...file, done: true } : file)));
 
-    // Phase 2 at 7s (1s after last checkmark at 5.9s)
-    if (e >= 7000) setPhase(2);
+    // Transition to Stage 1 at 7s (1s after last checkmark)
+    if (e >= 7000) setDemoStage(1);
 
     // Yardi connecting at 7.5s, connected at 8.3s
     if (e >= 7500 && e < 8300) setYardiState("connecting");
@@ -78,62 +78,68 @@ const Index = () => {
         <div className="mx-auto" style={{ maxWidth: 1200, padding: 60 }}>
           <TopBar onReplay={reset} />
 
-          {/* Agent Status */}
           <div className="mb-8">
             <AgentStatus messages={agentMessages} elapsed={elapsed} />
           </div>
 
-          {/* Content area */}
-          <motion.div
-            layout
-            transition={{ type: "spring", stiffness: 200, damping: 30 }}
-            className={phase === 1
-              ? "flex flex-col items-center justify-center"
-              : "flex gap-[3%]"
-            }
-            style={{ minHeight: phase === 1 ? 420 : "auto" }}
-          >
-            {/* Left / Center column */}
-            <motion.div
-              layout
-              transition={{ type: "spring", stiffness: 200, damping: 30 }}
-              style={{ width: phase === 1 ? "100%" : "62%" }}
-              className={phase === 1 ? "flex flex-col items-center" : ""}
-            >
-              <motion.h1
-                layout="position"
-                transition={{ type: "spring", stiffness: 200, damping: 30 }}
-                className={`text-[28px] font-bold text-heading mb-2 ${phase === 1 ? "text-center" : "text-left w-full"}`}
-              >
+          {/* Stage 0: Centered Ingestion */}
+          {demoStage === 0 && (
+            <div className="flex flex-col items-center justify-center" style={{ minHeight: 420 }}>
+              <h1 className="text-[28px] font-bold text-heading mb-2 text-center">
                 Connect your building data
-              </motion.h1>
-              <motion.p
-                layout="position"
-                transition={{ type: "spring", stiffness: 200, damping: 30 }}
-                className={`text-[15px] text-body-text mb-6 ${phase === 1 ? "text-center" : "text-left w-full"}`}
-                style={{ maxWidth: phase === 1 ? 480 : 500 }}
+              </h1>
+              <p
+                className="text-[15px] text-body-text mb-6 text-center"
+                style={{ maxWidth: 480 }}
               >
                 Upload documents, photos, and voice notes or connect directly to your property management software.
-              </motion.p>
+              </p>
 
               <motion.div
-                layout
-                transition={{ type: "spring", stiffness: 200, damping: 30 }}
-                className="card-base p-6"
-                style={{ maxWidth: phase === 1 ? 540 : "none", width: "100%" }}
+                layoutId="file-card"
+                className="rounded-xl border border-border bg-card/50 p-6"
+                style={{
+                  maxWidth: 540,
+                  width: "100%",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                }}
               >
                 <FileList files={files} />
               </motion.div>
-            </motion.div>
+            </div>
+          )}
 
-            {/* Right column - integrations */}
-            <AnimatePresence>
-              {phase === 2 && (
+          {/* Stage 1: Full Dashboard */}
+          {demoStage === 1 && (
+            <div className="flex gap-20">
+              {/* Left column */}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-[28px] font-bold text-heading mb-2">
+                  Connect your building data
+                </h1>
+                <p
+                  className="text-[15px] text-body-text mb-6"
+                  style={{ maxWidth: 500 }}
+                >
+                  Upload documents, photos, and voice notes or connect directly to your property management software.
+                </p>
+
+                <motion.div
+                  layoutId="file-card"
+                  className="rounded-xl border border-border bg-card/50 p-6"
+                  style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+                >
+                  <FileList files={files} />
+                </motion.div>
+              </div>
+
+              {/* Right column - integrations */}
+              <AnimatePresence>
                 <motion.div
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 30, delay: 0.1 }}
-                  style={{ width: "35%" }}
+                  transition={{ type: "spring", stiffness: 200, damping: 28, delay: 0.15 }}
+                  style={{ width: 320, flexShrink: 0 }}
                 >
                   <p
                     className="text-[11px] font-medium text-breadcrumb mb-3"
@@ -154,9 +160,9 @@ const Index = () => {
                     />
                   </div>
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+              </AnimatePresence>
+            </div>
+          )}
         </div>
       </main>
     </div>
