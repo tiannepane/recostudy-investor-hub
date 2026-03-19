@@ -15,6 +15,12 @@ const fileTypeStyles = {
   voice: { bg: "#F3E8FF", icon: Mic, iconColor: "#8B5CF6" },
 };
 
+const springTransition = {
+  type: "spring" as const,
+  stiffness: 300,
+  damping: 24,
+};
+
 const FileList = ({ files }: { files: FileItem[] }) => {
   return (
     <div className="flex flex-col gap-2">
