@@ -55,7 +55,7 @@ const IntegrationCard = ({ name, logoSrc, buttonState }: IntegrationCardProps) =
       >
         {buttonText[buttonState]}
       </button>
-    </motion.div>
+    </div>
   );
 };
 
