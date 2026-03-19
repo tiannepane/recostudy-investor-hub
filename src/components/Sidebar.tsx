@@ -52,7 +52,7 @@ const Sidebar = ({ activeItem, visitedItems }: SidebarProps) => {
 
         {/* Nav Items */}
         <nav className="px-3 flex flex-col gap-1">
-          {navItems.map((item) => {
+          {navItemsList.map((item) => {
             const isActive = item.id === activeItem;
             const isVisited = visitedItems.includes(item.id);
             const Icon = item.icon;
