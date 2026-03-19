@@ -30,9 +30,9 @@ const FileList = ({ files }: { files: FileItem[] }) => {
             file.visible && (
               <motion.div
                 key={file.name}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 16, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={springTransition}
                 className="flex items-center gap-3"
                 style={{ height: 56 }}
               >
@@ -47,7 +47,7 @@ const FileList = ({ files }: { files: FileItem[] }) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-medium text-heading truncate">{file.name}</p>
-                  <p className="text-[12px] text-breadcrumb">{file.detail}</p>
+                  <p className="text-[12px] font-mono text-breadcrumb">{file.detail}</p>
                 </div>
                 <div className="flex-shrink-0">
                   {file.done ? (
