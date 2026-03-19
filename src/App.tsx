@@ -5,6 +5,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import Inventory from "./pages/Inventory.tsx";
+import Financials from "./pages/Financials.tsx";
+import Projects from "./pages/Projects.tsx";
+import Marketplace from "./pages/Marketplace.tsx";
+import Funding from "./pages/Funding.tsx";
+import Insurance from "./pages/Insurance.tsx";
+import Reports from "./pages/Reports.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -18,6 +24,12 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/inventory" element={<Inventory />} />
+          <Route path="/financials" element={<Financials />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/funding" element={<Funding />} />
+          <Route path="/insurance" element={<Insurance />} />
+          <Route path="/reports" element={<Reports />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
