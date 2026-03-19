@@ -35,11 +35,9 @@ const IntegrationCard = ({ name, logoSrc, buttonState }: IntegrationCardProps) =
   };
 
   return (
-    <motion.div
+    <div
       className="card-base flex flex-col items-center justify-center"
       style={{ height: 160 }}
-      animate={animateScale ? { scale: [1, 1.015, 1] } : {}}
-      transition={{ duration: 0.3 }}
     >
       <img
         src={logoSrc}
