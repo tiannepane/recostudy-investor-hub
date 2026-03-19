@@ -36,20 +36,22 @@ const IntegrationCard = ({ name, logoSrc, buttonState }: IntegrationCardProps) =
 
   return (
     <div
-      className="card-base flex flex-col items-center justify-center"
-      style={{ height: 160 }}
+      className="rounded-xl border border-border bg-card/50 flex flex-col items-center justify-center"
+      style={{ height: 160, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
     >
       <img
         src={logoSrc}
         alt={name}
-        className="rounded-lg mb-3"
+        className="rounded-lg mb-3 pointer-events-none select-none"
         style={{ width: 40, height: 40 }}
+        draggable={false}
       />
       <p className="text-[15px] font-medium text-heading mb-3">{name}</p>
       <button
-        className="text-[12px] rounded-md transition-all duration-400 cursor-default"
+        className="text-[12px] rounded-md cursor-default"
         style={{
           padding: "6px 16px",
+          transition: "background 300ms, color 300ms, border-color 300ms",
           ...buttonStyles[buttonState],
         }}
       >
