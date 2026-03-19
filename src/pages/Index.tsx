@@ -57,7 +57,7 @@ const Index = () => {
     if (e >= 4900) setFiles((f) => f.map((file, i) => (i === 2 ? { ...file, visible: true } : file)));
     if (e >= 5900) setFiles((f) => f.map((file, i) => (i === 2 ? { ...file, done: true } : file)));
 
-    // Phase 2 at 7s
+    // Phase 2 at 7s (1s after last checkmark at 5.9s)
     if (e >= 7000) setPhase(2);
 
     // Yardi connecting at 7.5s, connected at 8.3s
@@ -75,7 +75,7 @@ const Index = () => {
       <Sidebar activeItem="overview" visitedItems={visitedItems} />
 
       <main className="flex-1" style={{ marginLeft: 260 }}>
-        <div className="p-10 mx-auto" style={{ maxWidth: 1100 }}>
+        <div className="mx-auto" style={{ maxWidth: 1200, padding: 60 }}>
           <TopBar onReplay={reset} />
 
           {/* Agent Status */}
@@ -83,30 +83,34 @@ const Index = () => {
             <AgentStatus messages={agentMessages} elapsed={elapsed} />
           </div>
 
-          {/* Content */}
+          {/* Content area */}
           <motion.div
             layout
-            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-            className={phase === 1 ? "flex flex-col items-center" : "flex gap-[3%]"}
+            transition={{ type: "spring", stiffness: 200, damping: 30 }}
+            className={phase === 1
+              ? "flex flex-col items-center justify-center"
+              : "flex gap-[3%]"
+            }
+            style={{ minHeight: phase === 1 ? 420 : "auto" }}
           >
             {/* Left / Center column */}
             <motion.div
               layout
-              transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+              transition={{ type: "spring", stiffness: 200, damping: 30 }}
               style={{ width: phase === 1 ? "100%" : "62%" }}
               className={phase === 1 ? "flex flex-col items-center" : ""}
             >
               <motion.h1
-                layout
-                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                className={`text-[28px] font-bold text-heading mb-2 ${phase === 1 ? "text-center" : "text-left"}`}
+                layout="position"
+                transition={{ type: "spring", stiffness: 200, damping: 30 }}
+                className={`text-[28px] font-bold text-heading mb-2 ${phase === 1 ? "text-center" : "text-left w-full"}`}
               >
                 Connect your building data
               </motion.h1>
               <motion.p
-                layout
-                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                className={`text-[15px] text-body-text mb-6 ${phase === 1 ? "text-center" : "text-left"}`}
+                layout="position"
+                transition={{ type: "spring", stiffness: 200, damping: 30 }}
+                className={`text-[15px] text-body-text mb-6 ${phase === 1 ? "text-center" : "text-left w-full"}`}
                 style={{ maxWidth: phase === 1 ? 480 : 500 }}
               >
                 Upload documents, photos, and voice notes or connect directly to your property management software.
@@ -114,9 +118,9 @@ const Index = () => {
 
               <motion.div
                 layout
-                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ type: "spring", stiffness: 200, damping: 30 }}
                 className="card-base p-6"
-                style={{ maxWidth: phase === 1 ? 520 : "none", width: "100%" }}
+                style={{ maxWidth: phase === 1 ? 540 : "none", width: "100%" }}
               >
                 <FileList files={files} />
               </motion.div>
@@ -126,9 +130,9 @@ const Index = () => {
             <AnimatePresence>
               {phase === 2 && (
                 <motion.div
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{ type: "spring", stiffness: 200, damping: 30, delay: 0.1 }}
                   style={{ width: "35%" }}
                 >
                   <p
