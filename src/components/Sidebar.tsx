@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard, Package, DollarSign, Wrench, Store, Landmark, Shield, FileText, Check 
 } from "lucide-react";
