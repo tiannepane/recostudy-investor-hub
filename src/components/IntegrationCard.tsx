@@ -9,7 +9,7 @@ interface IntegrationCardProps {
   animateScale?: boolean;
 }
 
-const IntegrationCard = ({ name, logoSrc, buttonState, animateScale }: IntegrationCardProps) => {
+const IntegrationCard = ({ name, logoSrc, buttonState }: IntegrationCardProps) => {
   const buttonStyles: Record<ButtonState, React.CSSProperties> = {
     connect: {
       border: "1px solid hsl(var(--card-border))",
@@ -35,11 +35,9 @@ const IntegrationCard = ({ name, logoSrc, buttonState, animateScale }: Integrati
   };
 
   return (
-    <motion.div
+    <div
       className="card-base flex flex-col items-center justify-center"
       style={{ height: 160 }}
-      animate={animateScale ? { scale: [1, 1.015, 1] } : {}}
-      transition={{ duration: 0.3 }}
     >
       <img
         src={logoSrc}
@@ -57,7 +55,7 @@ const IntegrationCard = ({ name, logoSrc, buttonState, animateScale }: Integrati
       >
         {buttonText[buttonState]}
       </button>
-    </motion.div>
+    </div>
   );
 };
 

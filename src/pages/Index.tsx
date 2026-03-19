@@ -1,28 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Camera, FileText, Mic } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
 import AgentStatus from "@/components/AgentStatus";
-import { UploadCard } from "@/components/UploadCard";
-import type { UploadZone, FileItem } from "@/components/UploadCard";
+import { FileList } from "@/components/FileList";
+import type { FileItem } from "@/components/FileList";
 import IntegrationCard from "@/components/IntegrationCard";
 import type { ButtonState } from "@/components/IntegrationCard";
 
 const agentMessages = [
-  { text: "Ingestion Agent — processing 3 files...", color: "gray" as const, startTime: 9000 },
-  { text: "Ingestion Agent — all files processed ✓", color: "green" as const, startTime: 11000 },
+  { text: "Ingestion Agent — all files processed ✓", color: "green" as const, startTime: 9500 },
 ];
 
 const Index = () => {
   const [elapsed, setElapsed] = useState(0);
   const [visitedItems, setVisitedItems] = useState<string[]>([]);
-
-  const [zones, setZones] = useState<UploadZone[]>([
-    { label: "Photos", icon: Camera, highlighted: false },
-    { label: "Documents", icon: FileText, highlighted: false },
-    { label: "Voice Notes", icon: Mic, highlighted: false },
-  ]);
+  const [phase, setPhase] = useState<1 | 2>(1);
 
   const [files, setFiles] = useState<FileItem[]>([
     { name: "6 building inspection photos", detail: "Images · 24.5 MB total", type: "image", visible: false, done: false },
@@ -31,15 +24,13 @@ const Index = () => {
   ]);
 
   const [yardiState, setYardiState] = useState<ButtonState>("connect");
-  const [yardiScale, setYardiScale] = useState(false);
 
   const reset = useCallback(() => {
     setElapsed(0);
     setVisitedItems([]);
-    setZones((z) => z.map((zone) => ({ ...zone, highlighted: false })));
+    setPhase(1);
     setFiles((f) => f.map((file) => ({ ...file, visible: false, done: false })));
     setYardiState("connect");
-    setYardiScale(false);
   }, []);
 
   // Timer
@@ -50,53 +41,31 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Animation sequence driven by elapsed time
+  // Animation sequence
   useEffect(() => {
     const e = elapsed;
 
-    // Photos zone highlight at 1500ms
-    if (e >= 1500 && e < 2100) {
-      setZones((z) => z.map((zone, i) => ({ ...zone, highlighted: i === 0 })));
-    } else if (e >= 2100 && e < 3200) {
-      setZones((z) => z.map((zone) => ({ ...zone, highlighted: false })));
-    }
+    // File 1: appear 1.5s, done 2.5s
+    if (e >= 1500) setFiles((f) => f.map((file, i) => (i === 0 ? { ...file, visible: true } : file)));
+    if (e >= 2500) setFiles((f) => f.map((file, i) => (i === 0 ? { ...file, done: true } : file)));
 
-    // File 1 appears at 2000ms, done at 2600ms
-    if (e >= 2000) setFiles((f) => f.map((file, i) => (i === 0 ? { ...file, visible: true } : file)));
-    if (e >= 2600) setFiles((f) => f.map((file, i) => (i === 0 ? { ...file, done: true } : file)));
+    // File 2: appear 3.2s, done 4.2s
+    if (e >= 3200) setFiles((f) => f.map((file, i) => (i === 1 ? { ...file, visible: true } : file)));
+    if (e >= 4200) setFiles((f) => f.map((file, i) => (i === 1 ? { ...file, done: true } : file)));
 
-    // Documents zone highlight at 3200ms
-    if (e >= 3200 && e < 3800) {
-      setZones((z) => z.map((zone, i) => ({ ...zone, highlighted: i === 1 })));
-    } else if (e >= 3800 && e < 4900) {
-      setZones((z) => z.map((zone) => ({ ...zone, highlighted: false })));
-    }
+    // File 3: appear 4.9s, done 5.9s
+    if (e >= 4900) setFiles((f) => f.map((file, i) => (i === 2 ? { ...file, visible: true } : file)));
+    if (e >= 5900) setFiles((f) => f.map((file, i) => (i === 2 ? { ...file, done: true } : file)));
 
-    // File 2 at 3700ms, done at 4300ms
-    if (e >= 3700) setFiles((f) => f.map((file, i) => (i === 1 ? { ...file, visible: true } : file)));
-    if (e >= 4300) setFiles((f) => f.map((file, i) => (i === 1 ? { ...file, done: true } : file)));
+    // Phase 2 at 7s
+    if (e >= 7000) setPhase(2);
 
-    // Voice zone highlight at 4900ms
-    if (e >= 4900 && e < 5500) {
-      setZones((z) => z.map((zone, i) => ({ ...zone, highlighted: i === 2 })));
-    } else if (e >= 5500) {
-      setZones((z) => z.map((zone) => ({ ...zone, highlighted: false })));
-    }
+    // Yardi connecting at 7.5s, connected at 8.3s
+    if (e >= 7500 && e < 8300) setYardiState("connecting");
+    if (e >= 8300) setYardiState("connected");
 
-    // File 3 at 5400ms, done at 6000ms
-    if (e >= 5400) setFiles((f) => f.map((file, i) => (i === 2 ? { ...file, visible: true } : file)));
-    if (e >= 6000) setFiles((f) => f.map((file, i) => (i === 2 ? { ...file, done: true } : file)));
-
-    // Yardi at 7000ms
-    if (e >= 7000 && e < 7800) setYardiState("connecting");
-    if (e >= 7800) {
-      setYardiState("connected");
-      setYardiScale(true);
-      setTimeout(() => setYardiScale(false), 300);
-    }
-
-    // Mark overview visited at 12000ms
-    if (e >= 12000 && !visitedItems.includes("overview")) {
+    // Mark overview visited at 11s
+    if (e >= 11000 && !visitedItems.includes("overview")) {
       setVisitedItems(["overview"]);
     }
   }, [elapsed, visitedItems]);
@@ -114,46 +83,75 @@ const Index = () => {
             <AgentStatus messages={agentMessages} elapsed={elapsed} />
           </div>
 
-          {/* Two columns */}
+          {/* Content */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }}
-            className="flex gap-[3%]"
+            layout
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+            className={phase === 1 ? "flex flex-col items-center" : "flex gap-[3%]"}
           >
-            {/* Left column - 62% */}
-            <div style={{ width: "62%" }}>
-              <h1 className="text-[28px] font-bold text-heading mb-2">
-                Connect your building data
-              </h1>
-              <p className="text-[15px] text-body-text mb-6" style={{ maxWidth: 500 }}>
-                Upload documents, photos, and voice notes or connect directly to your property management software.
-              </p>
-              <UploadCard zones={zones} files={files} />
-            </div>
-
-            {/* Right column - 35% */}
-            <div style={{ width: "35%" }}>
-              <p
-                className="text-[11px] font-medium text-breadcrumb mb-3"
-                style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}
+            {/* Left / Center column */}
+            <motion.div
+              layout
+              transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+              style={{ width: phase === 1 ? "100%" : "62%" }}
+              className={phase === 1 ? "flex flex-col items-center" : ""}
+            >
+              <motion.h1
+                layout
+                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                className={`text-[28px] font-bold text-heading mb-2 ${phase === 1 ? "text-center" : "text-left"}`}
               >
-                Integrations
-              </p>
-              <div className="flex flex-col gap-3">
-                <IntegrationCard
-                  name="Yardi"
-                  logoSrc="https://cdn.brandfetch.io/idH0TkFcNd/w/400/h/400/theme/dark/icon.jpeg"
-                  buttonState={yardiState}
-                  animateScale={yardiScale}
-                />
-                <IntegrationCard
-                  name="AppFolio"
-                  logoSrc="https://cdn.brandfetch.io/idpLibLBbM/w/400/h/400/theme/dark/icon.jpeg"
-                  buttonState="connect"
-                />
-              </div>
-            </div>
+                Connect your building data
+              </motion.h1>
+              <motion.p
+                layout
+                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                className={`text-[15px] text-body-text mb-6 ${phase === 1 ? "text-center" : "text-left"}`}
+                style={{ maxWidth: phase === 1 ? 480 : 500 }}
+              >
+                Upload documents, photos, and voice notes or connect directly to your property management software.
+              </motion.p>
+
+              <motion.div
+                layout
+                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                className="card-base p-6"
+                style={{ maxWidth: phase === 1 ? 520 : "none", width: "100%" }}
+              >
+                <FileList files={files} />
+              </motion.div>
+            </motion.div>
+
+            {/* Right column - integrations */}
+            <AnimatePresence>
+              {phase === 2 && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                  style={{ width: "35%" }}
+                >
+                  <p
+                    className="text-[11px] font-medium text-breadcrumb mb-3"
+                    style={{ letterSpacing: "0.08em", textTransform: "uppercase" }}
+                  >
+                    Integrations
+                  </p>
+                  <div className="flex flex-col gap-3">
+                    <IntegrationCard
+                      name="Yardi"
+                      logoSrc="https://cdn.brandfetch.io/idH0TkFcNd/w/400/h/400/theme/dark/icon.jpeg"
+                      buttonState={yardiState}
+                    />
+                    <IntegrationCard
+                      name="AppFolio"
+                      logoSrc="https://cdn.brandfetch.io/idpLibLBbM/w/400/h/400/theme/dark/icon.jpeg"
+                      buttonState="connect"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </div>
       </main>
