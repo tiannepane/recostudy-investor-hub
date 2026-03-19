@@ -60,7 +60,8 @@ const Sidebar = ({ activeItem, visitedItems }: SidebarProps) => {
             return (
               <div
                 key={item.id}
-                className="relative flex items-center gap-3 rounded-md transition-colors cursor-pointer"
+                onClick={() => navigate(item.path)}
+                className="relative flex items-center gap-3 rounded-md transition-colors cursor-pointer hover:bg-sidebar-bg-hover"
                 style={{
                   height: 44,
                   paddingLeft: isActive ? 17 : 20,
