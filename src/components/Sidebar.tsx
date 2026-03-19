@@ -8,11 +8,12 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   id: string;
+  path: string;
 }
 
-const navItems: NavItem[] = [
-  { label: "Overview", icon: LayoutDashboard, id: "overview" },
-  { label: "Inventory", icon: Package, id: "inventory" },
+const navItemsList: NavItem[] = [
+  { label: "Overview", icon: LayoutDashboard, id: "overview", path: "/" },
+  { label: "Inventory", icon: Package, id: "inventory", path: "/inventory" },
   { label: "Financials", icon: DollarSign, id: "financials" },
   { label: "Projects", icon: Wrench, id: "projects" },
   { label: "Marketplace", icon: Store, id: "marketplace" },
