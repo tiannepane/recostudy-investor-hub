@@ -10,7 +10,7 @@ const TopBar = ({ onReplay, breadcrumb = "Buildings › ABC Condominium Associat
     <div className="flex items-center justify-between mb-8">
       <p className="text-[13px] text-breadcrumb">
         {breadcrumb}
-
+      </p>
       <div className="flex items-center gap-4">
         <button
           onClick={onReplay}
