@@ -14,12 +14,12 @@ interface NavItem {
 const navItemsList: NavItem[] = [
   { label: "Overview", icon: LayoutDashboard, id: "overview", path: "/" },
   { label: "Inventory", icon: Package, id: "inventory", path: "/inventory" },
-  { label: "Financials", icon: DollarSign, id: "financials" },
-  { label: "Projects", icon: Wrench, id: "projects" },
-  { label: "Marketplace", icon: Store, id: "marketplace" },
-  { label: "Funding", icon: Landmark, id: "funding" },
-  { label: "Insurance", icon: Shield, id: "insurance" },
-  { label: "Reports", icon: FileText, id: "reports" },
+  { label: "Financials", icon: DollarSign, id: "financials", path: "/financials" },
+  { label: "Projects", icon: Wrench, id: "projects", path: "/projects" },
+  { label: "Marketplace", icon: Store, id: "marketplace", path: "/marketplace" },
+  { label: "Funding", icon: Landmark, id: "funding", path: "/funding" },
+  { label: "Insurance", icon: Shield, id: "insurance", path: "/insurance" },
+  { label: "Reports", icon: FileText, id: "reports", path: "/reports" },
 ];
 
 interface SidebarProps {
@@ -28,8 +28,9 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ activeItem, visitedItems }: SidebarProps) => {
-  const currentIndex = navItems.findIndex((item) => item.id === activeItem);
-  const progress = (currentIndex + 1) / navItems.length;
+  const navigate = useNavigate();
+  const currentIndex = navItemsList.findIndex((item) => item.id === activeItem);
+  const progress = (currentIndex + 1) / navItemsList.length;
 
   return (
     <aside
