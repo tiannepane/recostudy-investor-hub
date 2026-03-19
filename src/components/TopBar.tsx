@@ -2,14 +2,14 @@ import { RotateCcw } from "lucide-react";
 
 interface TopBarProps {
   onReplay?: () => void;
+  breadcrumb?: string;
 }
 
-const TopBar = ({ onReplay }: TopBarProps) => {
+const TopBar = ({ onReplay, breadcrumb = "Buildings › ABC Condominium Association, Inc. › Overview" }: TopBarProps) => {
   return (
     <div className="flex items-center justify-between mb-8">
       <p className="text-[13px] text-breadcrumb">
-        Buildings › ABC Condominium Association, Inc. › Overview
-      </p>
+        {breadcrumb}
 
       <div className="flex items-center gap-4">
         <button
