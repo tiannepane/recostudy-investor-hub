@@ -92,7 +92,7 @@ const Sidebar = ({ activeItem, visitedItems }: SidebarProps) => {
       {/* Progress */}
       <div className="px-6 pb-6">
         <p className="text-[12px] text-sidebar-text mb-2">
-          {currentIndex + 1} of {navItems.length}
+          {currentIndex + 1} of {navItemsList.length}
         </p>
         <div className="h-1 rounded-full" style={{ background: "hsl(var(--sidebar-progress-bg))" }}>
           <div
