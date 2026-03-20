@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, Landmark, Shield } from "lucide-react";
 import ConditionIndicator from "@/components/ConditionIndicator";
+import type { Condition } from "@/components/ConditionIndicator";
 import {
   AreaChart,
   Area,
@@ -15,9 +16,144 @@ import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
 import AgentStatus from "@/components/AgentStatus";
 
+/* ─── Animated counter hook ────────────────────────────── */
+
+function useCountUp(target: number, start: boolean, duration = 1500, delay = 0) {
+  const [value, setValue] = useState(0);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!start) return;
+    let startTime: number | null = null;
+    const delayTimer = setTimeout(() => {
+      const tick = (now: number) => {
+        if (startTime === null) startTime = now;
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / duration, 1);
+        // ease-out cubic
+        const eased = 1 - Math.pow(1 - t, 3);
+        setValue(Math.round(eased * target));
+        if (t < 1) {
+          rafRef.current = requestAnimationFrame(tick);
+        } else {
+          setValue(target);
+        }
+      };
+      rafRef.current = requestAnimationFrame(tick);
+    }, delay);
+
+    return () => {
+      clearTimeout(delayTimer);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [start, target, duration, delay]);
+
+  return value;
+}
+
+/* ─── Metric card with counting ────────────────────────── */
+
+type MetricCardProps = {
+  label: string;
+  index: number;
+  start: boolean;
+};
+
+const FundCard = ({ label, index, start }: MetricCardProps) => {
+  const v = useCountUp(370000, start, 1500, index * 150);
+  return (
+    <CardShell label={label} index={index} start={start}>
+      <p className="font-mono text-heading" style={{ fontSize: 28, fontWeight: 500, lineHeight: 1 }}>
+        ${v.toLocaleString()}
+      </p>
+    </CardShell>
+  );
+};
+
+const PercentCard = ({ label, index, start }: MetricCardProps) => {
+  const raw = useCountUp(135, start, 1500, index * 150); // ×10 for one decimal
+  const display = (raw / 10).toFixed(1);
+  return (
+    <CardShell label={label} index={index} start={start}>
+      <p className="font-mono text-heading" style={{ fontSize: 28, fontWeight: 500, lineHeight: 1 }}>
+        {display}%
+      </p>
+      <div style={{ marginTop: 6 }}>
+        <ConditionIndicator condition="Poor" />
+      </div>
+    </CardShell>
+  );
+};
+
+const YearCard = ({ label, index, start }: MetricCardProps) => {
+  const v = useCountUp(2028, start, 1500, index * 150);
+  // clamp to valid year range
+  const display = Math.max(2024, v);
+  return (
+    <CardShell label={label} index={index} start={start}>
+      <p className="font-mono text-heading" style={{ fontSize: 28, fontWeight: 500, lineHeight: 1 }}>
+        {display}
+      </p>
+    </CardShell>
+  );
+};
+
+const RecoCard = ({ label, index, start }: MetricCardProps) => {
+  const v = useCountUp(47, start, 1500, index * 150);
+  return (
+    <CardShell label={label} index={index} start={start}>
+      <p className="font-mono text-heading" style={{ fontSize: 28, fontWeight: 500, lineHeight: 1 }}>
+        {v}
+      </p>
+      <div style={{ marginTop: 6 }}>
+        <ConditionIndicator condition="Poor" />
+      </div>
+    </CardShell>
+  );
+};
+
+/* ─── Card shell ────────────────────────────────────────── */
+
+const CardShell = ({
+  label,
+  index,
+  start,
+  children,
+}: MetricCardProps & { children: React.ReactNode }) => (
+  <AnimatePresence>
+    {start && (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: "easeOut", delay: index * 0.08 }}
+        className="rounded-xl border border-border bg-card/50"
+        style={{ padding: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", flex: "1 1 0", minWidth: 0 }}
+      >
+        <p
+          className="text-breadcrumb font-medium"
+          style={{ fontSize: 10, letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: 6 }}
+        >
+          {label}
+        </p>
+        {children}
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+/* ─── Risk rows config ──────────────────────────────────── */
+
+const riskRows: { dot: string; name: string; condition: Condition }[] = [
+  { dot: "#EF4444", name: "Financial Health",  condition: "Poor"      },
+  { dot: "#F59E0B", name: "Physical Condition", condition: "Fair"     },
+  { dot: "#10B981", name: "Compliance",         condition: "Excellent" },
+];
+
+/* ─── Data ──────────────────────────────────────────────── */
+
 const agentMessages = [
-  { text: "Solver Agent — running financial analysis...", color: "gray" as const, startTime: 0 },
-  { text: "Solver Agent — financial analysis complete, 3 risks flagged ✓", color: "green" as const, startTime: 3000 },
+  { text: "Solver Engine — running financial analysis...", color: "gray" as const, startTime: 0 },
+  { text: "Solver Engine — financial analysis complete, 3 risks flagged ✓", color: "green" as const, startTime: 3000 },
 ];
 
 const projectionData = Array.from({ length: 31 }, (_, i) => {
@@ -31,18 +167,7 @@ const projectionData = Array.from({ length: 31 }, (_, i) => {
   return { year, value: Math.round(value) };
 });
 
-const metrics = [
-  { label: "CURRENT FUND AMOUNT",     value: "$370,000", badge: null,                                              recoscore: false },
-  { label: "PERCENT FUNDED",          value: "13.5%",    badge: { text: "Poor", color: "#EF4444", bg: "#FEF2F2" }, recoscore: false },
-  { label: "SPECIAL ASSESSMENT YEAR", value: "2028",     badge: null,                                              recoscore: false },
-  { label: "RECOSCORE",               value: "47",       badge: null,                                              recoscore: true  },
-];
-
-const riskRows = [
-  { dot: "#EF4444", name: "Financial Health",  badge: "High",      color: "#EF4444", bg: "#FEF2F2" },
-  { dot: "#F59E0B", name: "Physical Condition", badge: "Medium",   color: "#F59E0B", bg: "#FFFBEB" },
-  { dot: "#10B981", name: "Compliance",         badge: "Compliant", color: "#10B981", bg: "#ECFDF5" },
-];
+/* ─── Page ──────────────────────────────────────────────── */
 
 const Financials = () => {
   const [elapsed, setElapsed] = useState(0);
@@ -54,9 +179,9 @@ const Financials = () => {
     return () => clearInterval(id);
   }, []);
 
-  const metricsVisible   = elapsed >= 1500;
-  const chartVisible     = elapsed >= 3500;
-  const riskCardVisible  = elapsed >= 5000;
+  const metricsVisible  = elapsed >= 1500;
+  const chartVisible    = elapsed >= 3500;
+  const riskCardVisible = elapsed >= 5000;
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -69,7 +194,6 @@ const Financials = () => {
             breadcrumb="Buildings › ABC Condominium Association, Inc. › Financials"
           />
 
-          {/* Agent status — tighter bottom margin */}
           <div style={{ marginBottom: 20 }}>
             <AgentStatus messages={agentMessages} elapsed={elapsed} />
           </div>
@@ -80,52 +204,10 @@ const Financials = () => {
           </p>
 
           <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            {metrics.map((metric, i) => (
-              <AnimatePresence key={metric.label}>
-                {metricsVisible && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.28, ease: "easeOut", delay: i * 0.08 }}
-                    className="flex-1 rounded-xl border border-border bg-card/50"
-                    style={{ padding: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
-                  >
-                    <p
-                      className="text-breadcrumb font-medium"
-                      style={{
-                        fontSize: 10,
-                        letterSpacing: "0.07em",
-                        textTransform: "uppercase",
-                        marginBottom: 6,
-                      }}
-                    >
-                      {metric.label}
-                    </p>
-                    <p
-                      className="font-mono text-heading"
-                      style={{ fontSize: 28, fontWeight: 500, lineHeight: 1 }}
-                    >
-                      {metric.value}
-                    </p>
-                    {metric.badge && (
-                      <span
-                        className="font-medium inline-block"
-                        style={{
-                          fontSize: 11,
-                          color: metric.badge.color,
-                          background: metric.badge.bg,
-                          borderRadius: 100,
-                          padding: "2px 8px",
-                          marginTop: 6,
-                        }}
-                      >
-                        {metric.badge.text}
-                      </span>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            ))}
+            <FundCard   label="CURRENT FUND AMOUNT"     index={0} start={metricsVisible} />
+            <PercentCard label="PERCENT FUNDED"         index={1} start={metricsVisible} />
+            <YearCard   label="SPECIAL ASSESSMENT YEAR" index={2} start={metricsVisible} />
+            <RecoCard   label="RECOSCORE"               index={3} start={metricsVisible} />
           </div>
 
           {/* ── Chart + Risk Assessment ── */}
@@ -138,12 +220,7 @@ const Financials = () => {
             >
               <p
                 className="text-breadcrumb font-medium"
-                style={{
-                  fontSize: 11,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  marginBottom: 10,
-                }}
+                style={{ fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 }}
               >
                 30-Year Reserve Fund Projection
               </p>
@@ -215,28 +292,18 @@ const Financials = () => {
 
                   {/* Lenders / Insurers */}
                   <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-                    {/* Lenders */}
                     <div style={{ flex: 1 }}>
                       <Landmark size={20} style={{ color: "#9CA3B8", marginBottom: 4 }} />
-                      <p className="text-body-text" style={{ fontSize: 12, marginBottom: 2 }}>
-                        Lenders
-                      </p>
-                      <p style={{ fontSize: 15, fontWeight: 600, color: "#EF4444", marginBottom: 2 }}>
-                        Restricted
-                      </p>
+                      <p className="text-body-text" style={{ fontSize: 12, marginBottom: 2 }}>Lenders</p>
+                      <p style={{ fontSize: 15, fontWeight: 600, color: "#EF4444", marginBottom: 2 }}>Restricted</p>
                       <p className="text-breadcrumb" style={{ fontSize: 11, lineHeight: 1.3 }}>
                         Fund reserves to unlock financing
                       </p>
                     </div>
-                    {/* Insurers */}
                     <div style={{ flex: 1 }}>
                       <Shield size={20} style={{ color: "#9CA3B8", marginBottom: 4 }} />
-                      <p className="text-body-text" style={{ fontSize: 12, marginBottom: 2 }}>
-                        Insurers
-                      </p>
-                      <p style={{ fontSize: 15, fontWeight: 600, color: "#F59E0B", marginBottom: 2 }}>
-                        At Risk
-                      </p>
+                      <p className="text-body-text" style={{ fontSize: 12, marginBottom: 2 }}>Insurers</p>
+                      <p style={{ fontSize: 15, fontWeight: 600, color: "#F59E0B", marginBottom: 2 }}>At Risk</p>
                       <p className="text-breadcrumb" style={{ fontSize: 11, lineHeight: 1.3 }}>
                         Complete deferred repairs
                       </p>
@@ -254,11 +321,10 @@ const Financials = () => {
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          height: 32,
+                          height: 36,
                           borderBottom: i < riskRows.length - 1 ? "1px solid #F0F2F7" : "none",
                         }}
                       >
-                        {/* dot */}
                         <div
                           style={{
                             width: 8,
@@ -269,26 +335,10 @@ const Financials = () => {
                             marginRight: 8,
                           }}
                         />
-                        {/* name */}
-                        <p
-                          className="text-heading flex-1"
-                          style={{ fontSize: 13, fontWeight: 500 }}
-                        >
+                        <p className="text-heading flex-1" style={{ fontSize: 13, fontWeight: 500 }}>
                           {r.name}
                         </p>
-                        {/* badge */}
-                        <span
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 500,
-                            color: r.color,
-                            background: r.bg,
-                            borderRadius: 100,
-                            padding: "1px 8px",
-                          }}
-                        >
-                          {r.badge}
-                        </span>
+                        <ConditionIndicator condition={r.condition} />
                       </div>
                     ))}
                   </div>

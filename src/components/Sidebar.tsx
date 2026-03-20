@@ -12,7 +12,7 @@ interface NavItem {
 }
 
 const navItemsList: NavItem[] = [
-  { label: "Overview", icon: LayoutDashboard, id: "overview", path: "/" },
+  { label: "Onboarding", icon: LayoutDashboard, id: "overview", path: "/" },
   { label: "Inventory", icon: Package, id: "inventory", path: "/inventory" },
   { label: "Financials", icon: DollarSign, id: "financials", path: "/financials" },
   { label: "Projects", icon: Wrench, id: "projects", path: "/projects" },

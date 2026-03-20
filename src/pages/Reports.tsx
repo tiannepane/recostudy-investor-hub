@@ -1,75 +1,71 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  AlertTriangle,
+  Layers,
+  Users,
   FileText,
   Landmark,
   Shield,
   Building2,
-  Users,
+  AlertTriangle,
   Check,
+  ChevronLeft,
 } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
 import AgentStatus from "@/components/AgentStatus";
 
-const agentMessages = [
-  {
-    text: "Reports Agent — compiling stakeholder packages...",
-    color: "gray" as const,
-    startTime: 0,
-  },
+/* ─── Data ──────────────────────────────────────────────── */
+
+const STATUS_REPORTS = [
+  "Reserve fund study (current)",
+  "Financial statements summary",
+  "Special assessment disclosure",
 ];
 
-const specialPackages = [
+const PACKAGES = [
   {
-    highlighted: true,
-    badge: { text: "Ready to Send", color: "#10B981", bg: "#ECFDF5" },
-    icon: { component: FileText, color: "#F59E0B", bg: "#FFFBEB" },
-    title: "Status Certificate",
-    subtitle: "Required for every unit transaction.",
-    checklist: [
-      "Reserve fund study (current)",
-      "Financial statements summary",
-      "Special assessment disclosure",
-    ],
-    buttons: [
-      { text: "Download", variant: "green" },
-      { text: "Share →", variant: "blue" },
-    ],
+    id: "status",
+    name: "Status Certificate",
+    icon: FileText,
+    iconColor: "#4F6BFF",
+    desc: "Required for every unit transaction.",
+    reports: STATUS_REPORTS,
+    primary: true,
   },
   {
-    highlighted: false,
-    badge: null,
-    icon: { component: Landmark, color: "#4F6BFF", bg: "#EFF6FF" },
-    title: "Refinancing Package",
-    subtitle: "Everything a lender needs in one place.",
-    checklist: [
+    id: "refi",
+    name: "Refinancing Package",
+    icon: Landmark,
+    iconColor: "#8B92A8",
+    desc: "Everything a lender needs in one place.",
+    reports: [
       "RECOscore Lender Report",
       "30-Year Fund Projection",
       "Fannie Mae Eligibility Summary",
     ],
-    buttons: [{ text: "Generate", variant: "blue-full" }],
+    primary: false,
   },
   {
-    highlighted: false,
-    badge: null,
-    icon: { component: Shield, color: "#10B981", bg: "#ECFDF5" },
-    title: "Insurance Renewal Package",
-    subtitle: "Prepared for annual insurance review.",
-    checklist: [
+    id: "insurance",
+    name: "Insurance Renewal Package",
+    icon: Shield,
+    iconColor: "#8B92A8",
+    desc: "Prepared for annual insurance review.",
+    reports: [
       "RECOscore Insurance Report",
       "Component Risk Summary",
       "Project Completion Certificates",
     ],
-    buttons: [{ text: "Generate", variant: "blue-full" }],
+    primary: false,
   },
 ];
 
-const individualCards = [
+const STAKEHOLDERS = [
   {
-    title: "For Lenders",
-    Icon: Landmark,
+    id: "lenders",
+    icon: Landmark,
+    label: "Lenders",
     reports: [
       "RECOscore Lender Report",
       "30-Year Fund Projection",
@@ -77,8 +73,9 @@ const individualCards = [
     ],
   },
   {
-    title: "For Insurers",
-    Icon: Shield,
+    id: "insurers",
+    icon: Shield,
+    label: "Insurers",
     reports: [
       "RECOscore Insurance Report",
       "Component Risk Summary",
@@ -86,8 +83,9 @@ const individualCards = [
     ],
   },
   {
-    title: "For Regulators",
-    Icon: Building2,
+    id: "regulators",
+    icon: Building2,
+    label: "Regulators",
     reports: [
       "LL97 Emissions Report",
       "LL11 Facade Inspection Summary",
@@ -96,8 +94,9 @@ const individualCards = [
     ],
   },
   {
-    title: "For the Board",
-    Icon: Users,
+    id: "board",
+    icon: Users,
+    label: "Board",
     reports: [
       "Full Reserve Fund Study",
       "Capital Project Timeline",
@@ -106,22 +105,204 @@ const individualCards = [
   },
 ];
 
+const agentMessages = [
+  {
+    text: "Reports Agent — Status Certificate compiled, ready to send ✓",
+    color: "green" as const,
+    startTime: 11000,
+  },
+];
+
+/* ─── Types ─────────────────────────────────────────────── */
+
+type View = "landing" | "packages" | "individual";
+type BtnState = "generate" | "generating" | "done";
+
+/* ─── Small sub-components ──────────────────────────────── */
+
+const StakeholderCard = ({
+  label,
+  icon,
+  onClick,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+}) => {
+  const [hov, setHov] = useState(false);
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        height: 120,
+        borderRadius: 12,
+        border: hov ? "1.5px solid #4F6BFF" : "1px solid hsl(var(--border))",
+        background: hov ? "rgba(79,107,255,0.02)" : "hsl(var(--card))",
+        boxShadow: hov
+          ? "0 4px 12px rgba(79,107,255,0.10)"
+          : "0 1px 3px rgba(0,0,0,0.04)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        cursor: "pointer",
+        transition: "border-color 0.2s, background 0.2s, box-shadow 0.2s",
+      }}
+    >
+      {icon}
+      <span style={{ fontSize: 14, fontWeight: 500, color: "hsl(var(--heading))" }}>
+        {label}
+      </span>
+    </div>
+  );
+};
+
+const ReportRow = ({ name, isLast }: { name: string; isLast: boolean }) => {
+  const [hov, setHov] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        height: 48,
+        padding: "0 16px",
+        borderBottom: isLast ? "none" : "1px solid hsl(var(--border))",
+        background: hov ? "hsl(var(--background))" : "transparent",
+        transition: "background 0.15s ease",
+      }}
+    >
+      <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: "hsl(var(--heading))" }}>
+        {name}
+      </span>
+      <button
+        style={{
+          height: 30,
+          padding: "0 14px",
+          background: "transparent",
+          border: "1px solid #E8EBF0",
+          borderRadius: 6,
+          fontSize: 12,
+          fontWeight: 500,
+          color: "hsl(var(--heading))",
+          cursor: "pointer",
+        }}
+      >
+        Generate
+      </button>
+    </div>
+  );
+};
+
+/* ─── Back button ────────────────────────────────────────── */
+
+const BackBtn = ({ onClick }: { onClick: () => void }) => (
+  <button
+    onClick={onClick}
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 4,
+      fontSize: 13,
+      color: "#5A6178",
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      padding: "0 0 14px 0",
+    }}
+  >
+    <ChevronLeft size={14} />
+    Back to Reports
+  </button>
+);
+
+/* ─── Page ──────────────────────────────────────────────── */
+
 const Reports = () => {
   const [elapsed, setElapsed] = useState(0);
+  const [view, setView] = useState<View>("landing");
+  const [demoActive, setDemoActive] = useState(true);
+  const [landingHighlight, setLandingHighlight] = useState<
+    "packages" | "individual" | null
+  >(null);
+  const [statusHighlighted, setStatusHighlighted] = useState(false);
+  const [btnState, setBtnState] = useState<BtnState>("generate");
+  const [checkmarks, setCheckmarks] = useState([false, false, false]);
+  const [readyBadge, setReadyBadge] = useState(false);
+  const [selectedStakeholder, setSelectedStakeholder] = useState<string | null>(
+    null
+  );
+  const [hoveredLanding, setHoveredLanding] = useState<
+    "packages" | "individual" | null
+  >(null);
 
   const reset = useCallback(() => {
     setElapsed(0);
+    setView("landing");
+    setDemoActive(true);
+    setLandingHighlight(null);
+    setStatusHighlighted(false);
+    setBtnState("generate");
+    setCheckmarks([false, false, false]);
+    setReadyBadge(false);
+    setSelectedStakeholder(null);
+    setHoveredLanding(null);
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => setElapsed((p) => p + 30), 30);
-    return () => clearInterval(interval);
+    const id = setInterval(() => setElapsed((p) => p + 30), 30);
+    return () => clearInterval(id);
   }, []);
 
-  const bannerVisible = elapsed >= 500;
-  const specialVisible = elapsed >= 1000;
-  const individualVisible = elapsed >= 2500;
-  const pulseActive = elapsed >= 3500;
+  useEffect(() => {
+    if (!demoActive) return;
+    const e = elapsed;
+    if (e >= 4000) setLandingHighlight("packages");
+    if (e >= 5000) setView("packages");
+    if (e >= 6000) setStatusHighlighted(true);
+    if (e >= 7000) setBtnState((p) => (p === "generate" ? "generating" : p));
+    if (e >= 8000) setCheckmarks((p) => (p[0] ? p : [true, false, false]));
+    if (e >= 8600) setCheckmarks((p) => (p[1] ? p : [true, true, false]));
+    if (e >= 9200) setCheckmarks((p) => (p[2] ? p : [true, true, true]));
+    if (e >= 10000) {
+      setBtnState((p) => (p === "generating" ? "done" : p));
+      setReadyBadge(true);
+    }
+  }, [elapsed, demoActive]);
+
+  const showNotification = elapsed >= 1500 && elapsed < 4000;
+
+  const goBack = () => {
+    setDemoActive(false);
+    setView("landing");
+    setSelectedStakeholder(null);
+  };
+
+  const landingCardStyle = (id: "packages" | "individual"): React.CSSProperties => {
+    const active = landingHighlight === id || hoveredLanding === id;
+    return {
+      flex: 1,
+      height: 160,
+      borderRadius: 12,
+      border: active ? "2px solid #4F6BFF" : "1px solid hsl(var(--border))",
+      background: "hsl(var(--card))",
+      boxShadow: active
+        ? "0 4px 16px rgba(79,107,255,0.12)"
+        : "0 1px 3px rgba(0,0,0,0.04)",
+      transform: landingHighlight === id ? "scale(1.02)" : "scale(1)",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+      cursor: "pointer",
+      transition: "border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease",
+    };
+  };
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -139,237 +320,542 @@ const Reports = () => {
       />
 
       <main className="flex-1" style={{ marginLeft: 260 }}>
-        <div className="mx-auto" style={{ maxWidth: 1200, padding: 60 }}>
+        <div
+          className="mx-auto"
+          style={{ maxWidth: 1200, padding: 60, position: "relative" }}
+        >
           <TopBar
             onReplay={reset}
             breadcrumb="Buildings › ABC Condominium Association, Inc. › Reports"
           />
 
-          <div className="mb-8">
+          <div style={{ marginBottom: 20 }}>
             <AgentStatus messages={agentMessages} elapsed={elapsed} />
           </div>
 
-          {/* Notification Banner */}
+          {/* ── Notification ── */}
           <AnimatePresence>
-            {bannerVisible && (
+            {showNotification && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                className="flex items-center gap-3 rounded-lg mb-6 px-4 py-3"
-                style={{ background: "#FFFBEB", border: "1px solid #FDE68A" }}
+                initial={{ x: 80, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 80, opacity: 0 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                style={{
+                  position: "absolute",
+                  top: 108,
+                  right: 0,
+                  zIndex: 100,
+                  maxWidth: 360,
+                  background: "#FFFFFF",
+                  borderRadius: 12,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+                  borderLeft: "4px solid #F59E0B",
+                  padding: "14px 16px",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 10,
+                }}
               >
-                <AlertTriangle size={16} style={{ color: "#F59E0B", flexShrink: 0 }} />
-                <p style={{ fontSize: 14, color: "#92400E" }}>
-                  Unit 4B is in contract. Buyer's attorney has requested a Status Certificate.
-                </p>
+                <AlertTriangle
+                  size={16}
+                  style={{ color: "#F59E0B", flexShrink: 0, marginTop: 2 }}
+                />
+                <div>
+                  <p
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: "#0F1729",
+                      marginBottom: 3,
+                    }}
+                  >
+                    Unit 4B is in contract
+                  </p>
+                  <p style={{ fontSize: 13, color: "#5A6178" }}>
+                    Buyer's attorney has requested a Status Certificate.
+                  </p>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Heading */}
-          <h1 className="text-heading font-bold mb-1" style={{ fontSize: 28 }}>
-            Reports
-          </h1>
-          <p className="text-body-text mb-6" style={{ fontSize: 15 }}>
-            Your building data, formatted for every stakeholder.
-          </p>
+          {/* ── Views ── */}
+          <AnimatePresence mode="wait">
+            {/* Landing */}
+            {view === "landing" && (
+              <motion.div
+                key="landing"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.3 }}
+              >
+                <p
+                  className="text-heading"
+                  style={{ fontSize: 24, fontWeight: 700, marginBottom: 6 }}
+                >
+                  Reports
+                </p>
+                <p style={{ fontSize: 14, color: "#5A6178", marginBottom: 32 }}>
+                  Your building data, formatted for every stakeholder.
+                </p>
+                <div style={{ display: "flex", gap: 16 }}>
+                  <div
+                    style={landingCardStyle("packages")}
+                    onClick={() => {
+                      setDemoActive(false);
+                      setView("packages");
+                    }}
+                    onMouseEnter={() => setHoveredLanding("packages")}
+                    onMouseLeave={() => setHoveredLanding(null)}
+                  >
+                    <Layers size={32} style={{ color: "#9CA3B8" }} />
+                    <div style={{ textAlign: "center" }}>
+                      <p
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 600,
+                          color: "hsl(var(--heading))",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Special Packages
+                      </p>
+                      <p style={{ fontSize: 13, color: "#5A6178" }}>
+                        Pre-bundled reports for common scenarios
+                      </p>
+                    </div>
+                  </div>
 
-          {/* Special Packages */}
-          <p className="text-heading font-semibold mb-4" style={{ fontSize: 20 }}>
-            Special Packages
-          </p>
-          <div className="flex gap-4 mb-8">
-            {specialPackages.map((pkg, i) => {
-              const IconComp = pkg.icon.component;
-              return (
-                <AnimatePresence key={pkg.title}>
-                  {specialVisible && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, ease: "easeOut", delay: i * 0.12 }}
-                      className="flex-1 rounded-xl bg-card/50 p-5 flex flex-col"
-                      style={{
-                        border: pkg.highlighted
-                          ? "2px solid #4F6BFF"
-                          : "1px solid hsl(var(--border))",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                      }}
-                    >
-                      {/* Top row: badge + icon */}
-                      <div className="flex items-start justify-between mb-3">
-                        {pkg.badge ? (
-                          <span
-                            className="text-[12px] font-medium"
+                  <div
+                    style={landingCardStyle("individual")}
+                    onClick={() => {
+                      setDemoActive(false);
+                      setView("individual");
+                    }}
+                    onMouseEnter={() => setHoveredLanding("individual")}
+                    onMouseLeave={() => setHoveredLanding(null)}
+                  >
+                    <Users size={32} style={{ color: "#9CA3B8" }} />
+                    <div style={{ textAlign: "center" }}>
+                      <p
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 600,
+                          color: "hsl(var(--heading))",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Individual Reports
+                      </p>
+                      <p style={{ fontSize: 13, color: "#5A6178" }}>
+                        Generate reports by stakeholder
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Packages */}
+            {view === "packages" && (
+              <motion.div
+                key="packages"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <BackBtn onClick={goBack} />
+
+                <p
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 600,
+                    color: "hsl(var(--heading))",
+                    marginBottom: 16,
+                  }}
+                >
+                  Special Packages
+                </p>
+
+                <div style={{ display: "flex", gap: 16 }}>
+                  {PACKAGES.map((pkg) => {
+                    const Icon = pkg.icon;
+                    const isStatus = pkg.id === "status";
+                    const highlighted = isStatus && statusHighlighted;
+
+                    return (
+                      <div
+                        key={pkg.id}
+                        style={{
+                          flex: 1,
+                          borderRadius: 12,
+                          border: highlighted
+                            ? "1.5px solid #4F6BFF"
+                            : "1px solid hsl(var(--border))",
+                          background: "hsl(var(--card))",
+                          padding: 16,
+                          position: "relative",
+                          boxShadow: highlighted
+                            ? "0 0 0 4px rgba(79,107,255,0.10), 0 1px 3px rgba(0,0,0,0.04)"
+                            : "0 1px 3px rgba(0,0,0,0.04)",
+                          transition: "border-color 0.4s, box-shadow 0.4s",
+                        }}
+                      >
+                        {/* Ready to Send badge */}
+                        {isStatus && readyBadge && (
+                          <motion.span
+                            initial={{ opacity: 0, scale: 0.85 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.3 }}
                             style={{
-                              color: pkg.badge.color,
-                              background: pkg.badge.bg,
+                              position: "absolute",
+                              top: 12,
+                              left: 12,
+                              fontSize: 11,
+                              fontWeight: 500,
+                              color: "#10B981",
+                              background: "#ECFDF5",
                               borderRadius: 100,
-                              padding: "2px 10px",
+                              padding: "2px 8px",
                             }}
                           >
-                            {pkg.badge.text}
-                          </span>
-                        ) : (
-                          <div />
+                            Ready to Send
+                          </motion.span>
                         )}
+
+                        {/* Icon top-right */}
                         <div
-                          className="flex items-center justify-center rounded-full flex-shrink-0"
-                          style={{ width: 36, height: 36, background: pkg.icon.bg }}
+                          style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            marginBottom: 8,
+                          }}
                         >
-                          <IconComp size={18} style={{ color: pkg.icon.color }} />
+                          <Icon size={20} style={{ color: pkg.iconColor }} />
                         </div>
-                      </div>
 
-                      <p className="text-heading font-semibold mb-1" style={{ fontSize: 16 }}>
-                        {pkg.title}
-                      </p>
-                      <p className="text-breadcrumb mb-3" style={{ fontSize: 13 }}>
-                        {pkg.subtitle}
-                      </p>
+                        {/* Name + desc */}
+                        <p
+                          style={{
+                            fontSize: 15,
+                            fontWeight: 600,
+                            color: "hsl(var(--heading))",
+                            marginBottom: 3,
+                            marginTop: isStatus && readyBadge ? 12 : 0,
+                          }}
+                        >
+                          {pkg.name}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: 12,
+                            color: "#5A6178",
+                            marginBottom: 12,
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          {pkg.desc}
+                        </p>
 
-                      <div className="flex flex-col gap-2 mb-4 flex-1">
-                        {pkg.checklist.map((item) => (
-                          <div key={item} className="flex items-center gap-2">
-                            <div
-                              className="flex items-center justify-center rounded-full flex-shrink-0"
-                              style={{ width: 16, height: 16, background: "#10B981" }}
-                            >
-                              <Check size={10} color="white" />
-                            </div>
-                            <span className="text-body-text" style={{ fontSize: 13 }}>
-                              {item}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Buttons */}
-                      <div className="flex gap-2 mt-auto">
-                        {pkg.buttons.map((btn) => {
-                          if (btn.variant === "green") {
+                        {/* Report items */}
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 7,
+                            marginBottom: 14,
+                          }}
+                        >
+                          {pkg.reports.map((report, ri) => {
+                            const done = isStatus && checkmarks[ri];
                             return (
-                              <button
-                                key={btn.text}
-                                className="flex-1 text-white font-medium rounded-lg"
+                              <div
+                                key={report}
                                 style={{
-                                  height: 36,
-                                  background: "#10B981",
-                                  fontSize: 13,
-                                  border: "none",
-                                  cursor: "pointer",
-                                  boxShadow: pulseActive
-                                    ? "0 0 0 4px rgba(79,107,255,0.25)"
-                                    : "none",
-                                  transition: "box-shadow 0.8s ease-in-out",
-                                  animation: pulseActive ? "pulse-glow 1.5s ease-in-out 2" : "none",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 8,
                                 }}
                               >
-                                {btn.text}
-                              </button>
+                                <motion.div
+                                  initial={false}
+                                  animate={{
+                                    backgroundColor: done ? "#10B981" : "transparent",
+                                    scale: done ? [1, 1.2, 1] : 1,
+                                  }}
+                                  transition={{ duration: 0.3, ease: "easeOut" }}
+                                  style={{
+                                    width: 16,
+                                    height: 16,
+                                    borderRadius: "50%",
+                                    border: done ? "none" : "1.5px solid #D1D5DB",
+                                    flexShrink: 0,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  {done && <Check size={9} color="white" />}
+                                </motion.div>
+                                <span style={{ fontSize: 12, color: "#5A6178" }}>
+                                  {report}
+                                </span>
+                              </div>
                             );
-                          }
-                          if (btn.variant === "blue") {
-                            return (
-                              <button
-                                key={btn.text}
-                                className="flex-1 text-white font-medium rounded-lg"
+                          })}
+                        </div>
+
+                        {/* Button */}
+                        {isStatus ? (
+                          <AnimatePresence mode="wait">
+                            {btnState === "generate" && (
+                              <motion.button
+                                key="gen"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
                                 style={{
+                                  width: "100%",
                                   height: 36,
                                   background: "#4F6BFF",
-                                  fontSize: 13,
+                                  color: "white",
                                   border: "none",
+                                  borderRadius: 8,
+                                  fontSize: 13,
+                                  fontWeight: 500,
                                   cursor: "pointer",
                                 }}
                               >
-                                {btn.text}
-                              </button>
-                            );
-                          }
+                                Generate
+                              </motion.button>
+                            )}
+                            {btnState === "generating" && (
+                              <motion.button
+                                key="generating"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                style={{
+                                  width: "100%",
+                                  height: 36,
+                                  background: "#4F6BFF",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: 8,
+                                  fontSize: 13,
+                                  fontWeight: 500,
+                                  cursor: "not-allowed",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  gap: 8,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: 13,
+                                    height: 13,
+                                    borderRadius: "50%",
+                                    border: "2px solid rgba(255,255,255,0.3)",
+                                    borderTopColor: "white",
+                                    animation: "spin 0.8s linear infinite",
+                                  }}
+                                />
+                                Generating...
+                              </motion.button>
+                            )}
+                            {btnState === "done" && (
+                              <motion.div
+                                key="done"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                                style={{ display: "flex", gap: 8 }}
+                              >
+                                <button
+                                  style={{
+                                    flex: 1,
+                                    height: 36,
+                                    background: "#10B981",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: 8,
+                                    fontSize: 13,
+                                    fontWeight: 500,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Download
+                                </button>
+                                <button
+                                  style={{
+                                    flex: 1,
+                                    height: 36,
+                                    background: "transparent",
+                                    color: "#10B981",
+                                    border: "1.5px solid #10B981",
+                                    borderRadius: 8,
+                                    fontSize: 13,
+                                    fontWeight: 500,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Share →
+                                </button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        ) : (
+                          <button
+                            style={{
+                              width: "100%",
+                              height: 36,
+                              background: "transparent",
+                              color: "hsl(var(--heading))",
+                              border: "1px solid #E8EBF0",
+                              borderRadius: 8,
+                              fontSize: 13,
+                              fontWeight: 500,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Generate
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Individual Reports */}
+            {view === "individual" && (
+              <motion.div
+                key="individual"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <BackBtn onClick={goBack} />
+
+                <AnimatePresence mode="wait">
+                  {!selectedStakeholder ? (
+                    <motion.div
+                      key="grid"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <p
+                        style={{
+                          fontSize: 20,
+                          fontWeight: 600,
+                          color: "hsl(var(--heading))",
+                          marginBottom: 20,
+                          textAlign: "center",
+                        }}
+                      >
+                        Who is this report for?
+                      </p>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: 16,
+                          maxWidth: 560,
+                          margin: "0 auto",
+                        }}
+                      >
+                        {STAKEHOLDERS.map((s) => {
+                          const Icon = s.icon;
                           return (
-                            <button
-                              key={btn.text}
-                              className="w-full text-white font-medium rounded-lg"
-                              style={{
-                                height: 36,
-                                background: "#4F6BFF",
-                                fontSize: 13,
-                                border: "none",
-                                cursor: "pointer",
-                              }}
-                            >
-                              {btn.text}
-                            </button>
+                            <StakeholderCard
+                              key={s.id}
+                              label={s.label}
+                              icon={
+                                <Icon size={24} style={{ color: "#9CA3B8" }} />
+                              }
+                              onClick={() => setSelectedStakeholder(s.id)}
+                            />
                           );
                         })}
                       </div>
                     </motion.div>
-                  )}
-                </AnimatePresence>
-              );
-            })}
-          </div>
-
-          {/* Individual Reports */}
-          <p className="text-heading font-semibold mb-4" style={{ fontSize: 20 }}>
-            Individual Reports
-          </p>
-          <div className="grid grid-cols-2 gap-4">
-            {individualCards.map((card, i) => {
-              const IconComp = card.Icon;
-              return (
-                <AnimatePresence key={card.title}>
-                  {individualVisible && (
+                  ) : (
                     <motion.div
-                      initial={{ opacity: 0, y: 8 }}
+                      key="report-list"
+                      initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, ease: "easeOut", delay: i * 0.1 }}
-                      className="rounded-xl border border-border bg-card/50 p-5"
-                      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
                     >
-                      <div className="flex items-center gap-2 mb-3">
-                        <IconComp size={18} className="text-breadcrumb" />
-                        <p className="text-heading font-semibold" style={{ fontSize: 15 }}>
-                          {card.title}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          marginBottom: 16,
+                        }}
+                      >
+                        <button
+                          onClick={() => setSelectedStakeholder(null)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 3,
+                            fontSize: 13,
+                            color: "#5A6178",
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: 0,
+                          }}
+                        >
+                          <ChevronLeft size={14} />
+                        </button>
+                        <p
+                          style={{
+                            fontSize: 20,
+                            fontWeight: 600,
+                            color: "hsl(var(--heading))",
+                          }}
+                        >
+                          {
+                            STAKEHOLDERS.find(
+                              (s) => s.id === selectedStakeholder
+                            )?.label
+                          }
                         </p>
                       </div>
-                      <div className="flex flex-col">
-                        {card.reports.map((report, ri) => (
-                          <div
+
+                      <div
+                        className="rounded-xl border border-border bg-card/50"
+                        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+                      >
+                        {STAKEHOLDERS.find(
+                          (s) => s.id === selectedStakeholder
+                        )?.reports.map((report, i, arr) => (
+                          <ReportRow
                             key={report}
-                            className="flex items-center justify-between py-2"
-                            style={{
-                              borderBottom:
-                                ri < card.reports.length - 1
-                                  ? "1px solid hsl(var(--border))"
-                                  : "none",
-                            }}
-                          >
-                            <span className="text-body-text" style={{ fontSize: 14 }}>
-                              {report}
-                            </span>
-                            <button
-                              className="rounded font-medium px-2 py-0.5"
-                              style={{
-                                fontSize: 12,
-                                background: "transparent",
-                                border: "1px solid #4F6BFF",
-                                color: "#4F6BFF",
-                                cursor: "pointer",
-                              }}
-                            >
-                              Generate
-                            </button>
-                          </div>
+                            name={report}
+                            isLast={i === arr.length - 1}
+                          />
                         ))}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              );
-            })}
-          </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </main>
     </div>

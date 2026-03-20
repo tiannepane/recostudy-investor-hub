@@ -5,7 +5,7 @@ interface TopBarProps {
   breadcrumb?: string;
 }
 
-const TopBar = ({ onReplay, breadcrumb = "Buildings › ABC Condominium Association, Inc. › Overview" }: TopBarProps) => {
+const TopBar = ({ onReplay, breadcrumb = "Buildings › ABC Condominium Association, Inc. › Onboarding" }: TopBarProps) => {
   return (
     <div className="flex items-center justify-between mb-8">
       <p className="text-[13px] text-breadcrumb">

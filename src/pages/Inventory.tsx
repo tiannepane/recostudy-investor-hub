@@ -246,21 +246,22 @@ const Inventory = () => {
                 <thead>
                   <tr style={{ borderBottom: "1px solid hsl(var(--border))" }}>
                     {[
-                      { label: "COMPONENT", align: "left"  },
-                      { label: "CATEGORY",  align: "left"  },
-                      { label: "CONDITION", align: "left"  },
-                      { label: "LOCATION",  align: "left"  },
-                      { label: "RUL",       align: "right" },
-                      { label: "EST. COST", align: "right" },
-                    ].map(({ label, align }) => (
+                      { label: "COMPONENT",      },
+                      { label: "CATEGORY",       },
+                      { label: "CONDITION",      },
+                      { label: "LOCATION",       },
+                      { label: "REMAINING LIFE", },
+                      { label: "EST. COST",      },
+                    ].map(({ label }) => (
                       <th
                         key={label}
                         className="text-breadcrumb font-semibold pb-3"
                         style={{
                           fontSize: 11,
                           letterSpacing: "0.06em",
-                          textAlign: align as "left" | "right",
-                          paddingRight: label === "EST. COST" ? 0 : 12,
+                          textAlign: "left",
+                          paddingRight: 12,
+                          whiteSpace: "nowrap",
                         }}
                       >
                         {label}
@@ -327,10 +328,10 @@ const Inventory = () => {
                           >
                             {row.location}
                           </td>
-                          <td className="py-3 pr-3 text-[14px] font-mono text-heading text-right" style={{ whiteSpace: "nowrap" }}>
+                          <td className="py-3 pr-3 text-[14px] font-mono text-heading" style={{ whiteSpace: "nowrap" }}>
                             {row.rul} <span className="text-breadcrumb">yr</span>
                           </td>
-                          <td className="py-3 text-[14px] font-mono font-medium text-heading text-right" style={{ whiteSpace: "nowrap" }}>
+                          <td className="py-3 pr-3 text-[14px] font-mono font-medium text-heading" style={{ whiteSpace: "nowrap" }}>
                             {row.cost}
                           </td>
                         </motion.tr>
