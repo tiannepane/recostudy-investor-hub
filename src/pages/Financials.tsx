@@ -192,6 +192,7 @@ const Financials = () => {
           <TopBar
             onReplay={reset}
             breadcrumb="Buildings › ABC Condominium Association, Inc. › Financials"
+            activeItem="financials"
           />
 
           <div style={{ marginBottom: 20 }}>

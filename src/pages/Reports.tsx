@@ -327,6 +327,7 @@ const Reports = () => {
           <TopBar
             onReplay={reset}
             breadcrumb="Buildings › ABC Condominium Association, Inc. › Reports"
+            activeItem="reports"
           />
 
           <div style={{ marginBottom: 20 }}>

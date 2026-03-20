@@ -214,6 +214,7 @@ const Inventory = () => {
           <TopBar
             onReplay={reset}
             breadcrumb="Buildings › ABC Condominium Association, Inc. › Inventory"
+            activeItem="inventory"
           />
 
           <div className="mb-8">

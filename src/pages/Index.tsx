@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Upload, Image as ImageIcon, FileText, Mic, Camera, Check } from "lucide-react";
+import { MapPin, Upload, Image as ImageIcon, FileText, Mic, Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
 
-/* ─── Constants ─────────────────────────────────────────── */
+/* ─── Constants ──────────────────────────────────────────── */
 
 const BUILDINGS = [
   {
@@ -30,148 +31,108 @@ const BUILDINGS = [
   },
 ];
 
-// Photo fan offsets for the 6-photo stack
-const FAN_ROTATIONS = [-8, -4, -1, 2, 5, 9];
-const FAN_X_OFFSETS = [-28, -14, -4, 6, 16, 26];
+// Individual photo drop timing + horizontal offsets + real images
+const PHOTO_TIMES   = [4200, 4550, 4900, 5250, 5600, 5950];
+const PHOTO_OFFSETS = [-30, -15, 0, 15, -10, 20];
+const PHOTO_URLS = [
+  "https://images.unsplash.com/photo-1486718448742-163732cd1544?w=120&h=90&fit=crop",
+  "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=120&h=90&fit=crop",
+  "https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=120&h=90&fit=crop",
+  "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=120&h=90&fit=crop",
+  "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=120&h=90&fit=crop",
+  "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=120&h=90&fit=crop",
+];
 
-/* ─── Agent message strip ───────────────────────────────── */
+/* ─── Agent text (typewriter) ────────────────────────────── */
 
-type AgentMsg = { text: string; color: "gray" | "green" };
+const AGENT_VISION    = "● Vision Agent — analyzing building components and extracting data...";
+const AGENT_DOC       = "● Document Agent — extracting reserve fund data and specifications...";
+const AGENT_AUDIO     = "● Audio Agent — transcribing site walkthrough notes and extracting insights...";
+const AGENT_INGESTION = "● Ingestion Agent — all data extracted successfully ✓";
 
-function getAgentMsg(elapsed: number): AgentMsg | null {
-  if (elapsed >= 13500) return { text: "● Ingestion Agent — all sources connected ✓", color: "green" };
-  if (elapsed >= 9000)  return { text: "● Ingestion Agent — all files processed ✓", color: "green" };
-  if (elapsed >= 8000)  return { text: "● Audio Agent — transcribing site walkthrough notes...", color: "gray" };
-  if (elapsed >= 7000)  return { text: "● Document Agent — extracting reserve fund data...", color: "gray" };
-  if (elapsed >= 5500)  return { text: "● Vision Agent — analyzing building components...", color: "gray" };
+function computeAgent(e: number): { text: string; color: "gray" | "green"; phase: number } | null {
+  if (e >= 10500) return { text: AGENT_INGESTION, color: "green", phase: 4 };
+  if (e >= 9000) {
+    const chars = Math.min(AGENT_AUDIO.length, Math.floor(((e - 9000) / 1500) * AGENT_AUDIO.length));
+    return { text: AGENT_AUDIO.slice(0, chars), color: "gray", phase: 3 };
+  }
+  if (e >= 7200) {
+    const chars = Math.min(AGENT_DOC.length, Math.floor(((e - 7200) / 1500) * AGENT_DOC.length));
+    return { text: AGENT_DOC.slice(0, chars), color: "gray", phase: 2 };
+  }
+  if (e >= 4200) {
+    const chars = Math.min(AGENT_VISION.length, Math.floor(((e - 4200) / 2000) * AGENT_VISION.length));
+    return { text: AGENT_VISION.slice(0, chars), color: "gray", phase: 1 };
+  }
   return null;
 }
 
-/* ─── Drop ghost: photo stack ────────────────────────────── */
+/* ─── Individual photo drop ghost ────────────────────────── */
 
-const PhotoStack = ({ animating }: { animating: boolean }) => (
-  <AnimatePresence>
-    {animating && (
-      <motion.div
-        key="photostack"
-        style={{
-          position: "absolute",
-          top: -80,
-          left: "50%",
-          zIndex: 20,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {FAN_ROTATIONS.map((rot, i) => (
-          <motion.div
-            key={i}
-            initial={{
-              x: FAN_X_OFFSETS[i] - 30,
-              y: -20,
-              rotate: rot * 1.5,
-              opacity: 1,
-              scale: 1,
-            }}
-            animate={[
-              // Fall phase
-              {
-                x: FAN_X_OFFSETS[i],
-                y: 60,
-                rotate: rot * 0.4,
-                opacity: 1,
-                scale: 1,
-                transition: { duration: 0.45, ease: [0.4, 0, 1, 1], delay: i * 0.02 },
-              },
-              // Fan out briefly
-              {
-                x: FAN_X_OFFSETS[i] * 1.5,
-                y: 65,
-                rotate: rot,
-                scale: 1.05,
-                opacity: 1,
-                transition: { duration: 0.15, ease: "easeOut" },
-              },
-              // Collapse + vanish
-              {
-                x: 0,
-                y: 65,
-                rotate: 0,
-                scale: 0,
-                opacity: 0,
-                transition: { duration: 0.2, ease: "easeIn" },
-              },
-            ]}
-            style={{
-              position: "absolute",
-              width: 60,
-              height: 45,
-              borderRadius: 4,
-              background: "#E2E8F0",
-              border: "2px solid white",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transformOrigin: "center bottom",
-            }}
-          >
-            <Camera size={14} style={{ color: "#94A3B8" }} />
-          </motion.div>
-        ))}
-      </motion.div>
-    )}
-  </AnimatePresence>
-);
+const PhotoDrop = ({ animating, xOffset, src }: { animating: boolean; xOffset: number; src: string }) => {
+  if (!animating) return null;
+  return (
+    <motion.div
+      initial={{ y: 0, scale: 1, opacity: 1 }}
+      animate={{
+        y:       [0, 90, 90, 90, 90],
+        scale:   [1, 1, 1.08, 1.0, 1.0],
+        opacity: [1, 1, 1,    1,   0],
+      }}
+      transition={{ duration: 0.6, times: [0, 0.5, 0.625, 0.75, 1] }}
+      style={{
+        position: "absolute",
+        top: -80,
+        left: `calc(50% + ${xOffset}px - 32px)`,
+        zIndex: 20,
+        width: 64,
+        height: 48,
+        borderRadius: 4,
+        border: "2px solid white",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+        overflow: "hidden",
+      }}
+    >
+      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+    </motion.div>
+  );
+};
 
-/* ─── Drop ghost: single card ───────────────────────────── */
+/* ─── Single document/audio drop ghost ──────────────────── */
 
 const SingleDrop = ({
   animating,
   icon,
+  w,
+  h,
 }: {
   animating: boolean;
   icon: React.ReactNode;
-}) => (
-  <AnimatePresence>
-    {animating && (
+  w: number;
+  h: number;
+}) => {
+  if (!animating) return null;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: -80,
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 20,
+      }}
+    >
       <motion.div
-        key="singledrop"
-        initial={{ y: -80, x: "-50%", opacity: 1, scale: 1, rotate: -3 }}
-        animate={[
-          {
-            y: 30,
-            x: "-50%",
-            opacity: 1,
-            scale: 1,
-            rotate: 0,
-            transition: { duration: 0.4, ease: [0.4, 0, 1, 1] },
-          },
-          {
-            y: 30,
-            x: "-50%",
-            scale: 1.05,
-            opacity: 1,
-            rotate: 0,
-            transition: { duration: 0.15, ease: "easeOut" },
-          },
-          {
-            y: 30,
-            x: "-50%",
-            scale: 0,
-            opacity: 0,
-            rotate: 0,
-            transition: { duration: 0.18, ease: "easeIn" },
-          },
-        ]}
+        initial={{ y: 0, scale: 1, opacity: 1 }}
+        animate={{
+          y:       [0, 90, 90, 90, 90],
+          scale:   [1, 1, 1.08, 1.0, 1.0],
+          opacity: [1, 1, 1,    1,   0],
+        }}
+        transition={{ duration: 0.6, times: [0, 0.5, 0.625, 0.75, 1] }}
         style={{
-          position: "absolute",
-          top: -80,
-          left: "50%",
-          zIndex: 20,
-          width: 70,
-          height: 90,
+          width: w,
+          height: h,
           borderRadius: 8,
           background: "white",
           border: "1px solid #E8EBF0",
@@ -183,9 +144,9 @@ const SingleDrop = ({
       >
         {icon}
       </motion.div>
-    )}
-  </AnimatePresence>
-);
+    </div>
+  );
+};
 
 /* ─── File row ───────────────────────────────────────────── */
 
@@ -212,7 +173,7 @@ const FileRow = ({ file }: { file: FileEntry }) => {
             display: "flex",
             alignItems: "center",
             gap: 12,
-            padding: "9px 0",
+            padding: "10px 0",
             borderBottom: "1px solid hsl(var(--border))",
           }}
         >
@@ -231,12 +192,18 @@ const FileRow = ({ file }: { file: FileEntry }) => {
             <IconComp size={16} style={{ color: file.iconColor }} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: 13, fontWeight: 500, color: "hsl(var(--heading))", marginBottom: 1 }}>
+            <p
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "hsl(var(--heading))",
+                marginBottom: 1,
+              }}
+            >
               {file.name}
             </p>
             <p style={{ fontSize: 11, color: "#9CA3B8" }}>{file.detail}</p>
           </div>
-          {/* Spinner or checkmark */}
           {!file.done ? (
             <div
               style={{
@@ -288,13 +255,13 @@ const IntegrationCard = ({
   connectState: ConnectState;
 }) => {
   const btnStyle: React.CSSProperties =
-    connectState === "idle"
+    connectState === "connected"
       ? {
           height: 30,
           padding: "0 14px",
-          background: "transparent",
-          border: "1px solid #E8EBF0",
-          color: "#5A6178",
+          background: "#ECFDF5",
+          border: "1px solid #A7F3D0",
+          color: "#10B981",
           borderRadius: 6,
           fontSize: 12,
           fontWeight: 500,
@@ -317,9 +284,9 @@ const IntegrationCard = ({
       : {
           height: 30,
           padding: "0 14px",
-          background: "#ECFDF5",
-          border: "1px solid #A7F3D0",
-          color: "#10B981",
+          background: "transparent",
+          border: "1px solid #E8EBF0",
+          color: "#5A6178",
           borderRadius: 6,
           fontSize: 12,
           fontWeight: 500,
@@ -329,9 +296,7 @@ const IntegrationCard = ({
 
   return (
     <motion.div
-      animate={{
-        scale: connectState === "connected" ? [1, 1.015, 1] : 1,
-      }}
+      animate={{ scale: connectState === "connected" ? [1, 1.015, 1] : 1 }}
       transition={{ duration: 0.3 }}
       style={{
         flex: 1,
@@ -350,12 +315,7 @@ const IntegrationCard = ({
       <img
         src={logoSrc}
         alt={name}
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 8,
-          objectFit: "contain",
-        }}
+        style={{ width: 40, height: 40, borderRadius: 8, objectFit: "contain" }}
       />
       <p style={{ fontSize: 15, fontWeight: 500, color: "#0F1729" }}>{name}</p>
       <button style={btnStyle}>
@@ -369,9 +329,7 @@ const IntegrationCard = ({
   );
 };
 
-/* ─── Page ───────────────────────────────────────────────── */
-
-type Scene = "welcome" | "buildings" | "upload";
+/* ─── Initial file list ──────────────────────────────────── */
 
 const INITIAL_FILES: FileEntry[] = [
   {
@@ -403,34 +361,63 @@ const INITIAL_FILES: FileEntry[] = [
   },
 ];
 
-const Index = () => {
-  const [elapsed, setElapsed] = useState(0);
-  const [scene, setScene] = useState<Scene>("welcome");
-  const [abcHighlighted, setAbcHighlighted] = useState(false);
-  const [dzActive, setDzActive] = useState(false);
-  const [photoDropping, setPhotoDropping] = useState(false);
-  const [pdfDropping, setPdfDropping] = useState(false);
-  const [voiceDropping, setVoiceDropping] = useState(false);
-  const [files, setFiles] = useState<FileEntry[]>(INITIAL_FILES);
-  const [yardiState, setYardiState] = useState<ConnectState>("idle");
-  const [appfolioState, setAppfolioState] = useState<ConnectState>("idle");
-  const [showIntegrations, setShowIntegrations] = useState(false);
-  const [visitedItems, setVisitedItems] = useState<string[]>([]);
+/* ─── Page ───────────────────────────────────────────────── */
 
-  const agentMsg = getAgentMsg(elapsed);
+type Scene = "welcome" | "buildings" | "upload";
+
+const Index = () => {
+  const navigate = useNavigate();
+  const integrationStarted = useRef(false);
+
+  const [elapsed, setElapsed]               = useState(0);
+  const [scene, setScene]                   = useState<Scene>("welcome");
+  const [abcHighlighted, setAbcHighlighted] = useState(false);
+  const [dzActive, setDzActive]             = useState(false);
+  const [dzVisible, setDzVisible]           = useState(true);
+  const [photosDropping, setPhotosDropping] = useState<boolean[]>(Array(6).fill(false));
+  const [pdfDropping, setPdfDropping]       = useState(false);
+  const [voiceDropping, setVoiceDropping]   = useState(false);
+  const [files, setFiles]                   = useState<FileEntry[]>(INITIAL_FILES.map((f) => ({ ...f })));
+  const [modalVisible, setModalVisible]     = useState(false);
+  const [modalPhase, setModalPhase]         = useState<"prompt" | "integrating">("prompt");
+  const [yardiState, setYardiState]         = useState<ConnectState>("idle");
+  const [appfolioState, setAppfolioState]   = useState<ConnectState>("idle");
+  const [setupComplete, setSetupComplete]   = useState(false);
+  const [visitedItems, setVisitedItems]     = useState<string[]>([]);
+
+  // Phase 5: integration sequence (fires on button click or auto at 14.5s)
+  const startIntegration = useCallback(() => {
+    if (integrationStarted.current) return;
+    integrationStarted.current = true;
+    setModalPhase("integrating");
+    setTimeout(() => setYardiState("connecting"),                  300);
+    setTimeout(() => setYardiState("connected"),                  1100);
+    setTimeout(() => setAppfolioState("connecting"),              1500);
+    setTimeout(() => setAppfolioState("connected"),               2300);
+    setTimeout(() => setSetupComplete(true),                      3100);
+    setTimeout(() => {
+      setModalVisible(false);
+      setVisitedItems(["overview"]);
+      navigate("/inventory");
+    }, 4600);
+  }, [navigate]);
 
   const reset = useCallback(() => {
+    integrationStarted.current = false;
     setElapsed(0);
     setScene("welcome");
     setAbcHighlighted(false);
     setDzActive(false);
-    setPhotoDropping(false);
+    setDzVisible(true);
+    setPhotosDropping(Array(6).fill(false));
     setPdfDropping(false);
     setVoiceDropping(false);
     setFiles(INITIAL_FILES.map((f) => ({ ...f })));
+    setModalVisible(false);
+    setModalPhase("prompt");
     setYardiState("idle");
     setAppfolioState("idle");
-    setShowIntegrations(false);
+    setSetupComplete(false);
     setVisitedItems([]);
   }, []);
 
@@ -440,150 +427,341 @@ const Index = () => {
     return () => clearInterval(id);
   }, []);
 
-  // Sequence
+  // Animation sequence
   useEffect(() => {
     const e = elapsed;
 
-    // Scene transitions
-    if (e >= 1200 && scene === "welcome") setScene("buildings");
-    if (e >= 3800 && scene === "buildings") setScene("upload");
+    // Phase 1 → Phase 2: welcome exits at 0.9s
+    if (e >= 900  && scene === "welcome")   setScene("buildings");
+    // Phase 2 → Phase 3: buildings exits at 3.5s
+    if (e >= 3500 && scene === "buildings") setScene("upload");
 
-    // Building highlight
-    if (e >= 3000) setAbcHighlighted(true);
+    // Building highlight at 2.8s
+    if (e >= 2800) setAbcHighlighted(true);
 
-    // Drop zone activation
-    if (e >= 4500) setDzActive(true);
+    // Drop zone activates at 4.2s
+    if (e >= 4200) setDzActive(true);
 
-    // Photo drop
-    if (e >= 4500 && e < 4530) setPhotoDropping(true);
-    if (e >= 5300) setPhotoDropping(false);
+    // Individual photo drops — fire each once in a 30ms window
+    PHOTO_TIMES.forEach((t, i) => {
+      if (e >= t && e < t + 30) {
+        setPhotosDropping((prev) => { const n = [...prev]; n[i] = true; return n; });
+        setTimeout(() => setPhotosDropping((prev) => { const n = [...prev]; n[i] = false; return n; }), 650);
+      }
+    });
 
-    // File 1: photos
-    if (e >= 5500)
-      setFiles((f) => f.map((r, i) => (i === 0 ? { ...r, visible: true } : r)));
-    if (e >= 6000)
-      setFiles((f) => f.map((r, i) => (i === 0 ? { ...r, done: true } : r)));
-
-    // PDF drop
-    if (e >= 6500 && e < 6530) setPdfDropping(true);
-    if (e >= 7200) setPdfDropping(false);
-
-    // File 2: pdf
-    if (e >= 6500)
-      setFiles((f) => f.map((r, i) => (i === 1 ? { ...r, visible: true } : r)));
-    if (e >= 7000)
-      setFiles((f) => f.map((r, i) => (i === 1 ? { ...r, done: true } : r)));
-
-    // Voice drop
-    if (e >= 7500 && e < 7530) setVoiceDropping(true);
-    if (e >= 8200) setVoiceDropping(false);
-
-    // File 3: voice
-    if (e >= 7500)
-      setFiles((f) => f.map((r, i) => (i === 2 ? { ...r, visible: true } : r)));
-    if (e >= 8000)
-      setFiles((f) => f.map((r, i) => (i === 2 ? { ...r, done: true } : r)));
-
-    // Drop zone deactivate
-    if (e >= 9000) setDzActive(false);
-
-    // Phase 2: integrations
-    if (e >= 10000) setShowIntegrations(true);
-
-    // Yardi
-    if (e >= 11000) setYardiState((p) => (p === "idle" ? "connecting" : p));
-    if (e >= 11800) setYardiState((p) => (p === "connecting" ? "connected" : p));
-
-    // AppFolio
-    if (e >= 12500) setAppfolioState((p) => (p === "idle" ? "connecting" : p));
-    if (e >= 13300) setAppfolioState((p) => (p === "connecting" ? "connected" : p));
-
-    // Mark visited
-    if (e >= 14000 && !visitedItems.includes("overview")) {
-      setVisitedItems(["overview"]);
+    // PDF drop at 7.2s
+    if (e >= 7200 && e < 7230) {
+      setPdfDropping(true);
+      setTimeout(() => setPdfDropping(false), 650);
     }
-  }, [elapsed, scene, visitedItems]);
+
+    // Voice drop at 9s
+    if (e >= 9000 && e < 9030) {
+      setVoiceDropping(true);
+      setTimeout(() => setVoiceDropping(false), 650);
+    }
+
+    // File items: appear + checkmark
+    if (e >= 6300) setFiles((f) => f.map((r, i) => (i === 0 ? { ...r, visible: true } : r)));
+    if (e >= 6900) setFiles((f) => f.map((r, i) => (i === 0 ? { ...r, done: true }    : r)));
+    if (e >= 7600) setFiles((f) => f.map((r, i) => (i === 1 ? { ...r, visible: true } : r)));
+    if (e >= 8200) setFiles((f) => f.map((r, i) => (i === 1 ? { ...r, done: true }    : r)));
+    if (e >= 9400) setFiles((f) => f.map((r, i) => (i === 2 ? { ...r, visible: true } : r)));
+    if (e >= 10000) setFiles((f) => f.map((r, i) => (i === 2 ? { ...r, done: true }   : r)));
+
+    // Drop zone shrinks out at 10.8s
+    if (e >= 10800) setDzVisible(false);
+
+    // Integration modal appears at 11.5s
+    if (e >= 11500) setModalVisible(true);
+
+    // Auto-trigger integration at 14.5s (3s after modal appears)
+    if (e >= 14500) startIntegration();
+
+  }, [elapsed, scene, startIntegration]);
+
+  const agent = computeAgent(elapsed);
 
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar activeItem="overview" visitedItems={visitedItems} />
 
-      <main className="flex-1" style={{ marginLeft: 260 }}>
-        <div className="mx-auto" style={{ maxWidth: 1200, padding: 60 }}>
-          <TopBar onReplay={reset} />
+      {/* Main content — position:relative so modal backdrop is contained here */}
+      <main className="flex-1" style={{ marginLeft: 260, position: "relative", overflow: "hidden" }}>
 
-          {/* Agent status strip */}
+        {/* ── Integration modal + backdrop (covers main only, not sidebar) ── */}
+        <AnimatePresence>
+          {modalVisible && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(15,23,41,0.45)",
+                backdropFilter: "blur(3px)",
+                zIndex: 50,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                style={{
+                  maxWidth: 420,
+                  width: "calc(100% - 48px)",
+                  background: "white",
+                  borderRadius: 16,
+                  padding: 32,
+                  boxShadow: "0 8px 40px rgba(0,0,0,0.18)",
+                  position: "relative",
+                }}
+              >
+                <AnimatePresence mode="wait">
+
+                  {/* ── Prompt phase ── */}
+                  {modalPhase === "prompt" && (
+                    <motion.div
+                      key="prompt"
+                      exit={{ opacity: 0, transition: { duration: 0.2 } }}
+                    >
+                      {/* Green checkmark circle */}
+                      <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+                        <div
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: "50%",
+                            background: "#ECFDF5",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Check size={16} style={{ color: "#10B981" }} />
+                        </div>
+                      </div>
+
+                      <p
+                        style={{
+                          fontSize: 20,
+                          fontWeight: 700,
+                          color: "#0F1729",
+                          textAlign: "center",
+                          marginBottom: 8,
+                        }}
+                      >
+                        Building data ready.
+                      </p>
+                      <p
+                        style={{
+                          fontSize: 13,
+                          color: "#5A6178",
+                          textAlign: "center",
+                          marginBottom: 20,
+                        }}
+                      >
+                        Connect your property management tools to sync live data automatically.
+                      </p>
+
+                      <div style={{ height: 1, background: "#E8EBF0", marginBottom: 16 }} />
+
+                      {/* Logo previews */}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          gap: 12,
+                          marginBottom: 20,
+                        }}
+                      >
+                        {[
+                          { src: "/yardi-logo.png", label: "Yardi" },
+                          { src: "/appfolio-logo.png", label: "AppFolio" },
+                        ].map(({ src, label }) => (
+                          <div key={label} style={{ textAlign: "center" }}>
+                            <img
+                              src={src}
+                              alt={label}
+                              style={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: 6,
+                                objectFit: "contain",
+                                display: "block",
+                                margin: "0 auto 4px",
+                              }}
+                            />
+                            <p style={{ fontSize: 11, color: "#5A6178" }}>{label}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={startIntegration}
+                        style={{
+                          width: "100%",
+                          height: 44,
+                          background: "#4F6BFF",
+                          color: "white",
+                          border: "none",
+                          borderRadius: 8,
+                          fontSize: 14,
+                          fontWeight: 500,
+                          cursor: "pointer",
+                          marginBottom: 8,
+                        }}
+                      >
+                        Connect Yardi &amp; AppFolio
+                      </button>
+                      <p
+                        onClick={startIntegration}
+                        style={{
+                          fontSize: 12,
+                          color: "#9CA3B8",
+                          textAlign: "center",
+                          cursor: "pointer",
+                          margin: 0,
+                        }}
+                      >
+                        Skip for now
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {/* ── Integration phase ── */}
+                  {modalPhase === "integrating" && (
+                    <motion.div
+                      key="integrating"
+                      initial={{ opacity: 0, transition: { duration: 0.2 } }}
+                      animate={{ opacity: 1, transition: { duration: 0.2 } }}
+                    >
+                      <p
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 600,
+                          color: "#0F1729",
+                          textAlign: "center",
+                          marginBottom: 16,
+                        }}
+                      >
+                        Connecting your tools...
+                      </p>
+
+                      <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+                        <IntegrationCard
+                          name="Yardi"
+                          logoSrc="/yardi-logo.png"
+                          connectState={yardiState}
+                        />
+                        <IntegrationCard
+                          name="AppFolio"
+                          logoSrc="/appfolio-logo.png"
+                          connectState={appfolioState}
+                        />
+                      </div>
+
+                      <AnimatePresence>
+                        {setupComplete && (
+                          <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                            style={{
+                              fontSize: 13,
+                              color: "#10B981",
+                              textAlign: "center",
+                              margin: 0,
+                            }}
+                          >
+                            Setup complete. Taking you to your dashboard...
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  )}
+
+                </AnimatePresence>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Page content ── */}
+        <div className="mx-auto" style={{ maxWidth: 1200, padding: 60 }}>
+          <TopBar onReplay={reset} activeItem="overview" />
+
+          {/* Agent status strip — typewriter */}
           <div style={{ height: 32, marginBottom: 16, display: "flex", alignItems: "center" }}>
             <AnimatePresence mode="wait">
-              {agentMsg && (
+              {agent && (
                 <motion.p
-                  key={agentMsg.text}
+                  key={agent.phase}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25 }}
+                  transition={{ duration: 0.2 }}
                   style={{
                     fontFamily: "monospace",
                     fontSize: 13,
-                    color: agentMsg.color === "green" ? "#10B981" : "#8B92A8",
+                    color: agent.color === "green" ? "#10B981" : "#8B92A8",
                   }}
                 >
-                  {agentMsg.text}
+                  {agent.text}
                 </motion.p>
               )}
             </AnimatePresence>
           </div>
 
-          {/* ── SCENE: WELCOME ── */}
-          <AnimatePresence>
+          {/* ── Scenes ── */}
+          <AnimatePresence mode="wait">
+
+            {/* SCENE 1: Welcome */}
             {scene === "welcome" && (
               <motion.div
                 key="welcome"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
+                animate={{ opacity: 1, transition: { duration: 0.15 } }}
+                exit={{ opacity: 0, transition: { duration: 0.2 } }}
                 style={{
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  minHeight: 420,
+                  height: "calc(100vh - 220px)",
                   textAlign: "center",
                 }}
               >
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
+                <h1
+                  style={{
+                    fontSize: 32,
+                    fontWeight: 700,
+                    color: "#0F1729",
+                    marginBottom: 12,
+                  }}
                 >
-                  <h1
-                    style={{
-                      fontSize: 32,
-                      fontWeight: 700,
-                      color: "#0F1729",
-                      marginBottom: 12,
-                    }}
-                  >
-                    Welcome to RECOstudy
-                  </h1>
-                  <p style={{ fontSize: 16, color: "#5A6178" }}>
-                    Automated reserve fund studies, powered by AI.
-                  </p>
-                </motion.div>
+                  Welcome to RECOstudy
+                </h1>
+                <p style={{ fontSize: 16, color: "#5A6178" }}>
+                  Automated reserve fund studies, powered by AI.
+                </p>
               </motion.div>
             )}
-          </AnimatePresence>
 
-          {/* ── SCENE: BUILDINGS ── */}
-          <AnimatePresence>
+            {/* SCENE 2: Building selection */}
             {scene === "buildings" && (
               <motion.div
                 key="buildings"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
+                animate={{ opacity: 1, transition: { duration: 0.25 } }}
+                exit={{ opacity: 0, transition: { duration: 0.25 } }}
                 style={{ maxWidth: 800, margin: "0 auto" }}
               >
                 <p
@@ -602,7 +780,7 @@ const Index = () => {
 
                 <div style={{ display: "flex", gap: 20 }}>
                   {BUILDINGS.map((b, i) => {
-                    const isABC = b.id === "abc";
+                    const isABC  = b.id === "abc";
                     const active = isABC && abcHighlighted;
                     return (
                       <motion.div
@@ -666,17 +844,13 @@ const Index = () => {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
 
-          {/* ── SCENE: UPLOAD + INTEGRATIONS ── */}
-          <AnimatePresence>
+            {/* SCENE 3: Upload + file list */}
             {scene === "upload" && (
               <motion.div
                 key="upload"
                 initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
+                animate={{ opacity: 1, y: 0, transition: { duration: 0.25 } }}
                 style={{ maxWidth: 800, margin: "0 auto" }}
               >
                 {/* Header */}
@@ -701,51 +875,58 @@ const Index = () => {
                   Upload building data
                 </p>
 
-                {/* Drop zone */}
-                <div style={{ position: "relative", marginBottom: 0 }}>
-                  {/* Photo stack ghost */}
-                  <PhotoStack animating={photoDropping} />
+                {/* Drop zone area with photo/pdf/voice ghosts */}
+                <div style={{ position: "relative" }}>
+                  {/* 6 individual photo drops */}
+                  {PHOTO_TIMES.map((_, i) => (
+                    <PhotoDrop
+                      key={i}
+                      animating={photosDropping[i]}
+                      xOffset={PHOTO_OFFSETS[i]}
+                      src={PHOTO_URLS[i]}
+                    />
+                  ))}
 
-                  {/* PDF ghost */}
+                  {/* PDF drop */}
+                  <SingleDrop
+                    animating={pdfDropping}
+                    icon={<FileText size={28} style={{ color: "#EF4444" }} />}
+                    w={70}
+                    h={85}
+                  />
+
+                  {/* Voice drop */}
+                  <SingleDrop
+                    animating={voiceDropping}
+                    icon={<Mic size={28} style={{ color: "#8B5CF6" }} />}
+                    w={70}
+                    h={50}
+                  />
+
+                  {/* Drop zone — shrinks out at 10.8s */}
                   <AnimatePresence>
-                    {pdfDropping && (
-                      <SingleDrop
-                        animating={pdfDropping}
-                        icon={<FileText size={28} style={{ color: "#EF4444" }} />}
-                      />
+                    {dzVisible && (
+                      <motion.div
+                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.35, ease: "easeInOut" } }}
+                        style={{
+                          width: "100%",
+                          height: 200,
+                          borderRadius: 16,
+                          border: dzActive ? "2px solid #4F6BFF" : "2px dashed #D1D5DB",
+                          background: dzActive ? "rgba(79,107,255,0.04)" : "#FAFBFD",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 8,
+                          transition: "border-color 0.3s ease, background 0.3s ease",
+                        }}
+                      >
+                        <Upload size={36} style={{ color: "#9CA3B8" }} />
+                        <p style={{ fontSize: 14, color: "#9CA3B8" }}>Drop files here</p>
+                      </motion.div>
                     )}
                   </AnimatePresence>
-
-                  {/* Voice ghost */}
-                  <AnimatePresence>
-                    {voiceDropping && (
-                      <SingleDrop
-                        animating={voiceDropping}
-                        icon={<Mic size={28} style={{ color: "#8B5CF6" }} />}
-                      />
-                    )}
-                  </AnimatePresence>
-
-                  <div
-                    style={{
-                      width: "100%",
-                      height: 220,
-                      borderRadius: 16,
-                      border: dzActive ? "2px solid #4F6BFF" : "2px dashed #D1D5DB",
-                      background: dzActive
-                        ? "rgba(79,107,255,0.04)"
-                        : "#FAFBFD",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 8,
-                      transition: "border-color 0.3s ease, background 0.3s ease",
-                    }}
-                  >
-                    <Upload size={40} style={{ color: "#9CA3B8" }} />
-                    <p style={{ fontSize: 14, color: "#9CA3B8" }}>Drop files here</p>
-                  </div>
                 </div>
 
                 {/* File list */}
@@ -763,45 +944,9 @@ const Index = () => {
                     <FileRow key={file.name} file={file} />
                   ))}
                 </div>
-
-                {/* ── Integrations (Phase 2) ── */}
-                <AnimatePresence>
-                  {showIntegrations && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      style={{ marginTop: 24 }}
-                    >
-                      <p
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 500,
-                          color: "#9CA3B8",
-                          letterSpacing: "0.08em",
-                          textTransform: "uppercase",
-                          marginBottom: 12,
-                        }}
-                      >
-                        Integrations
-                      </p>
-                      <div style={{ display: "flex", gap: 16 }}>
-                        <IntegrationCard
-                          name="Yardi"
-                          logoSrc="/yardi-logo.png"
-                          connectState={yardiState}
-                        />
-                        <IntegrationCard
-                          name="AppFolio"
-                          logoSrc="/appfolio-logo.png"
-                          connectState={appfolioState}
-                        />
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </motion.div>
             )}
+
           </AnimatePresence>
         </div>
       </main>
