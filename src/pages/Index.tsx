@@ -1,245 +1,313 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Upload, Image as ImageIcon, FileText, Mic, Check } from "lucide-react";
+import { Upload, Image as ImageIcon, FileText, Mic, Check, Eye, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
 
 /* ─── Constants ──────────────────────────────────────────── */
 
-const BUILDINGS = [
-  {
-    id: "abc",
-    name: "ABC Condominium Association, Inc.",
-    img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop",
-    address: "1234 Street, City",
-    units: "113 units · 20 floors",
-  },
-  {
-    id: "mariner",
-    name: "The Grand Mariner",
-    img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop",
-    address: "123 Main Street, Toronto, ON",
-    units: "85 units · 28 floors",
-  },
-  {
-    id: "fairmont",
-    name: "Fairmont Residences",
-    img: "https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=600&h=400&fit=crop",
-    address: "456 Bay Street, Toronto, ON",
-    units: "64 units · 15 floors",
-  },
-];
+const UPLOAD_START = 1500; // absolute ms when upload scene begins
 
-// Individual photo drop timing + horizontal offsets + real images
-const PHOTO_TIMES   = [4200, 4550, 4900, 5250, 5600, 5950];
-const PHOTO_OFFSETS = [-30, -15, 0, 15, -10, 20];
+// All times below are RELATIVE to upload start (ms)
+const PHOTO_SLIDE_STARTS = [1000, 1600, 2200, 2800];
 const PHOTO_URLS = [
-  "https://images.unsplash.com/photo-1486718448742-163732cd1544?w=120&h=90&fit=crop",
-  "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=120&h=90&fit=crop",
-  "https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=120&h=90&fit=crop",
-  "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=120&h=90&fit=crop",
-  "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=120&h=90&fit=crop",
-  "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=120&h=90&fit=crop",
+  "https://images.unsplash.com/photo-1486718448742-163732cd1544?w=220&h=164&fit=crop",
+  "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=220&h=164&fit=crop",
+  "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=220&h=164&fit=crop",
+  "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=220&h=164&fit=crop",
 ];
 
-/* ─── Agent text (typewriter) ────────────────────────────── */
+// 2x2 grid positions inside drop zone (110x82 photos, 8px gap, centered)
+// Grid: 228px wide x 172px tall, centered in 180px-high drop zone
+const PHOTO_POSITIONS = [
+  { top: 4, left: "calc(50% - 114px)" },
+  { top: 4, left: "calc(50% + 4px)" },
+  { top: 94, left: "calc(50% - 114px)" },
+  { top: 94, left: "calc(50% + 4px)" },
+];
 
-const AGENT_VISION    = "● Vision Agent — analyzing building components and extracting data...";
-const AGENT_DOC       = "● Document Agent — extracting reserve fund data and specifications...";
-const AGENT_AUDIO     = "● Audio Agent — transcribing site walkthrough notes and extracting insights...";
-const AGENT_INGESTION = "● Ingestion Agent — all data extracted successfully ✓";
-
-function computeAgent(e: number): { text: string; color: "gray" | "green"; phase: number } | null {
-  if (e >= 10500) return { text: AGENT_INGESTION, color: "green", phase: 4 };
-  if (e >= 9000) {
-    const chars = Math.min(AGENT_AUDIO.length, Math.floor(((e - 9000) / 1500) * AGENT_AUDIO.length));
-    return { text: AGENT_AUDIO.slice(0, chars), color: "gray", phase: 3 };
-  }
-  if (e >= 7200) {
-    const chars = Math.min(AGENT_DOC.length, Math.floor(((e - 7200) / 1500) * AGENT_DOC.length));
-    return { text: AGENT_DOC.slice(0, chars), color: "gray", phase: 2 };
-  }
-  if (e >= 4200) {
-    const chars = Math.min(AGENT_VISION.length, Math.floor(((e - 4200) / 2000) * AGENT_VISION.length));
-    return { text: AGENT_VISION.slice(0, chars), color: "gray", phase: 1 };
-  }
-  return null;
-}
-
-/* ─── Individual photo drop ghost ────────────────────────── */
-
-const PhotoDrop = ({ animating, xOffset, src }: { animating: boolean; xOffset: number; src: string }) => {
-  if (!animating) return null;
-  return (
-    <motion.div
-      initial={{ y: 0, scale: 1, opacity: 1 }}
-      animate={{
-        y:       [0, 90, 90, 90, 90],
-        scale:   [1, 1, 1.08, 1.0, 1.0],
-        opacity: [1, 1, 1,    1,   0],
-      }}
-      transition={{ duration: 0.6, times: [0, 0.5, 0.625, 0.75, 1] }}
-      style={{
-        position: "absolute",
-        top: -80,
-        left: `calc(50% + ${xOffset}px - 32px)`,
-        zIndex: 20,
-        width: 64,
-        height: 48,
-        borderRadius: 4,
-        border: "2px solid white",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
-        overflow: "hidden",
-      }}
-    >
-      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-    </motion.div>
-  );
+// File item timings (relative to upload start, ms)
+const FILE_TIMES = {
+  photos: { appear: 3400, done: 4000 },
+  pdf:    { appear: 5500, done: 6100 },
+  voice:  { appear: 7500, done: 8100 },
 };
 
-/* ─── Single document/audio drop ghost ──────────────────── */
+// Agent timings (relative to upload start, ms)
+const AGENTS = {
+  vision:   { start: 1000, duration: 3500 },
+  document: { start: 5500, duration: 2500 },
+  audio:    { start: 7500, duration: 2500 },
+};
 
-const SingleDrop = ({
-  animating,
-  icon,
-  w,
-  h,
+const COMPLETION_REL = 10500;
+const FADE_DELAY = 6500;
+const AUTO_INTEGRATE_DELAY = 3000;
+
+const VISION_OBS = [
+  "\u2192 Detected: exterior facade, balcony structures",
+  "\u2192 Identified: HVAC unit, elevator shaft, parking level",
+  "\u2192 Flagged: visible concrete spalling on east elevation",
+];
+const DOC_OBS = [
+  "\u2192 Extracted: reserve fund balance $567,420",
+  "\u2192 Identified: 8 components approaching end of life",
+  "\u2192 Parsed: engineer PNA study, 2022 baseline",
+];
+const AUDIO_OBS = [
+  "\u2192 Transcribed: 4m 32s site walkthrough audio",
+  "\u2192 Extracted: rooftop HVAC showing wear, last serviced 2019",
+  "\u2192 Noted: parking structure visible cracking, elevator flagged",
+];
+
+/* ─── Agent Processing Card (right column) ──────────────── */
+
+const AgentProcessingCard = ({
+  name,
+  iconBg,
+  iconColor,
+  borderColor,
+  fillColor,
+  IconComp,
+  progress,
+  active,
+  complete,
+  observations,
 }: {
-  animating: boolean;
-  icon: React.ReactNode;
-  w: number;
-  h: number;
+  name: string;
+  iconBg: string;
+  iconColor: string;
+  borderColor: string;
+  fillColor: string;
+  IconComp: React.ElementType;
+  progress: number;
+  active: boolean;
+  complete: boolean;
+  observations: string[];
 }) => {
-  if (!animating) return null;
+  const isActive = active || complete;
+  const cardBg = complete ? "#F0FDF4" : active ? "#F4F5F8" : "#F7F8FA";
   return (
     <div
       style={{
-        position: "absolute",
-        top: -80,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 20,
+        background: cardBg,
+        borderRadius: 12,
+        border: `1px solid ${isActive ? borderColor : "#E8EBF0"}`,
+        padding: 16,
+        opacity: isActive ? 1 : 0.4,
+        boxShadow: isActive ? "0 4px 20px rgba(0,0,0,0.08)" : "none",
+        transition: "opacity 0.3s, box-shadow 0.3s, border-color 0.3s, background 0.4s ease",
       }}
     >
-      <motion.div
-        initial={{ y: 0, scale: 1, opacity: 1 }}
-        animate={{
-          y:       [0, 90, 90, 90, 90],
-          scale:   [1, 1, 1.08, 1.0, 1.0],
-          opacity: [1, 1, 1,    1,   0],
-        }}
-        transition={{ duration: 0.6, times: [0, 0.5, 0.625, 0.75, 1] }}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            background: iconBg,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <IconComp size={14} style={{ color: iconColor }} />
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729", flex: 1 }}>
+          {name}
+        </span>
+        {isActive && (
+          complete ? (
+            <motion.span
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: [0.8, 1.08, 1.0], opacity: 1 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                padding: "2px 8px",
+                borderRadius: 4,
+                background: "#ECFDF5",
+                color: "#10B981",
+                whiteSpace: "nowrap",
+                position: "relative",
+              }}
+            >
+              Complete &#10003;
+              {/* Ripple ring */}
+              <motion.span
+                initial={{ boxShadow: "0 0 0 0px rgba(16,185,129,0.5)" }}
+                animate={{ boxShadow: "0 0 0 10px rgba(16,185,129,0)" }}
+                transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: 4,
+                  pointerEvents: "none",
+                }}
+              />
+            </motion.span>
+          ) : (
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                padding: "2px 8px",
+                borderRadius: 4,
+                background: iconBg,
+                color: iconColor,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Processing...
+            </span>
+          )
+        )}
+      </div>
+
+      <div
         style={{
-          width: w,
-          height: h,
-          borderRadius: 8,
-          background: "white",
-          border: "1px solid #E8EBF0",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.14)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          marginTop: 10,
+          width: "100%",
+          height: 6,
+          background: "#F1F3F6",
+          borderRadius: 3,
+          overflow: "hidden",
         }}
       >
-        {icon}
-      </motion.div>
+        <div
+          style={{
+            height: "100%",
+            width: `${Math.min(progress * 100, 100)}%`,
+            background: fillColor,
+            borderRadius: 3,
+            transition: complete ? "width 0.1s linear, box-shadow 0.3s ease" : "width 0.1s linear",
+            boxShadow: complete ? `0 0 8px 1px ${fillColor}59` : "none",
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          marginTop: 10,
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 12,
+          color: "#5A6178",
+          lineHeight: 1.6,
+          minHeight: 58,
+        }}
+      >
+        {observations.map((obs, i) => {
+          const threshold = [0.33, 0.66, 0.95][i];
+          return (
+            <div
+              key={i}
+              style={{
+                opacity: progress >= threshold ? 1 : 0,
+                transition: "opacity 0.3s ease",
+              }}
+            >
+              {obs}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
 
-/* ─── File row ───────────────────────────────────────────── */
+/* ─── File Slide Row (left column) ──────────────────────── */
 
-type FileEntry = {
+const FileSlideRow = ({
+  visible,
+  done,
+  name,
+  detail,
+  iconBg,
+  iconColor,
+  IconComp,
+}: {
+  visible: boolean;
+  done: boolean;
   name: string;
   detail: string;
   iconBg: string;
   iconColor: string;
   IconComp: React.ElementType;
-  visible: boolean;
-  done: boolean;
-};
-
-const FileRow = ({ file }: { file: FileEntry }) => {
-  const { IconComp } = file;
-  return (
-    <AnimatePresence>
-      {file.visible && (
-        <motion.div
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
+}) => (
+  <AnimatePresence>
+    {visible && (
+      <motion.div
+        initial={{ x: -20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "14px 16px",
+          background: "white",
+          borderRadius: 10,
+          border: "1px solid #E8EBF0",
+        }}
+      >
+        <div
           style={{
+            width: 40,
+            height: 40,
+            borderRadius: 8,
+            background: iconBg,
+            flexShrink: 0,
             display: "flex",
             alignItems: "center",
-            gap: 12,
-            padding: "10px 0",
-            borderBottom: "1px solid hsl(var(--border))",
+            justifyContent: "center",
           }}
         >
+          <IconComp size={18} style={{ color: iconColor }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: 13, fontWeight: 500, color: "#0F1729", marginBottom: 2 }}>
+            {name}
+          </p>
+          <p style={{ fontSize: 11, color: "#9CA3B8" }}>{detail}</p>
+        </div>
+        {!done ? (
           <div
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              background: file.iconBg,
+              width: 18,
+              height: 18,
+              borderRadius: "50%",
+              border: "2px solid #E8EBF0",
+              borderTopColor: "#4F6BFF",
+              flexShrink: 0,
+              animation: "spin 0.8s linear infinite",
+            }}
+          />
+        ) : (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            style={{
+              width: 18,
+              height: 18,
+              borderRadius: "50%",
+              background: "#10B981",
               flexShrink: 0,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <IconComp size={16} style={{ color: file.iconColor }} />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p
-              style={{
-                fontSize: 13,
-                fontWeight: 500,
-                color: "hsl(var(--heading))",
-                marginBottom: 1,
-              }}
-            >
-              {file.name}
-            </p>
-            <p style={{ fontSize: 11, color: "#9CA3B8" }}>{file.detail}</p>
-          </div>
-          {!file.done ? (
-            <div
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: "50%",
-                border: "2px solid hsl(var(--border))",
-                borderTopColor: "#4F6BFF",
-                flexShrink: 0,
-                animation: "spin 0.8s linear infinite",
-              }}
-            />
-          ) : (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: "50%",
-                background: "#10B981",
-                flexShrink: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Check size={10} color="white" />
-            </motion.div>
-          )}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
+            <Check size={10} color="white" />
+          </motion.div>
+        )}
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 /* ─── Integration card ───────────────────────────────────── */
 
@@ -323,78 +391,71 @@ const IntegrationCard = ({
           ? "Connect"
           : connectState === "connecting"
           ? "Connecting..."
-          : "✓ Connected"}
+          : "\u2713 Connected"}
       </button>
     </motion.div>
   );
 };
 
-/* ─── Initial file list ──────────────────────────────────── */
-
-const INITIAL_FILES: FileEntry[] = [
-  {
-    name: "6 building inspection photos",
-    detail: "Images · 24.5 MB total",
-    iconBg: "#EFF6FF",
-    iconColor: "#3B82F6",
-    IconComp: ImageIcon,
-    visible: false,
-    done: false,
-  },
-  {
-    name: "existing-reserve-study.pdf",
-    detail: "PDF document · 8.7 MB",
-    iconBg: "#FEF2F2",
-    iconColor: "#EF4444",
-    IconComp: FileText,
-    visible: false,
-    done: false,
-  },
-  {
-    name: "site-walkthrough-notes.m4a",
-    detail: "Voice recording · 3.2 MB",
-    iconBg: "#F3E8FF",
-    iconColor: "#8B5CF6",
-    IconComp: Mic,
-    visible: false,
-    done: false,
-  },
-];
-
 /* ─── Page ───────────────────────────────────────────────── */
 
-type Scene = "welcome" | "buildings" | "upload";
+type Scene = "welcome" | "upload";
 
 const Index = () => {
   const navigate = useNavigate();
   const integrationStarted = useRef(false);
 
-  const [elapsed, setElapsed]               = useState(0);
-  const [scene, setScene]                   = useState<Scene>("welcome");
-  const [abcHighlighted, setAbcHighlighted] = useState(false);
-  const [dzActive, setDzActive]             = useState(false);
-  const [dzVisible, setDzVisible]           = useState(true);
-  const [photosDropping, setPhotosDropping] = useState<boolean[]>(Array(6).fill(false));
-  const [pdfDropping, setPdfDropping]       = useState(false);
-  const [voiceDropping, setVoiceDropping]   = useState(false);
-  const [files, setFiles]                   = useState<FileEntry[]>(INITIAL_FILES.map((f) => ({ ...f })));
-  const [modalVisible, setModalVisible]     = useState(false);
-  const [modalPhase, setModalPhase]         = useState<"prompt" | "integrating">("prompt");
-  const [yardiState, setYardiState]         = useState<ConnectState>("idle");
-  const [appfolioState, setAppfolioState]   = useState<ConnectState>("idle");
-  const [setupComplete, setSetupComplete]   = useState(false);
-  const [visitedItems, setVisitedItems]     = useState<string[]>([]);
+  const [elapsed, setElapsed]             = useState(0);
+  const [started, setStarted]             = useState(false);
+  const [scene, setScene]                 = useState<Scene>("welcome");
+  const [modalVisible, setModalVisible]   = useState(false);
+  const [modalPhase, setModalPhase]       = useState<"prompt" | "integrating">("prompt");
+  const [yardiState, setYardiState]       = useState<ConnectState>("idle");
+  const [appfolioState, setAppfolioState] = useState<ConnectState>("idle");
+  const [setupComplete, setSetupComplete] = useState(false);
+  const [visitedItems, setVisitedItems]   = useState<string[]>([]);
 
-  // Phase 5: integration sequence (fires on button click or auto at 14.5s)
+  // Upload-relative time (ms since upload scene appeared)
+  const t = scene === "upload" ? Math.max(0, elapsed - UPLOAD_START) : 0;
+
+  // Photo visibility (each becomes true when its slide starts)
+  const photoVisible = PHOTO_SLIDE_STARTS.map((start) => t >= start);
+  // Photos fade out after all 4 land (last lands at ~3300+700=4000)
+  const photosInDzFading = t >= 4200;
+  // Document and voice ghosts in drop zone
+  const showDocGhost   = t >= 5500 && t < 7300;
+  const showVoiceGhost = t >= 7500 && t < COMPLETION_REL;
+
+  // Agent progress (0 to 1)
+  const progress = (start: number, dur: number) =>
+    t < start ? 0 : Math.min((t - start) / dur, 1);
+  const visionProgress  = progress(AGENTS.vision.start, AGENTS.vision.duration);
+  const docProgress     = progress(AGENTS.document.start, AGENTS.document.duration);
+  const audioProgress   = progress(AGENTS.audio.start, AGENTS.audio.duration);
+
+  // File item visibility & done state
+  const photosFileVisible = t >= FILE_TIMES.photos.appear;
+  const photosFileDone    = t >= FILE_TIMES.photos.done;
+  const pdfFileVisible    = t >= FILE_TIMES.pdf.appear;
+  const pdfFileDone       = t >= FILE_TIMES.pdf.done;
+  const voiceFileVisible  = t >= FILE_TIMES.voice.appear;
+  const voiceFileDone     = t >= FILE_TIMES.voice.done;
+
+  // Completion
+  const showCompletion = t >= COMPLETION_REL;
+  const dzFading       = t >= COMPLETION_REL + FADE_DELAY;
+  const showModal      = elapsed >= UPLOAD_START + COMPLETION_REL + FADE_DELAY;
+
+  // Integration sequence (unchanged)
   const startIntegration = useCallback(() => {
     if (integrationStarted.current) return;
     integrationStarted.current = true;
     setModalPhase("integrating");
-    setTimeout(() => setYardiState("connecting"),                  300);
-    setTimeout(() => setYardiState("connected"),                  1100);
-    setTimeout(() => setAppfolioState("connecting"),              1500);
-    setTimeout(() => setAppfolioState("connected"),               2300);
-    setTimeout(() => setSetupComplete(true),                      3100);
+    setTimeout(() => setYardiState("connecting"),  300);
+    setTimeout(() => setYardiState("connected"),  1100);
+    setTimeout(() => setAppfolioState("connecting"), 1500);
+    setTimeout(() => setAppfolioState("connected"),  2300);
+    setTimeout(() => setSetupComplete(true),          3100);
     setTimeout(() => {
       setModalVisible(false);
       setVisitedItems(["overview"]);
@@ -405,14 +466,8 @@ const Index = () => {
   const reset = useCallback(() => {
     integrationStarted.current = false;
     setElapsed(0);
+    setStarted(false);
     setScene("welcome");
-    setAbcHighlighted(false);
-    setDzActive(false);
-    setDzVisible(true);
-    setPhotosDropping(Array(6).fill(false));
-    setPdfDropping(false);
-    setVoiceDropping(false);
-    setFiles(INITIAL_FILES.map((f) => ({ ...f })));
     setModalVisible(false);
     setModalPhase("prompt");
     setYardiState("idle");
@@ -421,76 +476,75 @@ const Index = () => {
     setVisitedItems([]);
   }, []);
 
-  // Timer
+  // Timer — only runs after user clicks "Add a Building"
   useEffect(() => {
+    if (!started) return;
     const id = setInterval(() => setElapsed((p) => p + 30), 30);
     return () => clearInterval(id);
-  }, []);
+  }, [started]);
 
-  // Animation sequence
+  // Scene transitions & modal timing
   useEffect(() => {
-    const e = elapsed;
-
-    // Phase 1 → Phase 2: welcome exits at 0.9s
-    if (e >= 900  && scene === "welcome")   setScene("buildings");
-    // Phase 2 → Phase 3: buildings exits at 3.5s
-    if (e >= 3500 && scene === "buildings") setScene("upload");
-
-    // Building highlight at 2.8s
-    if (e >= 2800) setAbcHighlighted(true);
-
-    // Drop zone activates at 4.2s
-    if (e >= 4200) setDzActive(true);
-
-    // Individual photo drops — fire each once in a 30ms window
-    PHOTO_TIMES.forEach((t, i) => {
-      if (e >= t && e < t + 30) {
-        setPhotosDropping((prev) => { const n = [...prev]; n[i] = true; return n; });
-        setTimeout(() => setPhotosDropping((prev) => { const n = [...prev]; n[i] = false; return n; }), 650);
-      }
-    });
-
-    // PDF drop at 7.2s
-    if (e >= 7200 && e < 7230) {
-      setPdfDropping(true);
-      setTimeout(() => setPdfDropping(false), 650);
-    }
-
-    // Voice drop at 9s
-    if (e >= 9000 && e < 9030) {
-      setVoiceDropping(true);
-      setTimeout(() => setVoiceDropping(false), 650);
-    }
-
-    // File items: appear + checkmark
-    if (e >= 6300) setFiles((f) => f.map((r, i) => (i === 0 ? { ...r, visible: true } : r)));
-    if (e >= 6900) setFiles((f) => f.map((r, i) => (i === 0 ? { ...r, done: true }    : r)));
-    if (e >= 7600) setFiles((f) => f.map((r, i) => (i === 1 ? { ...r, visible: true } : r)));
-    if (e >= 8200) setFiles((f) => f.map((r, i) => (i === 1 ? { ...r, done: true }    : r)));
-    if (e >= 9400) setFiles((f) => f.map((r, i) => (i === 2 ? { ...r, visible: true } : r)));
-    if (e >= 10000) setFiles((f) => f.map((r, i) => (i === 2 ? { ...r, done: true }   : r)));
-
-    // Drop zone shrinks out at 10.8s
-    if (e >= 10800) setDzVisible(false);
-
-    // Integration modal appears at 11.5s
-    if (e >= 11500) setModalVisible(true);
-
-    // Auto-trigger integration at 14.5s (3s after modal appears)
-    if (e >= 14500) startIntegration();
-
-  }, [elapsed, scene, startIntegration]);
-
-  const agent = computeAgent(elapsed);
+    if (showModal && !modalVisible) setModalVisible(true);
+    const autoTime = UPLOAD_START + COMPLETION_REL + FADE_DELAY + AUTO_INTEGRATE_DELAY;
+    if (elapsed >= autoTime) startIntegration();
+  }, [elapsed, scene, showModal, modalVisible, startIntegration]);
 
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar activeItem="overview" visitedItems={visitedItems} />
 
-      {/* Main content — position:relative so modal backdrop is contained here */}
       <main className="flex-1" style={{ marginLeft: 260, position: "relative", overflow: "hidden" }}>
 
-        {/* ── Integration modal + backdrop (covers main only, not sidebar) ── */}
+        {/* ── Welcome overlay — dark full-content screen (unchanged) ── */}
+        <AnimatePresence>
+          {scene === "welcome" && (
+            <motion.div
+              key="welcome-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.3 } }}
+              exit={{ opacity: 0, transition: { duration: 0.5 } }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "#0A0F1E",
+                zIndex: 45,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+              }}
+            >
+              <h1 style={{ fontSize: 36, fontWeight: 700, color: "#FFFFFF", marginBottom: 8 }}>
+                Welcome to RECOstudy
+              </h1>
+              <p style={{ fontSize: 16, color: "#94A3B8", marginBottom: 32 }}>
+                Automated reserve fund studies, powered by AI.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => { setScene("upload"); setElapsed(UPLOAD_START); setStarted(true); }}
+                style={{
+                  background: "white",
+                  color: "#0F1729",
+                  fontSize: 16,
+                  fontWeight: 600,
+                  padding: "14px 32px",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+                }}
+              >
+                Add a Building &rarr;
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Integration modal + backdrop (unchanged) ── */}
         <AnimatePresence>
           {modalVisible && (
             <motion.div
@@ -526,13 +580,11 @@ const Index = () => {
               >
                 <AnimatePresence mode="wait">
 
-                  {/* ── Prompt phase ── */}
                   {modalPhase === "prompt" && (
                     <motion.div
                       key="prompt"
                       exit={{ opacity: 0, transition: { duration: 0.2 } }}
                     >
-                      {/* Green checkmark circle */}
                       <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
                         <div
                           style={{
@@ -548,40 +600,14 @@ const Index = () => {
                           <Check size={16} style={{ color: "#10B981" }} />
                         </div>
                       </div>
-
-                      <p
-                        style={{
-                          fontSize: 20,
-                          fontWeight: 700,
-                          color: "#0F1729",
-                          textAlign: "center",
-                          marginBottom: 8,
-                        }}
-                      >
+                      <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", textAlign: "center", marginBottom: 8 }}>
                         Building data ready.
                       </p>
-                      <p
-                        style={{
-                          fontSize: 13,
-                          color: "#5A6178",
-                          textAlign: "center",
-                          marginBottom: 20,
-                        }}
-                      >
+                      <p style={{ fontSize: 13, color: "#5A6178", textAlign: "center", marginBottom: 20 }}>
                         Connect your property management tools to sync live data automatically.
                       </p>
-
                       <div style={{ height: 1, background: "#E8EBF0", marginBottom: 16 }} />
-
-                      {/* Logo previews */}
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          gap: 12,
-                          marginBottom: 20,
-                        }}
-                      >
+                      <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 20 }}>
                         {[
                           { src: "/yardi-logo.png", label: "Yardi" },
                           { src: "/appfolio-logo.png", label: "AppFolio" },
@@ -603,7 +629,6 @@ const Index = () => {
                           </div>
                         ))}
                       </div>
-
                       <button
                         onClick={startIntegration}
                         style={{
@@ -636,50 +661,26 @@ const Index = () => {
                     </motion.div>
                   )}
 
-                  {/* ── Integration phase ── */}
                   {modalPhase === "integrating" && (
                     <motion.div
                       key="integrating"
                       initial={{ opacity: 0, transition: { duration: 0.2 } }}
                       animate={{ opacity: 1, transition: { duration: 0.2 } }}
                     >
-                      <p
-                        style={{
-                          fontSize: 16,
-                          fontWeight: 600,
-                          color: "#0F1729",
-                          textAlign: "center",
-                          marginBottom: 16,
-                        }}
-                      >
+                      <p style={{ fontSize: 16, fontWeight: 600, color: "#0F1729", textAlign: "center", marginBottom: 16 }}>
                         Connecting your tools...
                       </p>
-
                       <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-                        <IntegrationCard
-                          name="Yardi"
-                          logoSrc="/yardi-logo.png"
-                          connectState={yardiState}
-                        />
-                        <IntegrationCard
-                          name="AppFolio"
-                          logoSrc="/appfolio-logo.png"
-                          connectState={appfolioState}
-                        />
+                        <IntegrationCard name="Yardi" logoSrc="/yardi-logo.png" connectState={yardiState} />
+                        <IntegrationCard name="AppFolio" logoSrc="/appfolio-logo.png" connectState={appfolioState} />
                       </div>
-
                       <AnimatePresence>
                         {setupComplete && (
                           <motion.p
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.3 }}
-                            style={{
-                              fontSize: 13,
-                              color: "#10B981",
-                              textAlign: "center",
-                              margin: 0,
-                            }}
+                            style={{ fontSize: 13, color: "#10B981", textAlign: "center", margin: 0 }}
                           >
                             Setup complete. Taking you to your dashboard...
                           </motion.p>
@@ -695,258 +696,320 @@ const Index = () => {
         </AnimatePresence>
 
         {/* ── Page content ── */}
-        <div className="mx-auto" style={{ maxWidth: 1200, padding: 60 }}>
+        <div className="mx-auto" style={{ maxWidth: 1200, padding: "32px 48px" }}>
           <TopBar onReplay={reset} activeItem="overview" />
 
-          {/* Agent status strip — typewriter */}
-          <div style={{ height: 32, marginBottom: 16, display: "flex", alignItems: "center" }}>
-            <AnimatePresence mode="wait">
-              {agent && (
-                <motion.p
-                  key={agent.phase}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  style={{
-                    fontFamily: "monospace",
-                    fontSize: 13,
-                    color: agent.color === "green" ? "#10B981" : "#8B92A8",
-                  }}
-                >
-                  {agent.text}
-                </motion.p>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* ── Scenes ── */}
-          <AnimatePresence mode="wait">
-
-            {/* SCENE 1: Welcome */}
-            {scene === "welcome" && (
-              <motion.div
-                key="welcome"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { duration: 0.15 } }}
-                exit={{ opacity: 0, transition: { duration: 0.2 } }}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "calc(100vh - 220px)",
-                  textAlign: "center",
-                }}
-              >
-                <h1
-                  style={{
-                    fontSize: 32,
-                    fontWeight: 700,
-                    color: "#0F1729",
-                    marginBottom: 12,
-                  }}
-                >
-                  Welcome to RECOstudy
-                </h1>
-                <p style={{ fontSize: 16, color: "#5A6178" }}>
-                  Automated reserve fund studies, powered by AI.
-                </p>
-              </motion.div>
-            )}
-
-            {/* SCENE 2: Building selection */}
-            {scene === "buildings" && (
-              <motion.div
-                key="buildings"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { duration: 0.25 } }}
-                exit={{ opacity: 0, transition: { duration: 0.25 } }}
-                style={{ maxWidth: 800, margin: "0 auto" }}
-              >
-                <p
-                  style={{
-                    fontSize: 24,
-                    fontWeight: 700,
-                    color: "hsl(var(--heading))",
-                    marginBottom: 6,
-                  }}
-                >
-                  Your Buildings
-                </p>
-                <p style={{ fontSize: 14, color: "#5A6178", marginBottom: 24 }}>
-                  Select a building to view its dashboard.
-                </p>
-
-                <div style={{ display: "flex", gap: 20 }}>
-                  {BUILDINGS.map((b, i) => {
-                    const isABC  = b.id === "abc";
-                    const active = isABC && abcHighlighted;
-                    return (
-                      <motion.div
-                        key={b.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, ease: "easeOut", delay: i * 0.1 }}
-                        style={{
-                          flex: 1,
-                          borderRadius: 12,
-                          border: active ? "2px solid #4F6BFF" : "1px solid #E8EBF0",
-                          background: "hsl(var(--card))",
-                          overflow: "hidden",
-                          boxShadow: active
-                            ? "0 0 0 4px rgba(79,107,255,0.15), 0 2px 8px rgba(0,0,0,0.06)"
-                            : "0 1px 4px rgba(0,0,0,0.06)",
-                          transform: active ? "scale(1.02)" : "scale(1)",
-                          transition:
-                            "border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease",
-                        }}
-                      >
-                        <img
-                          src={b.img}
-                          alt={b.name}
-                          style={{
-                            width: "100%",
-                            height: 180,
-                            objectFit: "cover",
-                            display: "block",
-                            borderRadius: "12px 12px 0 0",
-                          }}
-                        />
-                        <div style={{ padding: "12px 14px 14px" }}>
-                          <p
-                            style={{
-                              fontSize: 15,
-                              fontWeight: 600,
-                              color: "hsl(var(--heading))",
-                              marginBottom: 5,
-                              lineHeight: 1.3,
-                            }}
-                          >
-                            {b.name}
-                          </p>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 4,
-                              marginBottom: 3,
-                            }}
-                          >
-                            <MapPin size={12} style={{ color: "#9CA3B8", flexShrink: 0 }} />
-                            <p style={{ fontSize: 13, color: "#5A6178" }}>{b.address}</p>
-                          </div>
-                          <p style={{ fontSize: 12, color: "#9CA3B8" }}>{b.units}</p>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-
-            {/* SCENE 3: Upload + file list */}
+          <AnimatePresence>
             {scene === "upload" && (
               <motion.div
                 key="upload"
                 initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0, transition: { duration: 0.25 } }}
-                style={{ maxWidth: 800, margin: "0 auto" }}
+                animate={{ opacity: 1, y: 0, transition: { duration: 0.35 } }}
               >
-                {/* Header */}
-                <p
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 600,
-                    color: "hsl(var(--heading))",
-                    marginBottom: 4,
-                  }}
-                >
-                  ABC Condominium Association, Inc.
-                </p>
-                <p
-                  style={{
-                    fontSize: 22,
-                    fontWeight: 700,
-                    color: "hsl(var(--heading))",
-                    marginBottom: 20,
-                  }}
-                >
-                  Upload building data
-                </p>
+                {/* Agent status line at top (appears at completion) */}
+                <AnimatePresence>
+                  {showCompletion && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.4 }}
+                      style={{
+                        fontFamily: "monospace",
+                        fontSize: 13,
+                        color: "#10B981",
+                        marginBottom: 12,
+                      }}
+                    >
+                      &#9679; Ingestion Agent &mdash; all data extracted successfully &#10003;
+                    </motion.p>
+                  )}
+                </AnimatePresence>
 
-                {/* Drop zone area with photo/pdf/voice ghosts */}
-                <div style={{ position: "relative" }}>
-                  {/* 6 individual photo drops */}
-                  {PHOTO_TIMES.map((_, i) => (
-                    <PhotoDrop
-                      key={i}
-                      animating={photosDropping[i]}
-                      xOffset={PHOTO_OFFSETS[i]}
-                      src={PHOTO_URLS[i]}
-                    />
-                  ))}
-
-                  {/* PDF drop */}
-                  <SingleDrop
-                    animating={pdfDropping}
-                    icon={<FileText size={28} style={{ color: "#EF4444" }} />}
-                    w={70}
-                    h={85}
-                  />
-
-                  {/* Voice drop */}
-                  <SingleDrop
-                    animating={voiceDropping}
-                    icon={<Mic size={28} style={{ color: "#8B5CF6" }} />}
-                    w={70}
-                    h={50}
-                  />
-
-                  {/* Drop zone — shrinks out at 10.8s */}
-                  <AnimatePresence>
-                    {dzVisible && (
-                      <motion.div
-                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.35, ease: "easeInOut" } }}
-                        style={{
-                          width: "100%",
-                          height: 200,
-                          borderRadius: 16,
-                          border: dzActive ? "2px solid #4F6BFF" : "2px dashed #D1D5DB",
-                          background: dzActive ? "rgba(79,107,255,0.04)" : "#FAFBFD",
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 8,
-                          transition: "border-color 0.3s ease, background 0.3s ease",
-                        }}
-                      >
-                        <Upload size={36} style={{ color: "#9CA3B8" }} />
-                        <p style={{ fontSize: 14, color: "#9CA3B8" }}>Drop files here</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* File list */}
+                {/* ── Two-column layout ── */}
                 <div
                   style={{
-                    marginTop: 12,
-                    borderRadius: 12,
-                    border: "1px solid hsl(var(--border))",
-                    background: "hsl(var(--card))",
-                    padding: "0 16px",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                    display: "flex",
+                    gap: "4%",
                   }}
                 >
-                  {files.map((file) => (
-                    <FileRow key={file.name} file={file} />
-                  ))}
+                  {/* ─── LEFT COLUMN — Building Data ─── */}
+                  <div style={{ width: "48%", display: "flex", flexDirection: "column" }}>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        fontSize: 13,
+                        textTransform: "uppercase" as const,
+                        color: "#9CA3B8",
+                        letterSpacing: "0.06em",
+                        marginBottom: 16,
+                      }}
+                    >
+                      Building Data
+                    </motion.p>
+
+                    <p style={{ fontSize: 16, fontWeight: 700, color: "#0F1729", marginBottom: 4 }}>
+                      ABC Condominium Association, Inc.
+                    </p>
+                    <p style={{ fontSize: 13, color: "#5A6178", marginBottom: 16 }}>
+                      Upload building data to begin your reserve fund study.
+                    </p>
+
+                    {/* Drop zone with photos */}
+                    <AnimatePresence>
+                      {!dzFading && (
+                        <motion.div
+                          exit={{ opacity: 0, transition: { duration: 0.35 } }}
+                          style={{
+                            position: "relative",
+                            width: "100%",
+                            height: 180,
+                            borderRadius: 12,
+                            border: "2px dashed #4F6BFF",
+                            background: "rgba(79,107,255,0.04)",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 8,
+                          }}
+                        >
+                          {/* Upload placeholder */}
+                          <Upload size={32} style={{ color: "#4F6BFF", opacity: 0.5 }} />
+                          <p style={{ fontSize: 14, color: "#5A6178" }}>Drop files here</p>
+
+                          {/* Photos slide in from left into 2x2 grid, then fade */}
+                          {PHOTO_URLS.map((url, i) => {
+                            if (!photoVisible[i]) return null;
+                            const pos = PHOTO_POSITIONS[i];
+                            return (
+                              <motion.div
+                                key={`photo-${i}`}
+                                initial={{ x: -1500, opacity: 0 }}
+                                animate={
+                                  photosInDzFading
+                                    ? { x: 0, opacity: 0, scale: 1 }
+                                    : { x: 0, opacity: 1, scale: [1, 1, 1.05, 1] }
+                                }
+                                transition={
+                                  photosInDzFading
+                                    ? { opacity: { duration: 0.4 } }
+                                    : {
+                                        x: { duration: 0.5, ease: "easeOut" },
+                                        opacity: { duration: 0.4 },
+                                        scale: { duration: 0.2, delay: 0.5, ease: "easeInOut" },
+                                      }
+                                }
+                                style={{
+                                  position: "absolute",
+                                  top: pos.top,
+                                  left: pos.left,
+                                  width: 110,
+                                  height: 82,
+                                  borderRadius: 8,
+                                  border: "2px solid white",
+                                  boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                                  overflow: "hidden",
+                                  zIndex: 5,
+                                }}
+                              >
+                                <img
+                                  src={url}
+                                  alt=""
+                                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                                />
+                              </motion.div>
+                            );
+                          })}
+
+                          {/* Document ghost — slides in after photos fade */}
+                          <AnimatePresence>
+                            {showDocGhost && (
+                              <motion.div
+                                key="doc-ghost"
+                                initial={{ x: -1500, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1, scale: [1, 1, 1.05, 1] }}
+                                exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                                transition={{
+                                  x: { duration: 0.5, ease: "easeOut" },
+                                  opacity: { duration: 0.4 },
+                                  scale: { duration: 0.2, delay: 0.5, ease: "easeInOut" },
+                                }}
+                                style={{
+                                  position: "absolute",
+                                  top: 49,
+                                  left: "calc(50% - 55px)",
+                                  width: 110,
+                                  height: 82,
+                                  borderRadius: 8,
+                                  border: "2px solid white",
+                                  boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                                  background: "#FEF2F2",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  zIndex: 5,
+                                }}
+                              >
+                                <FileText size={32} style={{ color: "#EF4444" }} />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+
+                          {/* Voice ghost — slides in after doc ghost */}
+                          <AnimatePresence>
+                            {showVoiceGhost && (
+                              <motion.div
+                                key="voice-ghost"
+                                initial={{ x: -1500, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1, scale: [1, 1, 1.05, 1] }}
+                                exit={{ opacity: 0, transition: { duration: 0.3 } }}
+                                transition={{
+                                  x: { duration: 0.5, ease: "easeOut" },
+                                  opacity: { duration: 0.4 },
+                                  scale: { duration: 0.2, delay: 0.5, ease: "easeInOut" },
+                                }}
+                                style={{
+                                  position: "absolute",
+                                  top: 49,
+                                  left: "calc(50% - 55px)",
+                                  width: 110,
+                                  height: 82,
+                                  borderRadius: 8,
+                                  border: "2px solid white",
+                                  boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                                  background: "#F3E8FF",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  zIndex: 5,
+                                }}
+                              >
+                                <Mic size={32} style={{ color: "#8B5CF6" }} />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* File items */}
+                    <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                      <FileSlideRow
+                        visible={photosFileVisible}
+                        done={photosFileDone}
+                        name="6 building inspection photos"
+                        detail="Images · 24.5 MB · Vision AI processed"
+                        iconBg="#EFF6FF"
+                        iconColor="#3B82F6"
+                        IconComp={ImageIcon}
+                      />
+                      <FileSlideRow
+                        visible={pdfFileVisible}
+                        done={pdfFileDone}
+                        name="existing-reserve-study.pdf"
+                        detail="PDF Document · 8.7 MB · Document AI processed"
+                        iconBg="#FEF2F2"
+                        iconColor="#EF4444"
+                        IconComp={FileText}
+                      />
+                      <FileSlideRow
+                        visible={voiceFileVisible}
+                        done={voiceFileDone}
+                        name="site-walkthrough-notes.m4a"
+                        detail="Voice Recording · 3.2 MB · Audio AI processed"
+                        iconBg="#F3E8FF"
+                        iconColor="#8B5CF6"
+                        IconComp={Mic}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ─── RIGHT COLUMN — AI Processing ─── */}
+                  <div style={{ width: "48%", display: "flex", flexDirection: "column" }}>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        fontSize: 13,
+                        textTransform: "uppercase" as const,
+                        color: "#9CA3B8",
+                        letterSpacing: "0.06em",
+                        marginBottom: 16,
+                      }}
+                    >
+                      AI Processing
+                    </motion.p>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                      <AgentProcessingCard
+                        name="Vision Agent"
+                        iconBg="#F3E8FF"
+                        iconColor="#8B5CF6"
+                        borderColor="#8B5CF6"
+                        fillColor="#8B5CF6"
+                        IconComp={Eye}
+                        progress={visionProgress}
+                        active={t >= AGENTS.vision.start && visionProgress < 1}
+                        complete={visionProgress >= 1}
+                        observations={VISION_OBS}
+                      />
+                      <AgentProcessingCard
+                        name="Document Agent"
+                        iconBg="#FEF2F2"
+                        iconColor="#EF4444"
+                        borderColor="#EF4444"
+                        fillColor="#EF4444"
+                        IconComp={FileText}
+                        progress={docProgress}
+                        active={t >= AGENTS.document.start && docProgress < 1}
+                        complete={docProgress >= 1}
+                        observations={DOC_OBS}
+                      />
+                      <AgentProcessingCard
+                        name="Audio Agent"
+                        iconBg="#F3E8FF"
+                        iconColor="#8B5CF6"
+                        borderColor="#8B5CF6"
+                        fillColor="#8B5CF6"
+                        IconComp={Mic}
+                        progress={audioProgress}
+                        active={t >= AGENTS.audio.start && audioProgress < 1}
+                        complete={audioProgress >= 1}
+                        observations={AUDIO_OBS}
+                      />
+                    </div>
+
+                    {/* Completion bar */}
+                    <AnimatePresence>
+                      {showCompletion && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                          style={{
+                            marginTop: 12,
+                            background: "#ECFDF5",
+                            borderRadius: 8,
+                            padding: "10px 16px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <CheckCircle size={16} style={{ color: "#10B981", flexShrink: 0 }} />
+                          <span style={{ fontSize: 13, fontWeight: 600, color: "#10B981" }}>
+                            Ingestion complete &mdash; 3 sources processed by 3 AI agents
+                          </span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               </motion.div>
             )}
-
           </AnimatePresence>
         </div>
       </main>

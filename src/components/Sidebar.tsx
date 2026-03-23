@@ -45,7 +45,7 @@ const Sidebar = ({ activeItem, visitedItems }: SidebarProps) => {
         <div className="px-6 pt-7 pb-8">
           <span className="text-[20px] font-bold tracking-tight">
             <span className="text-sidebar-text-active">RECO</span>
-            <span style={{ color: "#4F6BFF" }}>study</span>
+            <span className="text-sidebar-text-active">study</span>
             <sup className="text-[10px] text-sidebar-text ml-0.5 -top-2 relative">™</sup>
           </span>
         </div>

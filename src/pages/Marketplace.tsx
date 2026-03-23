@@ -23,9 +23,9 @@ const BIDS = [
     name: "Restoration Experts LLC",
     photo: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=80&h=80&fit=crop",
     stars: 4.8,
-    responseTime: "2 hours response",
-    responseColor: "#10B981",
-    note: "Best price-to-quality ratio. Strong track record with similar facade projects.",
+    responseTime: "Response within 3 business days",
+    responseColor: "#5A6178",
+    note: "Best price-to-quality ratio for this project scope. Strong track record with 12 comparable facade restoration projects in the GTA.",
     amount: "$438,000",
   },
   {
@@ -33,9 +33,9 @@ const BIDS = [
     name: "Facade Solutions Group",
     photo: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=80&h=80&fit=crop",
     stars: 4.6,
-    responseTime: "4 hours response",
-    responseColor: "#F59E0B",
-    note: "Competitive pricing. Fewer comparable project references.",
+    responseTime: "Response within 5 business days",
+    responseColor: "#5A6178",
+    note: "Competitive pricing with solid structural credentials. Fewer directly comparable facade references but strong overall portfolio.",
     amount: "$455,000",
   },
   {
@@ -43,9 +43,9 @@ const BIDS = [
     name: "BuildRight Contractors",
     photo: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=80&h=80&fit=crop",
     stars: 4.9,
-    responseTime: "1 hour response",
-    responseColor: "#10B981",
-    note: "Highest rated, fastest response. Premium pricing.",
+    responseTime: "Response within 4 business days",
+    responseColor: "#5A6178",
+    note: "Highest rated contractor on the platform with fastest initial response. Premium pricing reflects their demand — budget accordingly.",
     amount: "$472,000",
   },
 ];
@@ -226,15 +226,35 @@ const Marketplace = () => {
                 transition={{ duration: 0.4, ease: "easeOut" }}
                 style={{
                   borderRadius: 12,
-                  background: "#0F1729",
                   overflow: "hidden",
-                  display: "flex",
+                  position: "relative",
                   marginBottom: 16,
                   maxHeight: 150,
                 }}
               >
+                {/* Full-bleed background image */}
+                <img
+                  src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&h=300&fit=crop"
+                  alt=""
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+                {/* Dark overlay */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(10,15,30,0.55)",
+                  }}
+                />
                 {/* Left — 65% */}
-                <div style={{ flex: "0 0 65%", padding: 16, overflow: "hidden" }}>
+                <div style={{ flex: "0 0 65%", padding: 16, overflow: "hidden", position: "relative", zIndex: 1 }}>
                   {/* Badge + title on one line */}
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                     <span
@@ -327,22 +347,6 @@ const Marketplace = () => {
                   ))}
                 </div>
 
-                {/* Right — 35% image */}
-                <div style={{ flex: "0 0 35%", position: "relative", overflow: "hidden" }}>
-                  <img
-                    src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&h=300&fit=crop"
-                    alt="Building balcony"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background:
-                        "linear-gradient(to right, #0F1729 0%, rgba(15,23,41,0.6) 30%, transparent 70%)",
-                    }}
-                  />
-                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -354,12 +358,17 @@ const Marketplace = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
-                style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}
+                style={{ marginBottom: 10 }}
               >
-                <p style={{ fontSize: 18, fontWeight: 600, color: "hsl(var(--heading))" }}>
+                <p style={{ fontSize: 16, fontWeight: 700, color: "#0F1729", marginBottom: 4 }}>
                   Contractor Bids
                 </p>
-                <p style={{ fontSize: 13, color: "#9CA3B8" }}>3 received</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <Sparkles size={12} style={{ color: "#4F6BFF" }} />
+                  <p style={{ fontSize: 13, color: "#5A6178", margin: 0 }}>
+                    3 bids received · Ranked by Marketplace Agent
+                  </p>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -382,7 +391,7 @@ const Marketplace = () => {
                         border:
                           recommended && isTop
                             ? "1.5px solid #10B981"
-                            : "1px solid hsl(var(--border))",
+                            : "1px solid #E8EBF0",
                         background: "hsl(var(--card))",
                         boxShadow:
                           recommended && isTop
@@ -712,7 +721,7 @@ const Marketplace = () => {
 
                 {/* CTA button */}
                 <button
-                  onClick={() => navigate("/financials")}
+                  onClick={() => navigate("/funding")}
                   style={{
                     width: "100%",
                     height: 44,
