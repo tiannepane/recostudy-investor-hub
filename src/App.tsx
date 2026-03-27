@@ -12,6 +12,7 @@ import Funding from "./pages/Funding.tsx";
 import Insurance from "./pages/Insurance.tsx";
 import Reports from "./pages/Reports.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import FloatingChat from "./components/FloatingChat.tsx";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <FloatingChat />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/inventory" element={<Inventory />} />

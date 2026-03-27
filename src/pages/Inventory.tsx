@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Image as ImageIcon, FileText, Mic, LayoutGrid } from "lucide-react";
+import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
-import AgentStatus from "@/components/AgentStatus";
 import ConditionIndicator from "@/components/ConditionIndicator";
 import type { Condition } from "@/components/ConditionIndicator";
 
@@ -14,331 +14,491 @@ interface InventoryRow {
   category: string;
   condition: Condition;
   location: string;
+  yearInstalled: number;
   rul: number;
   cost: string;
+  replacementYear: number;
+  image?: string;
+  notes: string;
 }
 
 const inventoryData: InventoryRow[] = [
-  { component: "Rooftop HVAC Unit",            category: "Mechanical",       condition: "Fair",      location: "Rooftop Mechanical Room",      rul: 12, cost: "$45,000"  },
-  { component: "Elevator Motor System",         category: "Mechanical",       condition: "Good",      location: "Mechanical Room - 1st Floor",  rul: 15, cost: "$78,000"  },
-  { component: "Parking Structure - Level 2",  category: "Structural",       condition: "Poor",      location: "North Parking Deck",           rul: 3,  cost: "$185,000" },
-  { component: "Fire Alarm Panel",             category: "Safety",           condition: "Good",      location: "Building B - Lobby",           rul: 8,  cost: "$32,000"  },
-  { component: "Pool Pump & Filter",           category: "Recreational",     condition: "Fair",      location: "Pool Equipment Room",          rul: 5,  cost: "$18,500"  },
-  { component: "Exterior Paint - South Wall",  category: "Building Envelope",condition: "Fair",      location: "Building C - South Facade",    rul: 4,  cost: "$25,000"  },
-  { component: "Exterior Facade & Balconies",  category: "Structural",       condition: "Poor",      location: "Main Building Exterior",       rul: 1,  cost: "$425,000" },
-  { component: "Fire Suppression Riser",       category: "Safety",           condition: "Good",      location: "Basement Mechanical",          rul: 20, cost: "$32,000"  },
-  { component: "Lobby Tile Flooring",          category: "Interior",         condition: "Excellent", location: "Main Lobby",                   rul: 22, cost: "$18,500"  },
+  {
+    component: "Elevator cab - Townhouse",
+    category: "Services",
+    condition: "Fair",
+    location: "Townhouse Elevator Shaft",
+    yearInstalled: 1992,
+    rul: 0,
+    cost: "$36,000",
+    replacementYear: 2024,
+    image: "/elevator-cab-townhouse.png",
+    notes: "Cab interior showing wear. Panels and flooring due for full replacement.",
+  },
+  {
+    component: "Site utilities - Garbage compactor",
+    category: "Site Improvements",
+    condition: "Poor",
+    location: "Garbage Room",
+    yearInstalled: 1992,
+    rul: 0,
+    cost: "$42,000",
+    replacementYear: 2024,
+    image: "/garbage-compactor.png",
+    notes: "Compactor motor failing intermittently. Hydraulic seals leaking.",
+  },
+  {
+    component: "Boiler",
+    category: "Services",
+    condition: "Fair",
+    location: "Mechanical Room",
+    yearInstalled: 1992,
+    rul: 1,
+    cost: "$100,000",
+    replacementYear: 2025,
+    image: "/boiler.png",
+    notes: "Operational but efficiency declining. Heat exchanger showing scale buildup.",
+  },
+  {
+    component: "Suspended slab waterproofing",
+    category: "Structural",
+    condition: "Fair",
+    location: "Underground Parkade",
+    yearInstalled: 2004,
+    rul: 2,
+    cost: "$180,000",
+    replacementYear: 2026,
+    image: "/suspended-slab-waterproofing.png",
+    notes: "Membrane showing minor cracking at expansion joints. No active leaks observed.",
+  },
+  {
+    component: "Wall finishes - Paint",
+    category: "Interiors",
+    condition: "Fair",
+    location: "Common Corridors",
+    yearInstalled: 2006,
+    rul: 2,
+    cost: "$95,000",
+    replacementYear: 2026,
+    image: "/wall-finishes-paint.png",
+    notes: "Scuffing and wear visible at high-traffic areas. Touch-ups no longer effective.",
+  },
+  {
+    component: "Carpeting",
+    category: "Interiors",
+    condition: "Fair",
+    location: "Common Corridors",
+    yearInstalled: 2006,
+    rul: 2,
+    cost: "$64,000",
+    replacementYear: 2026,
+    image: "/carpeting.png",
+    notes: "Carpet showing wear patterns and staining in main corridors.",
+  },
+  {
+    component: "Elevator machinery - Townhouse",
+    category: "Services",
+    condition: "Fair",
+    location: "Elevator Machine Room",
+    yearInstalled: 1998,
+    rul: 4,
+    cost: "$85,000",
+    replacementYear: 2028,
+    image: "/elevator-machinery-townhouse.png",
+    notes: "Motor and controller functioning. Increasing maintenance frequency noted.",
+  },
+  {
+    component: "Parkade roof deck",
+    category: "Shell",
+    condition: "Fair",
+    location: "Roof Level Parkade",
+    yearInstalled: 1992,
+    rul: 8,
+    cost: "$420,000",
+    replacementYear: 2032,
+    image: "/parkade-roof-deck.png",
+    notes: "Surface coating intact. Minor surface cracking consistent with age.",
+  },
+  {
+    component: "Roofing - Inverted",
+    category: "Shell",
+    condition: "Good",
+    location: "Main Roof",
+    yearInstalled: 2010,
+    rul: 14,
+    cost: "$310,000",
+    replacementYear: 2038,
+    image: "/roofing-inverted.png",
+    notes: "Membrane in good condition. Ballast evenly distributed, no ponding observed.",
+  },
+  {
+    component: "Exterior windows - Aluminum",
+    category: "Shell",
+    condition: "Good",
+    location: "Building Exterior",
+    yearInstalled: 1992,
+    rul: 23,
+    cost: "$890,000",
+    replacementYear: 2047,
+    image: "/exterior-windows-aluminum.png",
+    notes: "Seals and frames in serviceable condition. No fogging or seal failures noted.",
+  },
 ];
 
-const agentMessages = [
-  { text: "Vision Agent — analyzing building photos...",                     color: "gray"  as const, startTime: 0    },
-  { text: "Vision Agent — detecting HVAC, elevator, parking structure...",   color: "gray"  as const, startTime: 2000 },
-  { text: "Document Ingestion Agent — inventory populated ✓",               color: "green" as const, startTime: 4000 },
-];
+/* ─── Helpers ──────────────────────────────────────────────── */
 
-const SKELETON_WIDTHS = [140, 90, 80, 130, 50, 70];
-const ROW_STAGGER_MS  = 100;
+function rulDisplay(rul: number) {
+  if (rul === 0)
+    return <span style={{ color: "#EF4444", fontWeight: 500 }}>End of life</span>;
+  if (rul <= 2)
+    return (
+      <span style={{ color: "#D97706" }}>
+        {rul} <span style={{ color: "#D97706", opacity: 0.7 }}>yr{rul !== 1 ? "s" : ""}</span>
+      </span>
+    );
+  return (
+    <span style={{ color: "#6B7280" }}>
+      {rul} <span style={{ opacity: 0.6 }}>yrs</span>
+    </span>
+  );
+}
 
-/* ─── Pipeline sub-components ───────────────────────────────── */
+/* ─── Detail Panel ─────────────────────────────────────────── */
 
-const Line = ({ complete }: { complete: boolean }) => (
-  <div
-    style={{
-      flex: 1,
-      position: "relative",
-      height: 6,
-      overflow: "hidden",
-      display: "flex",
-      alignItems: "center",
-      margin: "0 16px",
-    }}
-  >
-    <div
-      style={{
-        position: "absolute",
-        height: 1,
-        width: "100%",
-        top: "50%",
-        background: complete ? "#10B981" : "#1E2440",
-        transition: "background 0.6s ease",
-      }}
-    />
-    {!complete && (
-      <div
-        style={{
-          position: "absolute",
-          width: 4,
-          height: 4,
-          borderRadius: "50%",
-          background: "#4F6BFF",
-          top: "50%",
-          marginTop: -2,
-          animation: "dot-travel 1.5s linear infinite",
-        }}
-      />
-    )}
-    {complete && (
-      <div
-        style={{
-          position: "absolute",
-          width: 4,
-          height: 4,
-          borderRadius: "50%",
-          background: "#10B981",
-          top: "50%",
-          left: "50%",
-          marginTop: -2,
-          marginLeft: -2,
-        }}
-      />
-    )}
-  </div>
-);
-
-const Stage = ({
-  label,
-  subLabel,
-  children,
+const DetailPanel = ({
+  row,
+  onClose,
+  onAddToProjects,
 }: {
-  label: string;
-  subLabel: string;
-  children: React.ReactNode;
+  row: InventoryRow;
+  onClose: () => void;
+  onAddToProjects: () => void;
 }) => (
-  <div
+  <motion.div
+    initial={{ x: 420 }}
+    animate={{ x: 0 }}
+    exit={{ x: 420 }}
+    transition={{ type: "spring", damping: 28, stiffness: 300 }}
     style={{
+      position: "fixed",
+      top: 0,
+      right: 0,
+      bottom: 0,
+      width: 420,
+      background: "#FFFFFF",
+      borderLeft: "1px solid #E5E7EB",
+      zIndex: 50,
+      overflowY: "auto",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
-      gap: 2,
-      flexShrink: 0,
     }}
   >
-    <span
+    {/* Close button floating over photo */}
+    <button
+      onClick={onClose}
       style={{
-        fontSize: 9,
-        fontWeight: 500,
-        color: "#6B7394",
-        letterSpacing: "0.09em",
-        textTransform: "uppercase",
-        lineHeight: 1,
+        position: "absolute",
+        top: 12,
+        right: 12,
+        zIndex: 2,
+        background: "rgba(255,255,255,0.85)",
+        backdropFilter: "blur(4px)",
+        border: "none",
+        cursor: "pointer",
+        padding: 6,
+        borderRadius: 8,
+        color: "#6B7280",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      {label}
-    </span>
-    {children}
-    <span style={{ fontSize: 10, color: "#8B92A8", lineHeight: 1 }}>{subLabel}</span>
-  </div>
-);
+      <X size={16} />
+    </button>
 
-const PipelineCard = ({ complete }: { complete: boolean }) => (
-  <div
-    style={{
-      borderRadius: 12,
-      background: "rgba(15,23,41,0.97)",
-      backdropFilter: "blur(8px)",
-      border: "1px solid #1E2440",
-      padding: "10px 36px",
-      display: "flex",
-      alignItems: "center",
-    }}
-  >
-    <Stage label="Sources" subLabel="3 files">
-      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-        <ImageIcon size={14} style={{ color: "#3B82F6" }} />
-        <FileText  size={14} style={{ color: "#EF4444" }} />
-        <Mic       size={14} style={{ color: "#8B5CF6" }} />
+    {/* Image — first thing, edge to edge */}
+    {row.image && (
+      <div>
+        <img
+          src={row.image}
+          alt={row.component}
+          style={{
+            width: "100%",
+            height: 280,
+            objectFit: "cover",
+            borderRadius: 0,
+            background: "#F3F4F6",
+            display: "block",
+          }}
+        />
+        <p style={{ fontSize: 11, color: "#9CA3AF", padding: "8px 24px 0" }}>
+          Photo from inspection report
+        </p>
       </div>
-    </Stage>
+    )}
 
-    <Line complete={complete} />
+    {/* Header */}
+    <div style={{ padding: "20px 24px 0" }}>
+      <h2 style={{ fontSize: 20, fontWeight: 700, color: "#0A0A0A", lineHeight: 1.3, margin: 0 }}>
+        {row.component}
+      </h2>
+      <div style={{ marginTop: 8 }}>
+        <ConditionIndicator condition={row.condition} />
+      </div>
+    </div>
 
-    <Stage label="Processing" subLabel="RECOstudy AI">
-      <div
+    {/* Metadata grid */}
+    <div
+      style={{
+        padding: "20px 24px 0",
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "16px 24px",
+      }}
+    >
+      {[
+        { label: "Category", value: row.category },
+        { label: "Location", value: row.location },
+        { label: "Year Installed", value: String(row.yearInstalled) },
+        { label: "Replacement Year", value: String(row.replacementYear) },
+        { label: "Remaining Life", value: row.rul === 0 ? "End of life" : `${row.rul} yr${row.rul !== 1 ? "s" : ""}` },
+        { label: "Replacement Cost", value: row.cost },
+      ].map(({ label, value }) => (
+        <div key={label}>
+          <p style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, letterSpacing: "0.04em", margin: 0 }}>
+            {label}
+          </p>
+          <p style={{ fontSize: 14, color: "#0A0A0A", fontWeight: 500, margin: "4px 0 0" }}>{value}</p>
+        </div>
+      ))}
+    </div>
+
+    {/* Condition Notes */}
+    <div style={{ padding: "24px 24px 0" }}>
+      <p style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, letterSpacing: "0.04em", margin: 0 }}>
+        Condition Notes
+      </p>
+      <p style={{ fontSize: 14, color: "#0A0A0A", lineHeight: 1.5, margin: "6px 0 0" }}>
+        {row.notes}
+      </p>
+    </div>
+
+    {/* Action button */}
+    <div style={{ padding: 24, marginTop: "auto" }}>
+      <button
+        onClick={onAddToProjects}
         style={{
-          width: 8,
-          height: 8,
-          borderRadius: "50%",
-          background: complete ? "#10B981" : "#4F6BFF",
-          transition: "background 0.6s ease",
-          animation: !complete ? "dot-pulse-blue 1.5s ease-in-out infinite" : "none",
+          width: "100%",
+          padding: "12px 0",
+          background: "#0A0A0A",
+          color: "#FFFFFF",
+          border: "none",
+          borderRadius: 8,
+          fontSize: 14,
+          fontWeight: 600,
+          cursor: "pointer",
         }}
-      />
-    </Stage>
-
-    <Line complete={complete} />
-
-    <Stage label="Inventory" subLabel="9 components">
-      <LayoutGrid
-        size={14}
-        style={{
-          color: complete ? "#10B981" : "#374466",
-          transition: "color 0.6s ease",
-        }}
-      />
-    </Stage>
-  </div>
+      >
+        Add to Projects →
+      </button>
+    </div>
+  </motion.div>
 );
 
 /* ─── Page ───────────────────────────────────────────────────── */
 
 const Inventory = () => {
-  const [elapsed,     setElapsed]     = useState(0);
-  const [visibleRows, setVisibleRows] = useState(0);
-
-  const reset = useCallback(() => {
-    setElapsed(0);
-    setVisibleRows(0);
-  }, []);
-
-  useEffect(() => {
-    const id = setInterval(() => setElapsed((p) => p + 30), 30);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    if (elapsed >= 4000 && visibleRows < inventoryData.length) {
-      const idx = Math.floor((elapsed - 4000) / ROW_STAGGER_MS);
-      setVisibleRows(Math.min(idx + 1, inventoryData.length));
-    }
-  }, [elapsed, visibleRows]);
-
-  const processingComplete = elapsed >= 4000;
-  const showSkeletons      = elapsed < 4000;
+  const [selectedRow, setSelectedRow] = useState<InventoryRow | null>(null);
+  const navigate = useNavigate();
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen" style={{ background: "#FFFFFF" }}>
       <Sidebar activeItem="inventory" visitedItems={["overview"]} />
+
+      {/* Overlay when panel is open */}
+      <AnimatePresence>
+        {selectedRow && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedRow(null)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.08)",
+              zIndex: 40,
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Detail panel */}
+      <AnimatePresence>
+        {selectedRow && (
+          <DetailPanel row={selectedRow} onClose={() => setSelectedRow(null)} onAddToProjects={() => navigate("/projects")} />
+        )}
+      </AnimatePresence>
 
       <main className="flex-1" style={{ marginLeft: 260 }}>
         <div className="mx-auto" style={{ maxWidth: 1200, padding: 60 }}>
           <TopBar
-            onReplay={reset}
-            breadcrumb="Buildings › ABC Condominium Association, Inc. › Inventory"
+            breadcrumb="Buildings › City Gate 1, LMS 195 › Inventory"
             activeItem="inventory"
           />
 
-          <div className="mb-8">
-            <AgentStatus messages={agentMessages} elapsed={elapsed} />
-          </div>
-
-          {/* Pipeline */}
-          <PipelineCard complete={processingComplete} />
-
           {/* Table section */}
-          <div style={{ marginTop: 24 }}>
-            <p className="text-heading font-semibold mb-4" style={{ fontSize: 20 }}>
+          <div style={{ marginTop: 32 }}>
+            <p style={{ fontSize: 20, fontWeight: 600, color: "#0A0A0A", marginBottom: 16 }}>
               Component Inventory
             </p>
 
             <div
-              className="rounded-xl border border-border bg-card/50 p-6"
-              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+              style={{
+                borderRadius: 12,
+                border: "1px solid #E5E7EB",
+                background: "#FFFFFF",
+                overflow: "hidden",
+              }}
             >
-              <table className="w-full" style={{ tableLayout: "fixed" }}>
+              <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse" }}>
                 <colgroup>
-                  <col style={{ width: "22%" }} />
-                  <col style={{ width: "14%" }} />
-                  <col style={{ width: "16%" }} />
-                  <col style={{ width: "22%" }} />
-                  <col style={{ width: "10%" }} />
+                  <col style={{ width: "28%" }} />
+                  <col style={{ width: "13%" }} />
+                  <col style={{ width: "11%" }} />
+                  <col style={{ width: "19%" }} />
+                  <col style={{ width: "13%" }} />
                   <col style={{ width: "16%" }} />
                 </colgroup>
 
                 <thead>
-                  <tr style={{ borderBottom: "1px solid hsl(var(--border))" }}>
-                    {[
-                      { label: "COMPONENT",      },
-                      { label: "CATEGORY",       },
-                      { label: "CONDITION",      },
-                      { label: "LOCATION",       },
-                      { label: "REMAINING LIFE", },
-                      { label: "EST. COST",      },
-                    ].map(({ label }) => (
-                      <th
-                        key={label}
-                        className="text-breadcrumb font-semibold pb-3"
-                        style={{
-                          fontSize: 11,
-                          letterSpacing: "0.06em",
-                          textAlign: "left",
-                          paddingRight: 12,
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {label}
-                      </th>
-                    ))}
+                  <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                    {["COMPONENT", "CATEGORY", "CONDITION", "LOCATION", "REMAINING LIFE", "EST. COST"].map(
+                      (label) => (
+                        <th
+                          key={label}
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            letterSpacing: "0.06em",
+                            color: "#9CA3AF",
+                            textAlign: "left",
+                            padding: "12px 16px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {label}
+                        </th>
+                      ),
+                    )}
                   </tr>
                 </thead>
 
                 <tbody>
-                  {showSkeletons ? (
-                    Array.from({ length: 7 }).map((_, i) => (
-                      <tr
-                        key={`skel-${i}`}
-                        style={{ borderBottom: "1px solid hsl(var(--border))" }}
-                      >
-                        {SKELETON_WIDTHS.map((w, ci) => (
-                          <td key={ci} className="py-3" style={{ paddingRight: 12, height: 48 }}>
-                            <div
-                              className="rounded"
+                  {inventoryData.map((row, i) => (
+                    <tr
+                      key={row.component}
+                      onClick={() => setSelectedRow(row)}
+                      style={{
+                        borderBottom:
+                          i < inventoryData.length - 1 ? "1px solid #F3F4F6" : "none",
+                        cursor: "pointer",
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background = "#FAFAFA")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                    >
+                      {/* Component name + thumbnail */}
+                      <td style={{ padding: "8px 16px", height: 56 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          {row.image && (
+                            <img
+                              src={row.image}
+                              alt=""
                               style={{
-                                width: "70%",
-                                maxWidth: w,
-                                height: 13,
-                                background:
-                                  "linear-gradient(90deg, hsl(var(--border)) 25%, #F3F4F8 50%, hsl(var(--border)) 75%)",
-                                backgroundSize: "200% 100%",
-                                animation: "shimmer 1.5s infinite linear",
-                                marginLeft: ci >= 4 ? "auto" : undefined,
+                                width: 48,
+                                height: 48,
+                                borderRadius: 8,
+                                objectFit: "cover",
+                                flexShrink: 0,
+                                background: "#F3F4F6",
                               }}
                             />
-                          </td>
-                        ))}
-                      </tr>
-                    ))
-                  ) : (
-                    <AnimatePresence>
-                      {inventoryData.slice(0, visibleRows).map((row) => (
-                        <motion.tr
-                          key={row.component}
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.25, ease: "easeOut" }}
-                          className="hover:bg-background"
-                          style={{ borderBottom: "1px solid hsl(var(--border))" }}
-                        >
-                          <td
-                            className="py-3 pr-3 text-[14px] text-heading font-medium"
-                            style={{ height: 48, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                          )}
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              color: "#0A0A0A",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
                           >
                             {row.component}
-                          </td>
-                          <td
-                            className="py-3 pr-3 text-[14px] text-body-text"
-                            style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                          >
-                            {row.category}
-                          </td>
-                          <td className="py-3 pr-3">
-                            <ConditionIndicator condition={row.condition} />
-                          </td>
-                          <td
-                            className="py-3 pr-3 text-[14px] text-body-text"
-                            style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                          >
-                            {row.location}
-                          </td>
-                          <td className="py-3 pr-3 text-[14px] font-mono text-heading" style={{ whiteSpace: "nowrap" }}>
-                            {row.rul} <span className="text-breadcrumb">yr</span>
-                          </td>
-                          <td className="py-3 pr-3 text-[14px] font-mono font-medium text-heading" style={{ whiteSpace: "nowrap" }}>
-                            {row.cost}
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </AnimatePresence>
-                  )}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td
+                        style={{
+                          padding: "10px 16px",
+                          fontSize: 13,
+                          color: "#6B7280",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {row.category}
+                      </td>
+
+                      <td style={{ padding: "10px 16px" }}>
+                        <ConditionIndicator condition={row.condition} />
+                      </td>
+
+                      <td
+                        style={{
+                          padding: "10px 16px",
+                          fontSize: 13,
+                          color: "#6B7280",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {row.location}
+                      </td>
+
+                      <td
+                        style={{
+                          padding: "10px 16px",
+                          fontSize: 13,
+                          fontFamily: "monospace",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {rulDisplay(row.rul)}
+                      </td>
+
+                      <td
+                        style={{
+                          padding: "10px 16px",
+                          fontSize: 13,
+                          fontFamily: "monospace",
+                          fontWeight: 500,
+                          color: "#0A0A0A",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {row.cost}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
