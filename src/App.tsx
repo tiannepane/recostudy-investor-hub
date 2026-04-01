@@ -11,6 +11,7 @@ import Marketplace from "./pages/Marketplace.tsx";
 import Funding from "./pages/Funding.tsx";
 import Insurance from "./pages/Insurance.tsx";
 import Reports from "./pages/Reports.tsx";
+import Recollab from "./pages/Recollab.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import FloatingChat from "./components/FloatingChat.tsx";
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/funding" element={<Funding />} />
           <Route path="/insurance" element={<Insurance />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/recollab" element={<Recollab />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
