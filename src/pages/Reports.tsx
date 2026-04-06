@@ -386,59 +386,8 @@ const Reports = () => {
               </div>
             </div>
 
-            {/* ─── Two columns ─── */}
-            <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-
-              {/* ─── LEFT 38% — Package Summary card ─── */}
-              <div style={{ flex: "0 0 38%", minWidth: 0 }}>
-                <AnimatePresence>
-                  {agentDone && (
-                    <motion.div
-                      key="summary"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{
-                        background: "#FFFFFF",
-                        border: "1px solid rgba(15,23,41,0.06)",
-                        boxShadow: "0 2px 8px rgba(15,23,41,0.05)",
-                        borderRadius: 10,
-                        padding: 16,
-                      }}
-                    >
-                      <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3B8", margin: 0, marginBottom: 12 }}>
-                        Package Summary
-                      </p>
-                      <p style={{ fontSize: 15, fontWeight: 600, color: "#0F1729", margin: 0, marginBottom: 4 }}>
-                        4 documents compiled
-                      </p>
-                      <p style={{ fontSize: 12, color: "#9CA3B8", margin: 0 }}>
-                        Ready to send to buyer-attorney@legalfirm.com
-                      </p>
-
-                      <div style={{ height: 1, background: "#EEEFF2", margin: "16px 0" }} />
-
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                        <div>
-                          <p style={{ fontSize: 10, color: "#9CA3B8", margin: 0, marginBottom: 2 }}>Requested by</p>
-                          <p style={{ fontSize: 13, color: "#0F1729", margin: 0 }}>Buyer&apos;s Attorney · Unit 4B</p>
-                        </div>
-                        <div>
-                          <p style={{ fontSize: 10, color: "#9CA3B8", margin: 0, marginBottom: 2 }}>Received</p>
-                          <p style={{ fontSize: 13, color: "#0F1729", margin: 0 }}>Today, 9:37 AM</p>
-                        </div>
-                        <div>
-                          <p style={{ fontSize: 10, color: "#9CA3B8", margin: 0, marginBottom: 2 }}>Type</p>
-                          <p style={{ fontSize: 13, color: "#0F1729", margin: 0 }}>Status Certificate</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* ─── RIGHT — Status Certificate Package ─── */}
-              <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+            {/* ─── Status Certificate Package (full width) ─── */}
+            <div style={{ display: "flex", flexDirection: "column" }}>
 
                 {/* Package header */}
                 <AnimatePresence>
@@ -585,7 +534,6 @@ const Reports = () => {
                   </AnimatePresence>
                 </div>
 
-              </div>
             </div>
 
           </motion.div>
