@@ -869,23 +869,6 @@ const Index = () => {
                               onConnect={startConnect}
                             />
                           </div>
-                          <AnimatePresence>
-                            {bothConnected && (
-                              <motion.p
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.4 }}
-                                style={{
-                                  fontSize: 12,
-                                  color: "#9CA3B8",
-                                  textAlign: "center",
-                                  marginTop: 12,
-                                }}
-                              >
-                                All sources connected. Use the arrow above to continue &rarr;
-                              </motion.p>
-                            )}
-                          </AnimatePresence>
                         </motion.div>
                       )}
                     </AnimatePresence>
