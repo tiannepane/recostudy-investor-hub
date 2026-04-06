@@ -11,7 +11,7 @@ const THINKING_MESSAGES = [
   "retrieving reserve fund balance...",
   "pulling best bid from marketplace...",
   "calculating funding gap...",
-  "gap identified \u2014 $68,000 shortfall",
+  "gap identified, $68,000 shortfall",
   "scanning lending partners for eligibility...",
 ];
 
@@ -180,7 +180,7 @@ const Funding = () => {
 
                     {/* Agent status */}
                     <p style={{ fontSize: 11, fontStyle: "italic", color: "#9CA3B8" }}>
-                      Funding Agent &mdash; 2 solutions matched &#10003;
+                      Funding Agent: 2 solutions matched &#10003;
                     </p>
                   </motion.div>
                 )}

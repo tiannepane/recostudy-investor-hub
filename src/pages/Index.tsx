@@ -605,7 +605,7 @@ const Index = () => {
                         }}
                       />
                       <span style={{ fontSize: 13, fontWeight: 600, color: "#15803D" }}>
-                        ✓ Ingestion Agent — all data extracted successfully
+                        ✓ Ingestion Agent: all data extracted successfully
                       </span>
                     </motion.div>
                   )}
@@ -957,7 +957,7 @@ const Index = () => {
                         >
                           <CheckCircle size={16} style={{ color: "#0A0A0A", flexShrink: 0 }} />
                           <span style={{ fontSize: 13, fontWeight: 600, color: "#0A0A0A" }}>
-                            Ingestion complete &mdash; 3 sources processed by 3 AI agents
+                            Ingestion complete: 3 sources processed by 3 AI agents
                           </span>
                         </motion.div>
                       )}

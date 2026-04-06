@@ -608,7 +608,7 @@ const Financials = () => {
                       fontWeight: 500,
                     }}
                   >
-                    Reserve Fund Trajectory — Action Required
+                    Reserve Fund Trajectory: Action Required
                   </p>
                   <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                     {/* Dashed gray swatch */}
@@ -831,7 +831,7 @@ const Financials = () => {
 
                           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                             {[
-                              { label: "Location",      value: "New York, NY \u2014 Concrete frame mid/high-rise" },
+                              { label: "Location",      value: "New York, NY \u00b7 Concrete frame mid/high-rise" },
                               { label: "Building Type", value: "Condominium, mid/high-rise" },
                               { label: "Age Range",     value: "Built 1990\u20131995" },
                               { label: "Size Class",    value: "100\u2013150 units" },
@@ -998,7 +998,7 @@ const Financials = () => {
                           Regulatory Update
                         </p>
                         <p style={{ fontSize: 13, color: "#B45309", lineHeight: 1.6 }}>
-                          January 2027 — Reserve contribution requirement increasing from 10% to 15% of annual budget.
+                          January 2027: Reserve contribution requirement increasing from 10% to 15% of annual budget.
                         </p>
                       </div>
                     </div>
@@ -1059,7 +1059,7 @@ const Financials = () => {
                       <p style={{ fontSize: 14, fontWeight: 500, color: "#0F1729", lineHeight: 1.6 }}>
                         Based on the current CRF balance of $2,064,255 and projected replacement costs of $7,335,097
                         over the next 10 years, we recommend increasing monthly CRF allocations by $87.43 per
-                        unit — bringing the annual contribution to $511,500. This positions the fund at 100%
+                        unit, bringing the annual contribution to $511,500. This positions the fund at 100%
                         financial strength over the 30-year horizon.
                       </p>
                     </div>

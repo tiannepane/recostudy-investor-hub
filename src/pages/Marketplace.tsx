@@ -275,8 +275,8 @@ const Marketplace = () => {
               </div>
               {[
                 { label: "Scope",    value: "Full exterior restoration, balcony waterproofing, structural repair", color: "#C4CAD8" },
-                { label: "Budget",   value: "$425,000 — $480,000", color: "#FFFFFF" },
-                { label: "Timeline", value: "Q2 2026 — Q4 2026", color: "#C4CAD8" },
+                { label: "Budget",   value: "$425,000 - $480,000", color: "#FFFFFF" },
+                { label: "Timeline", value: "Q2 2026 - Q4 2026", color: "#C4CAD8" },
                 { label: "Priority", value: "● Critical", color: "#FFFFFF" },
               ].map((row) => (
                 <div key={row.label} style={{ display: "flex", gap: 10, marginBottom: 3, fontSize: 12 }}>

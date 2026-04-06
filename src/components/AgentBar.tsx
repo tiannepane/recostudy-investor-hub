@@ -89,7 +89,7 @@ const AgentBar = ({
               color: "#5A6178",
             }}
           >
-            {agentName} &mdash; {thinkingMessage}
+            {agentName}: {thinkingMessage}
           </motion.span>
         ) : (
           <motion.span
@@ -106,7 +106,7 @@ const AgentBar = ({
               fontWeight: 500,
             }}
           >
-            &#10003; {agentName} &mdash; {completeMessage}
+            &#10003; {agentName}: {completeMessage}
           </motion.span>
         )}
       </AnimatePresence>

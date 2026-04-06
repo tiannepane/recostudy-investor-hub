@@ -36,7 +36,7 @@ const REPORT_ITEMS = [
 
 const RECENT_REQUESTS = [
   { text: "Annual Board Report requested", date: "Mar 15" },
-  { text: "Lender Package \u2014 refinancing review", date: "Feb 28" },
+  { text: "Lender Package, refinancing review", date: "Feb 28" },
   { text: "Insurance renewal documentation", date: "Feb 12" },
 ];
 
@@ -358,7 +358,7 @@ const Reports = () => {
               </span>
               <div style={{ width: 1, height: 16, background: "#EEEFF2", flexShrink: 0 }} />
               <span style={{ fontSize: 13, color: "#0F1729", flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                Unit 4B is under contract — buyer&apos;s attorney has requested a Status Certificate.
+                Unit 4B is under contract; buyer&apos;s attorney has requested a Status Certificate.
               </span>
               <span style={{ fontSize: 12, color: "#9CA3B8", flexShrink: 0 }}>Today, 9:37 AM</span>
               <ViewLink />

@@ -155,7 +155,7 @@ const Insurance = () => {
                       fontStyle: "italic",
                       color: "#9CA3B8",
                     }}>
-                      Insurance Agent scanned 24 components &mdash; 3 flagged
+                      Insurance Agent scanned 24 components, 3 flagged
                     </p>
 
                     {/* Component rows */}
@@ -192,7 +192,7 @@ const Insurance = () => {
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                           <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
                           <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
-                            Elevator Cab &mdash; Townhouse
+                            Elevator Cab, Townhouse
                           </span>
                         </div>
                         <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
@@ -340,7 +340,7 @@ const Insurance = () => {
                       },
                       {
                         label: "Subject:",
-                        value: "Building Update — Exterior Facade & Balconies · Meridian Condominium Association, Inc.",
+                        value: "Building Update: Exterior Facade & Balconies · Meridian Condominium Association, Inc.",
                         valueWeight: 500,
                       },
                     ].map(({ label, value, valueWeight }) => (

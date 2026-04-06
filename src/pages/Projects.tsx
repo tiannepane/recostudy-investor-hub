@@ -61,7 +61,7 @@ const COMPONENTS: ComponentDef[] = [
     sources: [
       { icon: "image",     label: "Facade inspection photos (3)",       bg: "#EFF6FF", color: "#3B82F6" },
       { icon: "file",      label: "Structural assessment report.pdf",   bg: "#FEF2F2", color: "#EF4444" },
-      { icon: "clipboard", label: "Maintenance history — 2019-2025",    bg: "#F3E8FF", color: "#8B5CF6" },
+      { icon: "clipboard", label: "Maintenance history 2019-2025",    bg: "#F3E8FF", color: "#8B5CF6" },
     ],
     rfp: {
       id: "RFP-2026-001",
@@ -69,8 +69,8 @@ const COMPONENTS: ComponentDef[] = [
       scope:
         "Complete restoration of exterior facade and balcony structures. Includes waterproofing membrane replacement, concrete spall repair, railing replacement, and protective coating application across all building elevations.",
       area: "Main Building Exterior",
-      budget: "$425,000 — $480,000",
-      timeline: "Q2 2026 — Q4 2026",
+      budget: "$425,000 - $480,000",
+      timeline: "Q2 2026 - Q4 2026",
       priority: "Critical",
       attachments: ["Structural Assessment Report", "Facade Inspection Photos"],
     },
@@ -82,7 +82,7 @@ const COMPONENTS: ComponentDef[] = [
     condition: "Fair",
     rul: "3 years RUL",
     rulColor: "#F59E0B",
-    location: "Full Rooftop — Level 20",
+    location: "Full Rooftop, Level 20",
     cost: "$180,000",
     lastInspection: "January 2025",
     risk: "Moderate",
@@ -90,16 +90,16 @@ const COMPONENTS: ComponentDef[] = [
     sources: [
       { icon: "image",     label: "Roof inspection photos (5)",         bg: "#EFF6FF", color: "#3B82F6" },
       { icon: "file",      label: "Roofing condition report.pdf",       bg: "#FEF2F2", color: "#EF4444" },
-      { icon: "clipboard", label: "Warranty records — 2017-2025",       bg: "#F3E8FF", color: "#8B5CF6" },
+      { icon: "clipboard", label: "Warranty records 2017-2025",       bg: "#F3E8FF", color: "#8B5CF6" },
     ],
     rfp: {
       id: "RFP-2026-002",
       title: "Roof Membrane Replacement",
       scope:
         "Full replacement of rooftop waterproofing membrane across all roof sections. Includes removal of existing membrane, substrate inspection and repair, installation of new TPO membrane system, and drainage improvements.",
-      area: "Full Rooftop — Level 20",
-      budget: "$180,000 — $210,000",
-      timeline: "Q3 2026 — Q4 2026",
+      area: "Full Rooftop, Level 20",
+      budget: "$180,000 - $210,000",
+      timeline: "Q3 2026 - Q4 2026",
       priority: "Moderate",
       attachments: ["Roofing Condition Report", "Warranty Records"],
     },
@@ -119,7 +119,7 @@ const COMPONENTS: ComponentDef[] = [
     sources: [
       { icon: "image",     label: "Elevator inspection photos (2)",     bg: "#EFF6FF", color: "#3B82F6" },
       { icon: "file",      label: "Mechanical systems audit.pdf",       bg: "#FEF2F2", color: "#EF4444" },
-      { icon: "clipboard", label: "Service history — 2018-2025",        bg: "#F3E8FF", color: "#8B5CF6" },
+      { icon: "clipboard", label: "Service history 2018-2025",        bg: "#F3E8FF", color: "#8B5CF6" },
     ],
     rfp: {
       id: "RFP-2026-003",
@@ -127,8 +127,8 @@ const COMPONENTS: ComponentDef[] = [
       scope:
         "Full modernization of all 4 elevator systems including cab refurbishment, control system upgrade, door operator replacement, and safety system compliance updates per TSSA requirements.",
       area: "All 4 Elevator Shafts",
-      budget: "$290,000 — $330,000",
-      timeline: "Q1 2027 — Q3 2027",
+      budget: "$290,000 - $330,000",
+      timeline: "Q1 2027 - Q3 2027",
       priority: "Moderate",
       attachments: ["Mechanical Systems Audit", "Service History"],
     },
@@ -296,7 +296,7 @@ const Projects = () => {
                             }}
                           >
                             <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3B8", fontWeight: 500, marginBottom: 6 }}>
-                              Critical — Action Required
+                              Critical: Action Required
                             </p>
                             <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", lineHeight: 1.2, marginBottom: 8 }}>
                               Exterior Facade &amp; Balconies
@@ -341,7 +341,7 @@ const Projects = () => {
                             }}
                           >
                             <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3B8", fontWeight: 500, marginBottom: 6 }}>
-                              {selectedComp.risk === "Critical" ? "Critical — Action Required" : "Flagged — Monitor Closely"}
+                              {selectedComp.risk === "Critical" ? "Critical: Action Required" : "Flagged: Monitor Closely"}
                             </p>
                             <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", marginBottom: 8, lineHeight: 1.2 }}>
                               {selectedComp.name}
@@ -534,8 +534,8 @@ const Projects = () => {
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 16px", marginBottom: 10 }}>
                                       {[
                                         { label: "Building Area", value: "Main Building Exterior" },
-                                        { label: "Est. Budget",   value: "$425,000 — $480,000"   },
-                                        { label: "Timeline",      value: "Q2 2026 — Q4 2026"     },
+                                        { label: "Est. Budget",   value: "$425,000 - $480,000"   },
+                                        { label: "Timeline",      value: "Q2 2026 - Q4 2026"     },
                                         { label: "Priority",      value: "Critical"               },
                                       ].map((spec) => (
                                         <div key={spec.label}>
