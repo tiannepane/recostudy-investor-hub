@@ -6,13 +6,13 @@ import {
   FileText,
   Clipboard,
   Paperclip,
-  Clock,
   DollarSign,
   Sparkles,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
+import AgentBar from "@/components/AgentBar";
 import ConditionIndicator from "@/components/ConditionIndicator";
 import type { Condition } from "@/components/ConditionIndicator";
 
@@ -145,48 +145,46 @@ const SOURCE_ICON_MAP: Record<SourceIcon, React.ElementType> = {
 
 /* ─── RFP text data ──────────────────────────────────────── */
 
-const TITLE_TEXT = "Exterior Facade & Balconies Restoration";
-
+const TITLE_TEXT  = "Exterior Facade & Balconies Restoration";
 const SCOPE_LINES = [
   "Complete restoration of exterior facade and balcony structures.",
   "Includes waterproofing membrane replacement, concrete spall repair,",
   "railing replacement, and protective coating across all elevations.",
 ];
 
-/* ─── Phase 1 scan items ─────────────────────────────────── */
+/* ─── Compact scan card rows ─────────────────────────────── */
 
-const SCAN_ITEMS = [
-  { name: "Parking Structure",           color: "#10B981", badge: "Good · 8 yrs",    t: 1500 },
-  { name: "Plumbing Systems",            color: "#10B981", badge: "Good · 7 yrs",    t: 2000 },
-  { name: "Elevator Systems",            color: "#F59E0B", badge: "Fair · 5 yrs",    t: 2500 },
-  { name: "Roof Membrane",               color: "#F59E0B", badge: "Fair · 3 yrs",    t: 3000 },
-  { name: "Lobby & Common Areas",        color: "#F59E0B", badge: "Fair · 4 yrs",    t: 3500 },
-  { name: "Exterior Facade & Balconies", color: "#EF4444", badge: "Critical · 1 yr", t: 4000 },
+const COMPACT_SCAN_ITEMS = [
+  { name: "Parking Structure", color: "#10B981", badge: "Good · 8 yrs", t: 400  },
+  { name: "Plumbing Systems",  color: "#10B981", badge: "Good · 7 yrs", t: 900  },
+  { name: "Elevator Systems",  color: "#F59E0B", badge: "Fair · 5 yrs", t: 1400 },
 ] as const;
+
+/* ─── AgentBar thinking messages ─────────────────────────── */
+
+const THINKING_MESSAGES = [
+  "scanning building inventory for critical components...",
+  "analyzing 24 components for end-of-life risk...",
+  "cross-referencing maintenance history...",
+  "flagging components with RUL < 2 years...",
+];
 
 /* ─── Page ───────────────────────────────────────────────── */
 
-type AgentMsg = { text: string; hex: string };
 
 const Projects = () => {
   const navigate = useNavigate();
 
   const [elapsed, setElapsed]               = useState(0);
-  const [phase, setPhase]                   = useState<"scan" | "content">("scan");
   const [selectedId, setSelectedId]         = useState("facade");
   const [hasSwitched, setHasSwitched]       = useState(false);
-  const [switchAgentMsg, setSwitchAgentMsg] = useState<AgentMsg | null>(null);
   const [hoveredCard, setHoveredCard]       = useState<string | null>(null);
-  const [btnHover, setBtnHover]             = useState(false);
 
   const reset = useCallback(() => {
     setElapsed(0);
-    setPhase("scan");
     setSelectedId("facade");
     setHasSwitched(false);
-    setSwitchAgentMsg(null);
     setHoveredCard(null);
-    setBtnHover(false);
   }, []);
 
   useEffect(() => {
@@ -194,10 +192,15 @@ const Projects = () => {
     return () => clearInterval(id);
   }, []);
 
-  // Phase transition
-  useEffect(() => {
-    if (elapsed >= 6000 && phase === "scan") setPhase("content");
-  }, [elapsed, phase]);
+  /* ── AgentBar: thinking until 3.5s, complete after ── */
+  const agentIsThinking = elapsed < 3500;
+  const agentIsComplete = elapsed >= 3500;
+  const thinkingMsg = THINKING_MESSAGES[
+    Math.min(THINKING_MESSAGES.length - 1, Math.floor(elapsed / 900))
+  ];
+
+  /* ── Inline notice: appears at 2s, fades out at 5s ── */
+  const showNotice = elapsed >= 2000 && elapsed < 5000;
 
   /* ── Handle component switch ── */
   const handleSelect = useCallback((id: string) => {
@@ -205,226 +208,77 @@ const Projects = () => {
     const comp = COMPONENTS.find((c) => c.id === id)!;
     setSelectedId(id);
     if (!hasSwitched) setHasSwitched(true);
-    setSwitchAgentMsg({ text: `● Compliance Agent — generating RFP for ${comp.name}...`, hex: "#8B92A8" });
-    setTimeout(() => {
-      setSwitchAgentMsg({
-        text: "● Compliance Agent — RFP generated, ready for marketplace ✓",
-        hex: "#10B981",
-      });
-    }, 1500);
   }, [selectedId, hasSwitched]);
 
   /* ── Derived state ── */
   const selectedComp   = COMPONENTS.find((c) => c.id === selectedId)!;
   const secondaryComps = COMPONENTS.filter((c) => c.id !== selectedId);
 
-  /* ── Phase 1 derived ── */
-  const scanItemsVisible = SCAN_ITEMS.map((item) => elapsed >= item.t);
-  const facadePulsed     = elapsed >= 4200;
-  const othersDimmed     = elapsed >= 4800;
+  /* ── Content timings ── */
+  // Right column (RFP) appears at 4s; left column at 4.5s
+  const rfpCardVisible = hasSwitched || elapsed >= 4000;
+  const cardVisible    = hasSwitched || elapsed >= 4500;
 
-  const phase1Agent: AgentMsg | null =
-    elapsed < 300 ? null :
-    elapsed >= 5500 ? { text: "● Compliance Agent — generating RFP...", hex: "#F59E0B" } :
-    elapsed >= 4200 ? { text: "● Compliance Agent — critical component identified: Exterior Facade & Balconies", hex: "#EF4444" } :
-                      { text: "● Compliance Agent — scanning building inventory for critical components...", hex: "#10B981" };
-
-  /* ── Phase 2 derived ── */
-  const alertVisible   = phase === "content" && (hasSwitched || elapsed >= 6600);
-  const cardVisible    = phase === "content" && (hasSwitched || elapsed >= 6800);
-  const rfpCardVisible = phase === "content" && (hasSwitched || elapsed >= 7000);
-
-  // Initial RFP animation timing (starts at 7.0s)
-  const rfpLogo          = elapsed >= 7000;
-  const rfpType          = elapsed >= 7300;
-  const titleCharsCount  = elapsed >= 7500
-    ? Math.min(TITLE_TEXT.length, Math.floor(((elapsed - 7500) / 800) * TITLE_TEXT.length))
+  // RFP progressive reveal (baseline: 4000ms)
+  const rfpLogo        = elapsed >= 4000;
+  const rfpType        = elapsed >= 4200;
+  const titleCharsCount = elapsed >= 4400
+    ? Math.min(TITLE_TEXT.length, Math.floor(((elapsed - 4400) / 800) * TITLE_TEXT.length))
     : 0;
   const titleText        = TITLE_TEXT.substring(0, titleCharsCount);
-  const rfpOrg           = elapsed >= 7900;
-  const scopeHeader      = elapsed >= 8100;
-  const scopeLineCount   = elapsed >= 8700 ? 3 : elapsed >= 8500 ? 2 : elapsed >= 8300 ? 1 : 0;
-  const specsVisible     = elapsed >= 8900;
-  const attachmentsVisible = elapsed >= 9200;
-  const buttonVisible    = elapsed >= 9800;
+  const rfpOrg           = elapsed >= 4900;
+  const scopeHeader      = elapsed >= 5100;
+  const scopeLineCount   = elapsed >= 5700 ? 3 : elapsed >= 5500 ? 2 : elapsed >= 5300 ? 1 : 0;
+  const specsVisible     = elapsed >= 5900;
+  const attachmentsVisible = elapsed >= 6200;
+  const buttonVisible    = elapsed >= 6800;
 
-  const secondaryLabelVisible = elapsed >= 10000;
-  const secondaryItemVisible  = [elapsed >= 10000, elapsed >= 10300];
+  const secondaryLabelVisible = hasSwitched || elapsed >= 4700;
+  const secondaryItemVisible  = [hasSwitched || elapsed >= 4700, hasSwitched || elapsed >= 5000];
 
-  const phase2Agent: AgentMsg = switchAgentMsg ??
-    (elapsed >= 9500
-      ? { text: "● Compliance Agent — RFP generated, ready for marketplace ✓", hex: "#10B981" }
-      : { text: "● Compliance Agent — analyzing component data...", hex: "#8B92A8" });
-
-  /* ── Alert banner data (for switched components) ── */
+  /* ── Alert banner style for switched component ── */
   const switchedAlertData = selectedComp.risk === "Critical"
     ? { bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.2)", iconColor: "#EF4444", textColor: "#EF4444", text: "Critical: End-of-life component detected" }
     : { bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.2)", iconColor: "#F59E0B", textColor: "#F59E0B", text: "Flagged: Component approaching end of life" };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen" style={{ background: "#FFFFFF" }}>
       <Sidebar
         activeItem="projects"
         visitedItems={["overview", "inventory", "financials"]}
       />
 
-      <main className="flex-1" style={{ marginLeft: 260, position: "relative", overflow: "hidden" }}>
-
-        {/* ══════════════════════════════════════════════════
-            PHASE 1 — Dark AI Discovery Scan Overlay
-        ══════════════════════════════════════════════════ */}
-        <AnimatePresence>
-          {phase === "scan" && (
-            <motion.div
-              key="scan-overlay"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.6, ease: "easeInOut" } }}
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "#0A0F1E",
-                zIndex: 45,
-                overflow: "hidden",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* Agent text — top-left */}
-              <div style={{ position: "absolute", top: 44, left: 50, right: 50 }}>
-                <AnimatePresence mode="wait">
-                  {phase1Agent && (
-                    <motion.p
-                      key={phase1Agent.hex}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      style={{
-                        fontFamily: "monospace",
-                        fontSize: 13,
-                        color: phase1Agent.hex,
-                      }}
-                    >
-                      {phase1Agent.text}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Centered scan container */}
-              <AnimatePresence>
-                {elapsed >= 1000 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, ease: "easeOut" }}
-                    style={{
-                      width: "100%",
-                      maxWidth: 640,
-                      padding: "0 24px",
-                    }}
-                  >
-                    {/* Title */}
-                    <p style={{ fontSize: 24, fontWeight: 700, color: "white", marginBottom: 6, textAlign: "center" }}>
-                      Analyzing 24 building components...
-                    </p>
-                    <p style={{ fontSize: 15, color: "#94A3B8", marginBottom: 20, textAlign: "center" }}>
-                      Identifying end-of-life risk and maintenance priority
-                    </p>
-
-                    {/* Scan rows */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      {SCAN_ITEMS.map((item, i) => {
-                        const isFacade    = i === 5;
-                        const isPulsed    = isFacade && facadePulsed;
-                        const isDimmed    = othersDimmed && !isFacade;
-                        return (
-                          <AnimatePresence key={item.name}>
-                            {scanItemsVisible[i] && (
-                              <motion.div
-                                initial={{ opacity: 0, x: -12 }}
-                                animate={{
-                                  opacity: isDimmed ? 0.3 : 1,
-                                  x: 0,
-                                  boxShadow: isPulsed
-                                    ? "0 0 0 3px rgba(239,68,68,0.4)"
-                                    : "none",
-                                }}
-                                transition={{
-                                  opacity: { duration: isDimmed ? 0.4 : 0.3 },
-                                  x: { duration: 0.3, ease: "easeOut" },
-                                  boxShadow: { duration: 0.3 },
-                                }}
-                                style={{
-                                  background: isPulsed ? "#1E1525" : "#141B2D",
-                                  borderRadius: 8,
-                                  padding: "14px 20px",
-                                  borderLeft: `3px solid ${item.color}`,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                  transition: "background 0.3s ease",
-                                }}
-                              >
-                                <span style={{ fontSize: 14, fontWeight: 500, color: "white" }}>
-                                  {item.name}
-                                </span>
-                                <span
-                                  style={{
-                                    fontFamily: "monospace",
-                                    fontSize: 11,
-                                    color: item.color,
-                                    flexShrink: 0,
-                                  }}
-                                >
-                                  {item.badge}
-                                </span>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ══════════════════════════════════════════════════
-            Page chrome — always rendered, revealed in Phase 2
-        ══════════════════════════════════════════════════ */}
-        <div className="mx-auto" style={{ maxWidth: 1100, padding: "44px 50px 36px" }}>
+      <main className="flex-1" style={{ marginLeft: 260 }}>
+        <div className="mx-auto" style={{ maxWidth: 1100, padding: "44px 50px 48px" }}>
           <TopBar
             onReplay={reset}
-            breadcrumb="Buildings › ABC Condominium Association, Inc. › Projects"
+            breadcrumb="Buildings › Meridian Condominium Association, Inc. › Projects"
             activeItem="projects"
           />
 
-          {/* ══════════════════════════════════════════════
-              PHASE 2 — Two-column layout
-          ══════════════════════════════════════════════ */}
-          <AnimatePresence>
-            {phase === "content" && (
-              <motion.div
-                key="content"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                style={{ display: "flex", gap: "3%", alignItems: "flex-start" }}
-              >
+          {/* ── Agent Bar ── */}
+          <AgentBar
+            agentName="Compliance Agent"
+            thinkingMessage={thinkingMsg}
+            completeMessage="1 critical component flagged: Exterior Facade &amp; Balconies"
+            accentColor="#6366F1"
+            isThinking={agentIsThinking}
+            isComplete={agentIsComplete}
+            isHidden={false}
+          />
 
-                {/* ══ LEFT COLUMN (45%) ══ */}
-                <div style={{ flex: "0 0 42%", minWidth: 0 }}>
+
+          {/* ══ MAIN CONTENT — Two-column layout ══ */}
+          <div style={{ display: "flex", gap: "3%", alignItems: "flex-start" }}>
+
+            {/* ══ LEFT COLUMN (45%) ══ */}
+            <div style={{ flex: "0 0 42%", minWidth: 0 }}>
 
                   {/* ── Main component card ── */}
                   <AnimatePresence mode="wait">
                     {cardVisible && (
                       <>
                         {!hasSwitched ? (
-                          /* Initial Phase 2 facade card */
                           <motion.div
                             key="facade-phase2"
                             initial={{ opacity: 0, y: 8 }}
@@ -432,81 +286,42 @@ const Projects = () => {
                             exit={{ opacity: 0, transition: { duration: 0.2 } }}
                             transition={{ duration: 0.35, ease: "easeOut" }}
                             style={{
-                              borderRadius: 12,
-                              border: "1px solid #E8EBF0",
-                              borderTop: "4px solid #EF4444",
-                              background: "white",
+                              borderRadius: 10,
+                              border: "1px solid rgba(220, 38, 38, 0.12)",
+                              borderLeft: "3px solid #0F1729",
+                              background: "rgba(255, 255, 255, 0.85)",
+                              backdropFilter: "blur(8px)",
+                              boxShadow: "0 0 0 1px rgba(220,38,38,0.05), 0 8px 32px rgba(220,38,38,0.09)",
                               padding: 24,
-                              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
                             }}
                           >
-                            {/* Title */}
-                            <p style={{ fontSize: 22, fontWeight: 700, color: "#0F1729", lineHeight: 1.2, marginBottom: 6 }}>
+                            <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3B8", fontWeight: 500, marginBottom: 6 }}>
+                              Critical — Action Required
+                            </p>
+                            <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", lineHeight: 1.2, marginBottom: 8 }}>
                               Exterior Facade &amp; Balconies
                             </p>
-
-                            {/* Pills row */}
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 8,
-                                marginBottom: 14,
-                              }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: 11,
-                                  color: "#5A6178",
-                                  background: "#F1F3F6",
-                                  borderRadius: 4,
-                                  padding: "2px 8px",
-                                }}
-                              >
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                              <span style={{ fontSize: 12, color: "#5A6178", background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "2px 8px" }}>
                                 Structural
                               </span>
                               <ConditionIndicator condition="Poor" />
                             </div>
-
-                            {/* Divider */}
-                            <div style={{ height: 1, background: "#F1F3F6", marginBottom: 14 }} />
-
-                            {/* 3 detail rows */}
-                            {[
-                              { Icon: Clock,      label: "Remaining Useful Life", value: "1 year",   valueColor: "#EF4444", mono: false },
-                              { Icon: DollarSign, label: "Estimated Cost",        value: "$425,000", valueColor: "#0F1729", mono: true  },
-                            ].map((row, idx) => (
-                              <div
-                                key={idx}
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  height: 36,
-                                  borderBottom: "1px solid #F8F9FC",
-                                }}
-                              >
-                                <row.Icon size={14} style={{ color: "#9CA3B8", flexShrink: 0, marginRight: 8 }} />
-                                <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>
-                                  {row.label}
-                                </span>
-                                <span
-                                  style={{
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    color: row.valueColor,
-                                    fontFamily: row.mono ? "monospace" : "inherit",
-                                  }}
-                                >
-                                  {row.value}
-                                </span>
-                              </div>
-                            ))}
-
+                            <div style={{ height: 1, background: "#EEEFF2", marginBottom: 14 }} />
+                            {/* Remaining Useful Life row — amber dot, no red */}
+                            <div style={{ display: "flex", alignItems: "center", height: 36, borderBottom: "1px solid #F8F9FC" }}>
+                              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F59E0B", flexShrink: 0, marginRight: 8, display: "inline-block" }} />
+                              <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>Remaining Useful Life</span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729" }}>1 year</span>
+                            </div>
+                            {/* Estimated Cost row */}
+                            <div style={{ display: "flex", alignItems: "center", height: 36 }}>
+                              <DollarSign size={14} style={{ color: "#9CA3B8", flexShrink: 0, marginRight: 8 }} />
+                              <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>Estimated Cost</span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$425,000</span>
+                            </div>
                           </motion.div>
-
                         ) : (
-
-                          /* Static card for switched component (existing logic unchanged) */
                           <motion.div
                             key={selectedId}
                             initial={{ opacity: 0 }}
@@ -514,42 +329,41 @@ const Projects = () => {
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.25 }}
                             style={{
-                              borderRadius: 12,
-                              border: "1px solid #E8EBF0",
-                              borderTop: "4px solid #EF4444",
-                              background: "white",
-                              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                              borderRadius: 10,
+                              border: selectedComp.risk === "Critical" ? "1px solid rgba(220, 38, 38, 0.12)" : "1px solid rgba(249, 115, 22, 0.15)",
+                              borderLeft: "3px solid #0F1729",
+                              background: "rgba(255, 255, 255, 0.85)",
+                              backdropFilter: "blur(8px)",
+                              boxShadow: selectedComp.risk === "Critical"
+                                ? "0 0 0 1px rgba(220,38,38,0.05), 0 8px 32px rgba(220,38,38,0.09)"
+                                : "0 0 0 1px rgba(249,115,22,0.06), 0 8px 32px rgba(249,115,22,0.10)",
                               padding: 24,
                             }}
                           >
-                            <p style={{ fontSize: 22, fontWeight: 700, color: "#0F1729", marginBottom: 10, lineHeight: 1.2 }}>
+                            <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3B8", fontWeight: 500, marginBottom: 6 }}>
+                              {selectedComp.risk === "Critical" ? "Critical — Action Required" : "Flagged — Monitor Closely"}
+                            </p>
+                            <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", marginBottom: 8, lineHeight: 1.2 }}>
                               {selectedComp.name}
                             </p>
-
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                              <span style={{ fontSize: 12, background: "#F8F9FC", border: "1px solid #E8EBF0", borderRadius: 4, padding: "2px 8px", color: "#5A6178" }}>
+                              <span style={{ fontSize: 12, background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "2px 8px", color: "#5A6178" }}>
                                 {selectedComp.category}
                               </span>
                               <ConditionIndicator condition={selectedComp.condition} />
-                              <span style={{ fontSize: 12, fontWeight: 500, color: selectedComp.rulColor }}>
-                                {selectedComp.rul}
-                              </span>
                             </div>
-
-                            <div style={{ height: 1, background: "#E8EBF0", margin: "10px 0 8px" }} />
-
-                            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                              {[
-                                { label: "Remaining Useful Life", value: selectedComp.rul, mono: false, color: selectedComp.rulColor },
-                                { label: "Estimated Cost",        value: selectedComp.cost, mono: true,  color: "#0F1729" },
-                              ].map((row) => (
-                                <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13 }}>
-                                  <span style={{ color: "#9CA3B8" }}>{row.label}</span>
-                                  <span style={{ color: row.color, fontFamily: row.mono ? "monospace" : "inherit", fontWeight: row.mono ? 500 : 600 }}>
-                                    {row.value}
-                                  </span>
-                                </div>
-                              ))}
+                            <div style={{ height: 1, background: "#EEEFF2", margin: "10px 0 8px" }} />
+                            {/* Remaining Useful Life row — amber dot */}
+                            <div style={{ display: "flex", alignItems: "center", height: 36, borderBottom: "1px solid #F8F9FC" }}>
+                              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F59E0B", flexShrink: 0, marginRight: 8, display: "inline-block" }} />
+                              <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>Remaining Useful Life</span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729" }}>{selectedComp.rul}</span>
+                            </div>
+                            {/* Estimated Cost row */}
+                            <div style={{ display: "flex", alignItems: "center", height: 36 }}>
+                              <DollarSign size={14} style={{ color: "#9CA3B8", flexShrink: 0, marginRight: 8 }} />
+                              <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>Estimated Cost</span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>{selectedComp.cost}</span>
                             </div>
                           </motion.div>
                         )}
@@ -564,13 +378,7 @@ const Projects = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.25 }}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 5,
-                          marginTop: 24,
-                          marginBottom: 8,
-                        }}
+                        style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 24, marginBottom: 8 }}
                       >
                         <Sparkles size={11} style={{ color: "#9CA3B8" }} />
                         <span style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8" }}>
@@ -582,7 +390,7 @@ const Projects = () => {
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     {secondaryComps.map((comp, i) => {
-                      const isHovered = hoveredCard === comp.id;
+                      const isHovered  = hoveredCard === comp.id;
                       const isSelected = comp.id === selectedId;
                       return (
                         <AnimatePresence key={comp.id}>
@@ -595,42 +403,22 @@ const Projects = () => {
                               onMouseEnter={() => setHoveredCard(comp.id)}
                               onMouseLeave={() => setHoveredCard(null)}
                               style={{
-                                background: "#F8F9FC",
-                                border: isSelected || isHovered ? "1px solid #4F6BFF" : "1px solid #EEEFF2",
+                                background: "rgba(255, 255, 255, 0.85)",
+                                backdropFilter: "blur(8px)",
+                                border: isSelected || isHovered ? "1px solid #4F6BFF" : "1px solid rgba(249,115,22,0.09)",
                                 borderRadius: 10,
-                                padding: "14px 16px",
+                                padding: "12px 14px",
                                 cursor: "pointer",
-                                boxShadow: isSelected || isHovered ? "0 0 0 3px rgba(79,107,255,0.08)" : "none",
-                                transition: "border-color 200ms ease, box-shadow 200ms ease, background 200ms ease",
+                                boxShadow: isSelected || isHovered ? "0 0 0 3px rgba(79,107,255,0.08)" : "0 0 0 1px rgba(249,115,22,0.04), 0 8px 32px rgba(249,115,22,0.06)",
+                                transition: "border-color 200ms ease, box-shadow 200ms ease",
                               }}
                             >
-                              {/* Top row: name + badge */}
-                              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                                <p style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
-                                  {comp.name}
-                                </p>
-                                <span
-                                  style={{
-                                    fontSize: 10,
-                                    fontWeight: 500,
-                                    background: "#FEF3C7",
-                                    color: "#D97706",
-                                    borderRadius: 4,
-                                    padding: "2px 7px",
-                                    flexShrink: 0,
-                                  }}
-                                >
-                                  Moderate
-                                </span>
-                              </div>
-
-                              {/* Condition bar */}
-                              <div style={{ marginBottom: 6 }}>
+                              <p style={{ fontSize: 14, fontWeight: 600, color: "#0F1729", marginBottom: 6 }}>{comp.name}</p>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F59E0B", flexShrink: 0, display: "inline-block" }} />
                                 <ConditionIndicator condition={comp.condition} />
                               </div>
-
-                              {/* RUL + Cost */}
-                              <p style={{ fontSize: 12, color: "#5A6178" }}>
+                              <p style={{ fontSize: 12, color: "#9CA3B8" }}>
                                 {comp.rul.replace("years", "yrs").replace("year", "yr")} · {comp.cost}
                               </p>
                             </motion.div>
@@ -640,31 +428,10 @@ const Projects = () => {
                     })}
                   </div>
 
-                  {/* Agent status — footer */}
-                  <div style={{ marginTop: 12, minHeight: 18 }}>
-                    <AnimatePresence mode="wait">
-                      <motion.p
-                        key={phase2Agent.text}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        style={{
-                          fontFamily: "monospace",
-                          fontSize: 12,
-                          color: phase2Agent.hex,
-                        }}
-                      >
-                        {phase2Agent.text}
-                      </motion.p>
-                    </AnimatePresence>
-                  </div>
                 </div>
 
                 {/* ══ RIGHT COLUMN (55%) — RFP Document ══ */}
                 <div style={{ flex: "0 0 55%", minWidth: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-
-                  {/* Document card */}
                   <AnimatePresence>
                     {rfpCardVisible && (
                       <motion.div
@@ -677,7 +444,8 @@ const Projects = () => {
                           flex: 1,
                           borderRadius: 4,
                           background: "white",
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)",
+                          border: "1px solid rgba(15,23,41,0.06)",
+                          boxShadow: "0 2px 8px rgba(15,23,41,0.05)",
                           padding: "20px 22px",
                         }}
                       >
@@ -689,21 +457,17 @@ const Projects = () => {
                               key="rfp-initial-content"
                               exit={{ opacity: 0, transition: { duration: 0.2 } }}
                             >
-                              {/* Logo row */}
                               <AnimatePresence>
                                 {rfpLogo && (
-                                  <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.2 }}
+                                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
                                     style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}
                                   >
-                                    <p style={{ fontSize: 14, lineHeight: 1 }}>
+                                    <p style={{ fontSize: 13, lineHeight: 1 }}>
                                       <span style={{ fontWeight: 700, color: "#0F1729" }}>RECO</span>
-                                      <span style={{ fontWeight: 700, color: "#0F1729" }}>study</span>
+                                      <span style={{ fontWeight: 700, color: "#4F6BFF" }}>study</span>
                                       <sup style={{ fontSize: 9, color: "#9CA3B8", fontWeight: 400 }}>™</sup>
                                     </p>
-                                    <p style={{ fontFamily: "monospace", fontSize: 11, color: "#9CA3B8" }}>RFP-2026-001</p>
+                                    <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#9CA3B8" }}>RFP-2026-001</p>
                                   </motion.div>
                                 )}
                               </AnimatePresence>
@@ -712,11 +476,8 @@ const Projects = () => {
 
                               <AnimatePresence>
                                 {rfpType && (
-                                  <motion.p
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.2 }}
-                                    style={{ display: "inline-block", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, color: "#4F6BFF", background: "#EFF3FF", borderRadius: 4, padding: "3px 10px", marginBottom: 8 }}
+                                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
+                                    style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#9CA3B8", marginBottom: 8 }}
                                   >
                                     Request for Proposal
                                   </motion.p>
@@ -724,7 +485,7 @@ const Projects = () => {
                               </AnimatePresence>
 
                               {titleCharsCount > 0 && (
-                                <p style={{ fontSize: 17, fontWeight: 700, color: "#0F1729", marginBottom: 4, lineHeight: 1.3, minHeight: 22 }}>
+                                <p style={{ fontSize: 18, fontWeight: 700, color: "#0F1729", marginBottom: 4, lineHeight: 1.3, minHeight: 22 }}>
                                   {titleText}
                                   {titleCharsCount < TITLE_TEXT.length && (
                                     <span style={{ opacity: 0.35, fontWeight: 300 }}>|</span>
@@ -734,13 +495,10 @@ const Projects = () => {
 
                               <AnimatePresence>
                                 {rfpOrg && (
-                                  <motion.p
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.2 }}
+                                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
                                     style={{ fontSize: 13, color: "#5A6178", marginBottom: 12 }}
                                   >
-                                    ABC Condominium Association, Inc.
+                                    Meridian Condominium Association, Inc.
                                   </motion.p>
                                 )}
                               </AnimatePresence>
@@ -749,10 +507,7 @@ const Projects = () => {
 
                               <AnimatePresence>
                                 {scopeHeader && (
-                                  <motion.p
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.2 }}
+                                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
                                     style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#9CA3B8", marginBottom: 5 }}
                                   >
                                     Scope of Work
@@ -762,11 +517,7 @@ const Projects = () => {
 
                               <div style={{ marginBottom: 10, minHeight: scopeLineCount > 0 ? scopeLineCount * 22 : 0 }}>
                                 {SCOPE_LINES.slice(0, scopeLineCount).map((line, i) => (
-                                  <motion.p
-                                    key={i}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.2 }}
+                                  <motion.p key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
                                     style={{ fontSize: 12, color: "#5A6178", lineHeight: 1.55 }}
                                   >
                                     {line}
@@ -788,8 +539,8 @@ const Projects = () => {
                                         { label: "Priority",      value: "Critical"               },
                                       ].map((spec) => (
                                         <div key={spec.label}>
-                                          <p style={{ fontSize: 10, color: "#9CA3B8", marginBottom: 2 }}>{spec.label}</p>
-                                          <p style={{ fontSize: 12, fontWeight: 500, color: "#0F1729" }}>{spec.value}</p>
+                                          <p style={{ fontSize: 11, color: "#9CA3B8", marginBottom: 2 }}>{spec.label}</p>
+                                          <p style={{ fontSize: 13, fontWeight: 500, color: "#0F1729" }}>{spec.value}</p>
                                         </div>
                                       ))}
                                     </div>
@@ -800,17 +551,14 @@ const Projects = () => {
                               <AnimatePresence>
                                 {attachmentsVisible && (
                                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                                    <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#9CA3B8", marginBottom: 7 }}>
+                                    <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 7 }}>
                                       Attachments
                                     </p>
                                     <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 12 }}>
                                       {["Structural Assessment Report", "Facade Inspection Photos"].map((att) => (
-                                        <div
-                                          key={att}
-                                          style={{ display: "flex", alignItems: "center", gap: 5, background: "#F8F9FC", border: "1px solid #E8EBF0", borderRadius: 4, padding: "4px 9px" }}
-                                        >
+                                        <div key={att} style={{ display: "flex", alignItems: "center", gap: 5, background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "4px 9px" }}>
                                           <Paperclip size={11} style={{ color: "#9CA3B8" }} />
-                                          <span style={{ fontSize: 11, color: "#5A6178" }}>{att}</span>
+                                          <span style={{ fontSize: 12, color: "#5A6178" }}>{att}</span>
                                         </div>
                                       ))}
                                     </div>
@@ -825,7 +573,7 @@ const Projects = () => {
 
                           ) : (
 
-                            /* ── Static RFP for switched component (unchanged) ── */
+                            /* ── Static RFP for switched component ── */
                             <motion.div
                               key={selectedId}
                               initial={{ opacity: 0 }}
@@ -834,40 +582,23 @@ const Projects = () => {
                               transition={{ duration: 0.3 }}
                             >
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                                <p style={{ fontSize: 14, lineHeight: 1 }}>
+                                <p style={{ fontSize: 13, lineHeight: 1 }}>
                                   <span style={{ fontWeight: 700, color: "#0F1729" }}>RECO</span>
-                                  <span style={{ fontWeight: 700, color: "#0F1729" }}>study</span>
+                                  <span style={{ fontWeight: 700, color: "#4F6BFF" }}>study</span>
                                   <sup style={{ fontSize: 9, color: "#9CA3B8", fontWeight: 400 }}>™</sup>
                                 </p>
-                                <p style={{ fontFamily: "monospace", fontSize: 11, color: "#9CA3B8" }}>
-                                  {selectedComp.rfp.id}
-                                </p>
+                                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#9CA3B8" }}>{selectedComp.rfp.id}</p>
                               </div>
-
                               <div style={{ height: 1, background: "#E8EBF0", marginBottom: 12 }} />
-
-                              <p style={{ display: "inline-block", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, color: "#4F6BFF", background: "#EFF3FF", borderRadius: 4, padding: "3px 10px", marginBottom: 8 }}>
+                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#9CA3B8", marginBottom: 8 }}>
                                 Request for Proposal
                               </p>
-                              <p style={{ fontSize: 17, fontWeight: 700, color: "#0F1729", marginBottom: 4, lineHeight: 1.3 }}>
-                                {selectedComp.rfp.title}
-                              </p>
-                              <p style={{ fontSize: 13, color: "#5A6178", marginBottom: 12 }}>
-                                ABC Condominium Association, Inc.
-                              </p>
-
+                              <p style={{ fontSize: 18, fontWeight: 700, color: "#0F1729", marginBottom: 4, lineHeight: 1.3 }}>{selectedComp.rfp.title}</p>
+                              <p style={{ fontSize: 13, color: "#5A6178", marginBottom: 12 }}>Meridian Condominium Association, Inc.</p>
                               <div style={{ height: 1, background: "#E8EBF0", marginBottom: 10 }} />
-
-                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#9CA3B8", marginBottom: 5 }}>
-                                Scope of Work
-                              </p>
-                              <p style={{ fontSize: 12, color: "#5A6178", lineHeight: 1.55, marginBottom: 10 }}>
-                                {selectedComp.rfp.scope}
-                              </p>
-
-                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#9CA3B8", marginBottom: 7 }}>
-                                Specifications
-                              </p>
+                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 5 }}>Scope of Work</p>
+                              <p style={{ fontSize: 12, color: "#5A6178", lineHeight: 1.55, marginBottom: 10 }}>{selectedComp.rfp.scope}</p>
+                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 7 }}>Specifications</p>
                               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 16px", marginBottom: 10 }}>
                                 {[
                                   { label: "Building Area", value: selectedComp.rfp.area     },
@@ -876,40 +607,32 @@ const Projects = () => {
                                   { label: "Priority",      value: selectedComp.rfp.priority },
                                 ].map((spec) => (
                                   <div key={spec.label}>
-                                    <p style={{ fontSize: 10, color: "#9CA3B8", marginBottom: 2 }}>{spec.label}</p>
-                                    <p style={{ fontSize: 12, fontWeight: 500, color: "#0F1729" }}>{spec.value}</p>
+                                    <p style={{ fontSize: 11, color: "#9CA3B8", marginBottom: 2 }}>{spec.label}</p>
+                                    <p style={{ fontSize: 13, fontWeight: 500, color: "#0F1729" }}>{spec.value}</p>
                                   </div>
                                 ))}
                               </div>
-
-                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#9CA3B8", marginBottom: 7 }}>
-                                Attachments
-                              </p>
+                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 7 }}>Attachments</p>
                               <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 12 }}>
                                 {selectedComp.rfp.attachments.map((att) => (
-                                  <div
-                                    key={att}
-                                    style={{ display: "flex", alignItems: "center", gap: 5, background: "#F8F9FC", border: "1px solid #E8EBF0", borderRadius: 4, padding: "4px 9px" }}
-                                  >
+                                  <div key={att} style={{ display: "flex", alignItems: "center", gap: 5, background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "4px 9px" }}>
                                     <Paperclip size={11} style={{ color: "#9CA3B8" }} />
-                                    <span style={{ fontSize: 11, color: "#5A6178" }}>{att}</span>
+                                    <span style={{ fontSize: 12, color: "#5A6178" }}>{att}</span>
                                   </div>
                                 ))}
                               </div>
-
                               <div style={{ height: 1, background: "#E8EBF0", marginBottom: 8 }} />
                               <p style={{ fontSize: 10, color: "#9CA3B8", fontStyle: "italic" }}>
                                 Generated by RECOstudy Compliance Agent &nbsp;·&nbsp; March 20, 2026
                               </p>
                             </motion.div>
                           )}
-
                         </AnimatePresence>
                       </motion.div>
                     )}
                   </AnimatePresence>
 
-                  {/* Send to Marketplace — payoff button */}
+                  {/* Send to Marketplace */}
                   <AnimatePresence>
                     {buttonVisible && (
                       <motion.button
@@ -917,21 +640,26 @@ const Projects = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.35, ease: "easeOut" }}
                         onClick={() => navigate("/marketplace")}
-                        onMouseEnter={() => setBtnHover(true)}
-                        onMouseLeave={() => setBtnHover(false)}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#0F1729";
+                          e.currentTarget.style.color = "#FFFFFF";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "transparent";
+                          e.currentTarget.style.color = "#0F1729";
+                        }}
                         style={{
                           width: "100%",
                           height: 48,
-                          background: "#4F6BFF",
-                          color: "white",
-                          border: "none",
-                          borderRadius: 10,
-                          fontSize: 16,
-                          fontWeight: 600,
+                          background: "transparent",
+                          color: "#0F1729",
+                          border: "1px solid #0F1729",
+                          borderRadius: 7,
+                          fontSize: 14,
+                          fontWeight: 500,
                           cursor: "pointer",
                           flexShrink: 0,
-                          boxShadow: btnHover ? "0 4px 20px rgba(79,107,255,0.35)" : "none",
-                          transition: "box-shadow 200ms ease",
+                          transition: "background 200ms, color 200ms",
                         }}
                       >
                         Send to Marketplace ›
@@ -940,9 +668,7 @@ const Projects = () => {
                   </AnimatePresence>
                 </div>
 
-              </motion.div>
-            )}
-          </AnimatePresence>
+          </div>
         </div>
       </main>
     </div>

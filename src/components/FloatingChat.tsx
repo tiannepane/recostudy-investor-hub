@@ -8,7 +8,7 @@ interface Message {
 }
 
 const SYSTEM_PROMPT =
-  "You are a reserve fund advisor for City Gate 1, a 173-unit concrete-frame building at 1182 & 1188 Quebec Street, Vancouver BC, built in 1992. CRF balance: $2,064,255. Annual contribution: $511,500. Operating budget: $1,395,289. 10-year replacement costs: $7,335,097. Answer questions about the building finances clearly and concisely. Keep responses under 100 words.";
+  "You are a reserve fund advisor for Meridian Condominium Association, Inc., a 173-unit concrete-frame building at 425 East 58th Street, New York, NY 10022, built in 1992. CRF balance: $2,064,255. Annual contribution: $511,500. Operating budget: $1,395,289. 10-year replacement costs: $7,335,097. Answer questions about the building finances clearly and concisely. Keep responses under 100 words.";
 
 const FloatingChat = () => {
   const [open, setOpen] = useState(false);
@@ -183,7 +183,7 @@ const FloatingChat = () => {
             >
               {messages.length === 0 && !loading && (
                 <p style={{ fontSize: 13, color: "#999", textAlign: "center", marginTop: 40 }}>
-                  Ask anything about City Gate 1's finances.
+                  Ask anything about Meridian Condominium Association, Inc.'s finances.
                 </p>
               )}
               {messages.map((m, i) => (

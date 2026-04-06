@@ -1,680 +1,538 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  AlertTriangle,
-  CheckCircle,
-  FileText,
-  File,
-  Archive,
-  ArrowRight,
-  Sparkles,
-} from "lucide-react";
-import ConditionIndicator from "@/components/ConditionIndicator";
+import { Building, Paperclip } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
+import AgentBar from "@/components/AgentBar";
 
-/* ─── CSS Keyframes ─────────────────────────────────────── */
+/* ─── AgentBar thinking messages (900ms between each step) ─── */
 
-const KEYFRAMES = `
-@keyframes pulse-dot {
-  0%, 100% { opacity: 0.3; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1); }
-}
-`;
-
-/* ─── Dark scan lines ────────────────────────────────────── */
-
-const SCAN_LINES = [
-  { text: "> loading building inventory \u2014 24 components...", color: "#4ADE80" },
-  { text: "> checking current risk classification...", color: "#4ADE80" },
-  { text: "> scanning premium history...", color: "#4ADE80" },
-  { text: "> identified 3 components elevating risk profile", color: "#4ADE80" },
-  { text: "> benchmarking against comparable buildings...", color: "#F59E0B" },
-  { text: "> current premium $6,200 above market average", color: "#F59E0B" },
+const THINKING_MESSAGES = [
+  "scanning 24 components for insurance implications...",
+  "3 components identified as end-of-life or critical...",
+  "Exterior Facade flagged as primary insurance risk...",
+  "drafting insurer notification...",
+  "attaching reserve study and updated inventory...",
 ];
 
-/* ─── Processing overlay lines ───────────────────────────── */
+/* ─── Left column bullet rows ─────────────────────────────── */
 
-const PROCESSING_LINES = [
-  { text: "Compliance Agent \u2014 facade project marked complete", time: 300, color: "#C4CAD8" },
-  { text: "Inventory Agent \u2014 component RUL updated: Exterior Facade \u2192 Restored", time: 1000, color: "#C4CAD8" },
-  { text: "Marketplace Agent \u2014 project closed, contractor payment confirmed", time: 1700, color: "#C4CAD8" },
-  { text: "Funding Agent \u2014 reserve balance updated post-disbursement", time: 2400, color: "#C4CAD8" },
-  { text: "Insurance Agent \u2014 risk profile recalculated...", time: 3100, color: "#C4CAD8" },
-  { text: "Insurance Agent \u2014 classification: High Risk \u2192 Moderate Risk \u2713", time: 4000, color: "#10B981" },
+const WHY_ROWS = [
+  "Building classification may change if structural components are not addressed",
+  "Current premium is $6,200 above market average for comparable NYC buildings",
+  "Completing the facade project may qualify for premium reduction",
 ];
 
-/* ─── Page ──────────────────────────────────────────────── */
+/* ─── Email body lines (start at 4200ms, 300ms apart) ─────── */
 
-type Phase = "dark" | "act1" | "processing" | "act2";
+const BODY_LINES: { text: string; spacerAfter?: boolean }[] = [
+  { text: "Dear Apex Property Insurance,", spacerAfter: true },
+  {
+    text: "This is an automated update from RECOstudy to confirm that a critical component has been identified in the building's reserve fund study.",
+    spacerAfter: true,
+  },
+  { text: "Component: Exterior Facade & Balconies" },
+  { text: "Status: End-of-life · Remaining Useful Life: 1 year" },
+  { text: "Estimated Replacement Cost: $425,000", spacerAfter: true },
+  {
+    text: "Updated reserve study and component inventory records are attached for your review. A restoration project has been initiated and submitted to the contractor marketplace.",
+    spacerAfter: true,
+  },
+  { text: "Please update your records accordingly." },
+];
+
+/* ─── Page ──────────────────────────────────────────────────── */
 
 const Insurance = () => {
   const [elapsed, setElapsed] = useState(0);
-  const [phase, setPhase] = useState<Phase>("dark");
-  const [transitionHov, setTransitionHov] = useState(false);
-  const [reviewHov, setReviewHov] = useState(false);
-  const [procElapsed, setProcElapsed] = useState(0);
 
-  const reset = useCallback(() => {
-    setElapsed(0);
-    setPhase("dark");
-    setProcElapsed(0);
-    setAct2Elapsed(0);
-  }, []);
+  const reset = useCallback(() => setElapsed(0), []);
 
   useEffect(() => {
     const id = setInterval(() => setElapsed((p) => p + 30), 30);
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    if (elapsed >= 3800 && phase === "dark") setPhase("act1");
-  }, [elapsed, phase]);
+  // AgentBar: cycles through thinking messages every 900ms, completes at 7s
+  const stepIndex   = Math.min(THINKING_MESSAGES.length - 1, Math.floor(elapsed / 900));
+  const thinkingMsg = THINKING_MESSAGES[stepIndex];
+  const agentIsThinking = elapsed < 7000;
+  const agentIsComplete = elapsed >= 7000;
 
-  // Dark phase
-  const scanLineCount = Math.min(6, Math.max(0, Math.floor((elapsed - 200) / 350) + 1));
-  const radarHit = elapsed >= 200 + 4 * 350 && elapsed < 200 + 4 * 350 + 200;
-  const dimOthers = elapsed >= 3300;
+  // Column reveal timings
+  const showLeft  = elapsed >= 2000;
+  const showRight = elapsed >= 3500;
 
-  // Act 1 timings
-  const showTitle     = elapsed >= 4500;
-  const showPills     = elapsed >= 4800;
-  const showColumns   = elapsed >= 5200;
-  const showRiskRows  = [elapsed >= 5500, elapsed >= 5700, elapsed >= 5900];
-  const showBars      = elapsed >= 5600;
-  const showAgentLine = elapsed >= 6200;
-  const showTransBtn  = elapsed >= 6800;
+  // Body line reveals: line i shows at 4200 + i * 300ms
+  const bodyLineVisible = (i: number) => elapsed >= 4200 + i * 300;
 
-  const barProgress = showBars ? Math.min(1, (elapsed - 5600) / 600) : 0;
+  // Attachments
+  const showAttachments = elapsed >= 5500;
 
-  // Processing overlay timer
-  useEffect(() => {
-    if (phase !== "processing") return;
-    const id = setInterval(() => setProcElapsed((p) => p + 30), 30);
-    return () => clearInterval(id);
-  }, [phase]);
-
-  // Processing: fade lines at 4800ms, show "Updating..." at 4800ms, exit at 5500ms
-  const procLinesFaded = procElapsed >= 4800;
-  const procUpdating = procElapsed >= 4800;
-  useEffect(() => {
-    if (phase === "processing" && procElapsed >= 5500) {
-      setPhase("act2");
-      setAct2Elapsed(0);
-    }
-  }, [phase, procElapsed]);
-
-  // Act 2 timer
-  const [act2Elapsed, setAct2Elapsed] = useState(0);
-  useEffect(() => {
-    if (phase !== "act2") return;
-    const id = setInterval(() => setAct2Elapsed((p) => p + 30), 30);
-    return () => clearInterval(id);
-  }, [phase]);
-
-  const savingsBarPct = phase === "act2" && act2Elapsed > 200
-    ? Math.min(92, ((act2Elapsed - 200) / 800) * 92)
+  // Send button states
+  const showButton  = elapsed >= 6000;
+  const buttonState = elapsed >= 7000 ? "sent" : elapsed >= 6300 ? "sending" : "idle";
+  const showProgress = elapsed >= 6300 && elapsed < 7000;
+  const progressPct  = showProgress
+    ? Math.min(100, ((elapsed - 6300) / 1200) * 100)
     : 0;
 
-  const handleToProcessing = () => {
-    setProcElapsed(0);
-    setPhase("processing");
-  };
-
-  const handleBackToAct1 = () => {
-    setPhase("act1");
-  };
-
-  const RISK_ROWS: { name: string; condition: "Poor" | "Fair" }[] = [
-    { name: "Exterior Facade & Balconies", condition: "Poor" },
-    { name: "Roof Membrane", condition: "Poor" },
-    { name: "Elevator Systems", condition: "Fair" },
-  ];
-
-  const DOC_ROWS = [
-    { Icon: FileText, color: "#3B82F6", bg: "#EFF6FF", label: "Updated Reserve Study Report" },
-    { Icon: File, color: "#EF4444", bg: "#FEF2F2", label: "Project Completion Certificate.pdf" },
-    { Icon: Archive, color: "#8B5CF6", bg: "#F3E8FF", label: "Updated Component Inventory" },
-  ];
-
-  const cardStyle: React.CSSProperties = {
-    background: "#FFFFFF",
-    borderRadius: 12,
-    border: "1px solid #E8EBF0",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-  };
-
-  const pillStyle: React.CSSProperties = {
-    ...cardStyle,
-    padding: "14px 20px",
-    flex: 1,
-    minWidth: 0,
-  };
-
   return (
-    <div className="flex" style={{ height: "100vh", overflow: "hidden", background: "#F8F9FC" }}>
-      <style>{KEYFRAMES}</style>
-
+    <div className="flex min-h-screen" style={{ background: "#F8F9FC" }}>
       <Sidebar
         activeItem="insurance"
         visitedItems={["overview", "inventory", "financials", "projects", "marketplace", "funding"]}
       />
 
-      <main className="flex-1" style={{ marginLeft: 260, position: "relative", overflow: "hidden" }}>
+      <main className="flex-1" style={{ marginLeft: 260 }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 44px 48px" }}>
 
-        {/* ══ PHASE 0 — DARK SCAN ══ */}
-        <AnimatePresence>
-          {phase === "dark" && (
-            <motion.div
-              key="dark"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.6, ease: "easeInOut" } }}
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: radarHit ? "#1A1A0A" : "#0A0F1E",
-                zIndex: 45,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "background 200ms",
-              }}
-            >
-              <div style={{ width: "100%", maxWidth: 600, padding: "0 24px" }}>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", color: "#94A3B8", marginBottom: 20 }}
-                >
-                  &#9679; Insurance Agent
-                </motion.p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {SCAN_LINES.map((line, i) => {
-                    if (i >= scanLineCount) return null;
-                    const isAmber = i >= 4;
-                    const dimmed = dimOthers && !isAmber;
-                    return (
-                      <motion.p
-                        key={i}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: dimmed ? 0.2 : 1 }}
-                        transition={{ opacity: { duration: dimmed ? 0.4 : 0.15 } }}
-                        style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: 13, color: line.color, margin: 0, lineHeight: 1.6 }}
-                      >
-                        {line.text}
-                      </motion.p>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ══ PROCESSING OVERLAY ══ */}
-        <AnimatePresence>
-          {phase === "processing" && (
-            <motion.div
-              key="processing"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.4 } }}
-              transition={{ duration: 0.3 }}
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "#0A0F1E",
-                zIndex: 50,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <div style={{ width: "100%", maxWidth: 560, padding: "0 24px" }}>
-                {!procUpdating && (
-                  <>
-                    {/* Pulsing dots */}
-                    <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 }}>
-                      {[0, 1, 2].map((i) => (
-                        <div
-                          key={i}
-                          style={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: "50%",
-                            background: "#4F6BFF",
-                            animation: `pulse-dot 1.2s ease-in-out ${i * 0.2}s infinite`,
-                          }}
-                        />
-                      ))}
-                    </div>
-
-                    {/* Processing lines */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {PROCESSING_LINES.map((line) => {
-                        if (procElapsed < line.time) return null;
-                        return (
-                          <motion.div
-                            key={line.text}
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: procLinesFaded ? 0 : 1, x: 0 }}
-                            transition={{ duration: 0.2 }}
-                            style={{ display: "flex", alignItems: "flex-start", gap: 8 }}
-                          >
-                            <span style={{ color: "#4F6BFF", flexShrink: 0 }}>&#10022;</span>
-                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 14, color: line.color, lineHeight: 1.5 }}>
-                              {line.text}
-                            </span>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-
-                {/* "Updating..." text */}
-                {procUpdating && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ fontSize: 16, color: "#9CA3B8", textAlign: "center" }}
-                  >
-                    Updating your insurance profile...
-                  </motion.p>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ══ LIGHT LAYOUT ══ */}
-        <div
-          style={{
-            maxWidth: 1100,
-            margin: "0 auto",
-            padding: "28px 44px 20px",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
           <TopBar
             onReplay={reset}
-            breadcrumb="Buildings > ABC Condominium Association, Inc. > Insurance"
+            breadcrumb="Buildings › Meridian Condominium Association, Inc. › Insurance"
             activeItem="insurance"
           />
 
-          <AnimatePresence mode="wait">
+          {/* ── Agent Bar ── */}
+          <AgentBar
+            agentName="Insurance Agent"
+            thinkingMessage={thinkingMsg}
+            completeMessage="3 components flagged, notification sent to insurer@example.com"
+            accentColor="#8B5CF6"
+            isThinking={agentIsThinking}
+            isComplete={agentIsComplete}
+            isHidden={false}
+          />
 
-            {/* ══════════════════════════════════════════
-                ACT 1 — PRE-PROJECT
-            ══════════════════════════════════════════ */}
-            {phase === "act1" && (
-              <motion.div
-                key="act1"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: { duration: 0.4 } }}
-                transition={{ duration: 0.4 }}
-                style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", overflow: "hidden" }}
-              >
-                <div style={{ width: "100%", maxWidth: 900 }}>
+          {/* ── Page title + subtitle ── */}
+          <div style={{ marginBottom: 20 }}>
+            <h1 style={{ fontSize: 20, fontWeight: 600, color: "#0A0A0A", margin: 0, marginBottom: 3 }}>
+              Insurance
+            </h1>
+            <p style={{ fontSize: 14, color: "#9CA3B8", margin: 0 }}>
+              RECOstudy monitors your building's insurance exposure automatically.
+            </p>
+          </div>
 
-                  {/* Title */}
-                  <AnimatePresence>
-                    {showTitle && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} style={{ marginBottom: 14 }}>
-                        <h1 style={{ fontSize: 26, fontWeight: 700, color: "#0F1729", marginBottom: 4 }}>Insurance</h1>
-                        <p style={{ fontSize: 13, color: "#5A6178" }}>Understanding your current risk profile and what's driving your premium.</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+          {/* ── Two-column layout ── */}
+          <div style={{ display: "flex", gap: 24 }}>
 
-                  {/* Top summary pills */}
-                  <AnimatePresence>
-                    {showPills && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.35 }}
-                        style={{ display: "flex", gap: 20, marginBottom: 14 }}
-                      >
-                        <div style={pillStyle}>
-                          <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.04em", color: "#9CA3B8", marginBottom: 4 }}>Current Classification</p>
-                          <p style={{ fontSize: 20, fontWeight: 700, color: "#EF4444" }}>High Risk</p>
+            {/* ════ LEFT COLUMN — 38% ════ */}
+            <div style={{ width: "38%", flexShrink: 0 }}>
+              <AnimatePresence>
+                {showLeft && (
+                  <motion.div
+                    key="left"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    style={{
+                      background: "rgba(255, 255, 255, 0.85)",
+                      backdropFilter: "blur(8px)",
+                      border: "1px solid rgba(220, 38, 38, 0.12)",
+                      boxShadow: "0 0 0 1px rgba(220,38,38,0.05), 0 8px 32px rgba(220,38,38,0.09)",
+                      borderRadius: 10,
+                      padding: 20,
+                    }}
+                  >
+                    {/* TRIGGER label */}
+                    <p style={{
+                      margin: 0,
+                      marginBottom: 8,
+                      fontSize: 10,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      color: "#9CA3B8",
+                    }}>
+                      Trigger
+                    </p>
+
+                    {/* Scan summary line */}
+                    <p style={{
+                      margin: 0,
+                      marginBottom: 10,
+                      fontSize: 12,
+                      fontStyle: "italic",
+                      color: "#9CA3B8",
+                    }}>
+                      Insurance Agent scanned 24 components &mdash; 3 flagged
+                    </p>
+
+                    {/* Component rows */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+
+                      {/* Row 1 — Exterior Facade (primary, dark left accent) */}
+                      <div style={{
+                        background: "#FFFFFF",
+                        border: "1px solid rgba(15,23,41,0.06)",
+                        borderLeft: "2px solid #0F1729",
+                        borderRadius: 8,
+                        padding: "10px 14px",
+                        boxShadow: "0 2px 8px rgba(220,38,38,0.08)",
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
+                          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
+                            Exterior Facade &amp; Balconies
+                          </span>
                         </div>
-                        <div style={pillStyle}>
-                          <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.04em", color: "#9CA3B8", marginBottom: 4 }}>Annual Premium</p>
-                          <p style={{ fontSize: 20, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$52,000 <span style={{ fontSize: 13, fontWeight: 400, color: "#9CA3B8" }}>/ yr</span></p>
+                        <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
+                          End-of-life &middot; 1 year RUL &middot; $425,000
+                        </p>
+                      </div>
+
+                      {/* Row 2 — Elevator Cab */}
+                      <div style={{
+                        background: "#FFFFFF",
+                        border: "1px solid rgba(15,23,41,0.06)",
+                        borderRadius: 8,
+                        padding: "10px 14px",
+                        boxShadow: "0 2px 8px rgba(15,23,41,0.05)",
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
+                          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
+                            Elevator Cab &mdash; Townhouse
+                          </span>
                         </div>
-                        <div style={pillStyle}>
-                          <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.04em", color: "#9CA3B8", marginBottom: 4 }}>vs. Market Average</p>
-                          <p style={{ fontSize: 20, fontWeight: 600, color: "#F59E0B", fontFamily: "'JetBrains Mono', monospace" }}>+$6,200</p>
-                          <p style={{ fontSize: 11, color: "#9CA3B8" }}>above comparable buildings</p>
+                        <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
+                          End-of-life &middot; Immediate &middot; $36,000
+                        </p>
+                      </div>
+
+                      {/* Row 3 — Boiler */}
+                      <div style={{
+                        background: "#FFFFFF",
+                        border: "1px solid rgba(15,23,41,0.06)",
+                        borderRadius: 8,
+                        padding: "10px 14px",
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#F59E0B", flexShrink: 0 }} />
+                          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
+                            Boiler
+                          </span>
                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
+                          Critical &middot; 1 year RUL &middot; $100,000
+                        </p>
+                      </div>
 
-                  {/* Two columns */}
-                  <AnimatePresence>
-                    {showColumns && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.35 }}
-                        style={{ display: "flex", gap: 20 }}
-                      >
-                        {/* LEFT — Risk Components */}
-                        <div style={{ width: "50%" }}>
-                          <div style={{ ...cardStyle, padding: "20px 22px" }}>
-                            <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 12 }}>
-                              Components Elevating Risk
-                            </p>
+                    </div>
 
-                            {RISK_ROWS.map((row, i) => (
-                              <AnimatePresence key={row.name}>
-                                {showRiskRows[i] && (
-                                  <motion.div
-                                    initial={{ opacity: 0, x: -6 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.25 }}
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 10,
-                                      padding: "10px 0",
-                                      borderBottom: i < RISK_ROWS.length - 1 ? "1px solid #F1F3F6" : "none",
-                                    }}
-                                  >
-                                    <AlertTriangle size={14} style={{ color: "#EF4444", flexShrink: 0 }} />
-                                    <span style={{ fontSize: 14, fontWeight: 500, color: "#0F1729", flex: 1 }}>{row.name}</span>
-                                    <ConditionIndicator condition={row.condition} />
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            ))}
+                    {/* Divider */}
+                    <div style={{ height: 1, background: "#EEEFF2", margin: "16px 0" }} />
 
-                            <p style={{ fontSize: 12, color: "#9CA3B8", fontStyle: "italic", lineHeight: 1.5, marginTop: 12 }}>
-                              Resolving the facade project alone could lower your classification and reduce your annual premium.
-                            </p>
-                          </div>
-                        </div>
+                    {/* WHY THIS MATTERS label */}
+                    <p style={{
+                      margin: 0,
+                      marginBottom: 10,
+                      fontSize: 10,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      color: "#9CA3B8",
+                    }}>
+                      Why This Matters
+                    </p>
 
-                        {/* RIGHT — Premium Benchmark */}
-                        <div style={{ width: "50%" }}>
-                          <div style={{ ...cardStyle, padding: "20px 22px" }}>
-                            <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 12 }}>
-                              Premium Benchmark
-                            </p>
-
-                            {/* Your building bar */}
-                            <div style={{ marginBottom: 12 }}>
-                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                                <span style={{ fontSize: 12, color: "#374151" }}>Your building</span>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: "#EF4444", fontFamily: "'JetBrains Mono', monospace" }}>$52,000</span>
-                              </div>
-                              <div style={{ width: "100%", height: 8, borderRadius: 4, background: "#F1F3F6", overflow: "hidden" }}>
-                                <div style={{ width: `${barProgress * 100}%`, height: "100%", background: "#EF4444", borderRadius: 4, transition: "width 30ms linear" }} />
-                              </div>
-                            </div>
-
-                            {/* Market average bar */}
-                            <div style={{ marginBottom: 16 }}>
-                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                                <span style={{ fontSize: 12, color: "#374151" }}>Market average</span>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: "#10B981", fontFamily: "'JetBrains Mono', monospace" }}>$45,800</span>
-                              </div>
-                              <div style={{ width: "100%", height: 8, borderRadius: 4, background: "#F1F3F6", overflow: "hidden" }}>
-                                <div style={{ width: `${barProgress * 88}%`, height: "100%", background: "#10B981", borderRadius: 4, transition: "width 30ms linear" }} />
-                              </div>
-                            </div>
-
-                            <p style={{ fontSize: 13, color: "#5A6178", marginBottom: 8 }}>What would change your premium?</p>
-                            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                              <span style={{ fontSize: 12, background: "#F8F9FC", border: "1px solid #E8EBF0", borderRadius: 6, padding: "4px 10px", color: "#5A6178" }}>
-                                Complete critical repairs
-                              </span>
-                              <span style={{ fontSize: 12, background: "#F8F9FC", border: "1px solid #E8EBF0", borderRadius: 6, padding: "4px 10px", color: "#5A6178" }}>
-                                Update component inventory
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Agent insight line */}
-                  <AnimatePresence>
-                    {showAgentLine && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12 }}>
-                        <Sparkles size={13} style={{ color: "#4F6BFF", flexShrink: 0 }} />
-                        <span style={{ fontSize: 13, color: "#9CA3B8" }}>
-                          Insurance Agent identified 3 components driving 92% of your excess premium.
-                        </span>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {/* CTA button */}
-                  <AnimatePresence>
-                    {showTransBtn && (
-                      <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-                        <button
-                          onClick={handleToProcessing}
-                          onMouseEnter={() => setTransitionHov(true)}
-                          onMouseLeave={() => setTransitionHov(false)}
-                          style={{
-                            background: transitionHov ? "#1E2A3B" : "#0F1729",
-                            color: "white",
-                            fontSize: 14,
-                            fontWeight: 500,
-                            borderRadius: 8,
-                            padding: "0 28px",
-                            height: 44,
-                            border: "none",
-                            cursor: "pointer",
-                            transition: "background 200ms",
-                          }}
+                    {/* Bullet rows */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingLeft: 8 }}>
+                      {WHY_ROWS.map((text, i) => (
+                        <div
+                          key={i}
+                          style={{ display: "flex", alignItems: "flex-start", gap: 10 }}
                         >
-                          See what happened after the project &rarr;
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ══════════════════════════════════════════
-                ACT 2 — POST-PROJECT
-            ══════════════════════════════════════════ */}
-            {phase === "act2" && (
-              <motion.div
-                key="act2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", overflow: "hidden" }}
-              >
-                <div style={{ width: "100%", maxWidth: 900 }}>
-
-                  {/* Back link */}
-                  <button onClick={handleBackToAct1} style={{ fontSize: 12, color: "#9CA3B8", background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 8 }}>
-                    &larr; Back to before
-                  </button>
-
-                  {/* Title */}
-                  <div style={{ marginBottom: 14 }}>
-                    <h1 style={{ fontSize: 26, fontWeight: 700, color: "#0F1729", marginBottom: 4 }}>Insurance</h1>
-                    <p style={{ fontSize: 13, color: "#5A6178" }}>Project completed. Risk profile improved, savings identified.</p>
-                  </div>
-
-                  {/* Top summary pills — staggered */}
-                  <div style={{ display: "flex", gap: 20, marginBottom: 14 }}>
-                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0 }} style={pillStyle}>
-                      <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.04em", color: "#9CA3B8", marginBottom: 4 }}>Risk Classification</p>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontSize: 18, fontWeight: 700, color: "#EF4444", textDecoration: "line-through", opacity: 0.5 }}>High Risk</span>
-                        <ArrowRight size={14} style={{ color: "#9CA3B8", flexShrink: 0 }} />
-                        <span style={{ fontSize: 18, fontWeight: 700, color: "#F59E0B" }}>Moderate Risk</span>
-                      </div>
-                    </motion.div>
-                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }} style={pillStyle}>
-                      <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.04em", color: "#9CA3B8", marginBottom: 4 }}>Projected Premium</p>
-                      <p style={{ fontSize: 20, fontWeight: 600, color: "#10B981", fontFamily: "'JetBrains Mono', monospace" }}>$47,800 <span style={{ fontSize: 13, fontWeight: 400, color: "#9CA3B8" }}>/ yr</span></p>
-                    </motion.div>
-                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.3 }} style={pillStyle}>
-                      <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.04em", color: "#9CA3B8", marginBottom: 4 }}>Est. Annual Savings</p>
-                      <p style={{ fontSize: 20, fontWeight: 700, color: "#10B981", fontFamily: "'JetBrains Mono', monospace" }}>$4,200 <span style={{ fontSize: 13, fontWeight: 400, color: "#9CA3B8" }}>/ yr</span></p>
-                      <p style={{ fontSize: 11, color: "#9CA3B8" }}>projected premium reduction</p>
-                    </motion.div>
-                  </div>
-
-                  {/* Two columns */}
-                  <div style={{ display: "flex", gap: 20 }}>
-                    {/* LEFT — Project Completed */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, delay: 0.2 }}
-                      style={{ width: "50%", ...cardStyle, padding: "20px 22px" }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                        <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#ECFDF5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <CheckCircle size={14} style={{ color: "#10B981" }} />
+                          <div style={{
+                            width: 4,
+                            height: 4,
+                            borderRadius: "50%",
+                            background: "#EEEFF2",
+                            flexShrink: 0,
+                            marginTop: 7,
+                          }} />
+                          <span style={{ fontSize: 13, color: "#5A6178", lineHeight: 1.6 }}>
+                            {text}
+                          </span>
                         </div>
-                        <span style={{ fontSize: 16, fontWeight: 600, color: "#0F1729" }}>Project Completed</span>
-                      </div>
-                      <p style={{ fontSize: 14, color: "#5A6178", marginBottom: 2 }}>Exterior Facade &amp; Balconies Restoration</p>
-                      <p style={{ fontSize: 12, color: "#9CA3B8", marginBottom: 14 }}>March 20, 2026 &middot; $438,000 project value</p>
+                      ))}
+                    </div>
 
-                      <div style={{ height: 1, background: "#F1F3F6", marginBottom: 12 }} />
+                    {/* Divider */}
+                    <div style={{ height: 1, background: "#EEEFF2", margin: "16px 0" }} />
 
-                      <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 10 }}>
-                        Documents Generated
-                      </p>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-                        {DOC_ROWS.map((doc, i) => (
-                          <motion.div
-                            key={doc.label}
-                            initial={{ opacity: 0, x: -4 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.2, delay: 0.3 + i * 0.15 }}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 10,
-                              height: 40,
-                              borderBottom: i < DOC_ROWS.length - 1 ? "1px solid #F1F3F6" : "none",
-                            }}
-                          >
-                            <div style={{ width: 28, height: 28, borderRadius: 7, background: doc.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              <doc.Icon size={13} style={{ color: doc.color }} />
-                            </div>
-                            <span style={{ fontSize: 12, color: "#374151" }}>{doc.label}</span>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
+                    {/* INSURER ON FILE label */}
+                    <p style={{
+                      margin: 0,
+                      marginBottom: 6,
+                      fontSize: 10,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      color: "#9CA3B8",
+                    }}>
+                      Insurer on File
+                    </p>
 
-                    {/* RIGHT — Premium Comparison */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, delay: 0.35 }}
-                      style={{ width: "50%", ...cardStyle, padding: "20px 22px" }}
-                    >
-                      <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 12 }}>
-                        Premium Comparison
-                      </p>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                      <Building size={14} style={{ color: "#9CA3B8", flexShrink: 0 }} />
+                      <span style={{ fontSize: 13, fontWeight: 500, color: "#0F1729" }}>
+                        Apex Property Insurance
+                      </span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
+                      insurer@example.com
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
-                      {/* Current / projected rows */}
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, padding: "8px 10px" }}>
-                        <span style={{ fontSize: 13, color: "#9CA3B8" }}>Current premium</span>
-                        <span style={{ fontSize: 13, color: "#9CA3B8", textDecoration: "line-through" }}>$52,000 / yr</span>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, padding: "8px 10px", background: "rgba(16,185,129,0.05)", borderRadius: 6 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729" }}>Projected premium</span>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: "#10B981", fontFamily: "'JetBrains Mono', monospace" }}>$47,800 / yr</span>
-                      </div>
+            {/* ════ RIGHT COLUMN — 62% ════ */}
+            <div style={{ flex: 1, minWidth: 0 }}>
 
-                      {/* Coverage bar */}
-                      <div style={{ marginBottom: 20 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                          <span style={{ fontSize: 11, color: "#9CA3B8" }}>Coverage retained</span>
-                          <span style={{ fontSize: 12, fontWeight: 600, color: "#10B981" }}>92%</span>
-                        </div>
-                        <div style={{ width: "100%", height: 8, borderRadius: 4, background: "#F1F3F6", overflow: "hidden" }}>
-                          <div style={{ width: `${savingsBarPct}%`, height: "100%", background: "#10B981", borderRadius: 4, transition: "width 30ms linear" }} />
-                        </div>
-                      </div>
+              {/* ── Email card ── */}
+              <AnimatePresence>
+                {showRight && (
+                  <motion.div
+                    key="email-card"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    style={{
+                      background: "#FFFFFF",
+                      borderRadius: 6,
+                      boxShadow: "0 0 0 1px rgba(15,23,41,0.04), 0 8px 24px rgba(15,23,41,0.07)",
+                      padding: 28,
+                    }}
+                  >
+                    {/* ── Email header top row ── */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                      {/* RECOstudy™ wordmark */}
+                      <span style={{ fontSize: 13 }}>
+                        <span style={{ fontWeight: 700, color: "#0F1729" }}>RECO</span>
+                        <span style={{ fontWeight: 700, color: "#4F6BFF" }}>study</span>
+                        <span style={{ fontSize: 9, color: "#9CA3B8", verticalAlign: "super", marginLeft: 1 }}>™</span>
+                      </span>
+                      {/* INSURANCE NOTIFICATION label */}
+                      <span style={{
+                        fontSize: 11,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                        color: "#9CA3B8",
+                      }}>
+                        Insurance Notification
+                      </span>
+                    </div>
 
-                      {/* CTA */}
-                      <button
-                        onMouseEnter={() => setReviewHov(true)}
-                        onMouseLeave={() => setReviewHov(false)}
+                    {/* Thin divider */}
+                    <div style={{ height: 1, background: "#EEEFF2", marginBottom: 0 }} />
+
+                    {/* ── TO / FROM / SUBJECT rows ── */}
+                    {[
+                      {
+                        label: "To:",
+                        value: "insurer@example.com",
+                        valueWeight: 400,
+                      },
+                      {
+                        label: "From:",
+                        value: "RECollab Admin · Meridian Condominium Association, Inc.",
+                        valueWeight: 400,
+                      },
+                      {
+                        label: "Subject:",
+                        value: "Building Update — Exterior Facade & Balconies · Meridian Condominium Association, Inc.",
+                        valueWeight: 500,
+                      },
+                    ].map(({ label, value, valueWeight }) => (
+                      <div
+                        key={label}
                         style={{
-                          width: "100%",
-                          height: 44,
-                          background: reviewHov ? "#D97706" : "#F59E0B",
-                          color: "white",
-                          fontSize: 14,
-                          fontWeight: 500,
-                          borderRadius: 8,
-                          border: "none",
-                          cursor: "pointer",
-                          transition: "background 200ms",
-                          marginBottom: 8,
+                          display: "flex",
+                          alignItems: "center",
+                          height: 32,
+                          borderBottom: "1px solid #F8F9FC",
                         }}
                       >
-                        Request Premium Review &rarr;
-                      </button>
-                    </motion.div>
-                  </div>
+                        <span style={{
+                          width: 60,
+                          flexShrink: 0,
+                          fontSize: 11,
+                          color: "#9CA3B8",
+                        }}>
+                          {label}
+                        </span>
+                        <span style={{
+                          fontSize: 13,
+                          fontWeight: valueWeight,
+                          color: "#0F1729",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}>
+                          {value}
+                        </span>
+                      </div>
+                    ))}
 
-                  {/* Notification toast + agent line */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: 0.5 }}
+                    {/* Thin divider before body */}
+                    <div style={{ height: 1, background: "#EEEFF2", margin: "12px 0" }} />
+
+                    {/* ── Body lines (reveal at 4200ms, 300ms apart) ── */}
+                    <div style={{ fontSize: 13, color: "#5A6178", lineHeight: 1.75 }}>
+                      {BODY_LINES.map((line, i) => (
+                        <AnimatePresence key={i}>
+                          {bodyLineVisible(i) && (
+                            <motion.p
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.3 }}
+                              style={{
+                                margin: 0,
+                                marginBottom: line.spacerAfter ? 14 : 0,
+                              }}
+                            >
+                              {line.text}
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
+                      ))}
+                    </div>
+
+                    {/* ── Attachments (5.5s) ── */}
+                    <AnimatePresence>
+                      {showAttachments && (
+                        <motion.div
+                          key="attachments"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.35 }}
+                          style={{ marginTop: 18 }}
+                        >
+                          <p style={{
+                            margin: 0,
+                            marginBottom: 8,
+                            fontSize: 10,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.08em",
+                            color: "#9CA3B8",
+                          }}>
+                            Attachments
+                          </p>
+                          <div style={{ display: "flex", gap: 8 }}>
+                            {[
+                              "Reserve Study Report",
+                              "Updated Component Inventory",
+                            ].map((label) => (
+                              <div
+                                key={label}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 6,
+                                  background: "#F8F9FC",
+                                  border: "1px solid rgba(15,23,41,0.06)",
+                                  borderRadius: 5,
+                                  padding: "5px 12px",
+                                }}
+                              >
+                                <Paperclip size={12} style={{ color: "#9CA3B8", flexShrink: 0 }} />
+                                <span style={{ fontSize: 12, color: "#5A6178" }}>{label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* ── Send button + progress bar (outside card) ── */}
+              <AnimatePresence>
+                {showButton && (
+                  <motion.div
+                    key="send-btn-wrap"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.25 }}
+                    style={{ marginTop: 10 }}
+                  >
+                    {/* Button */}
+                    <div
                       style={{
+                        width: "100%",
+                        height: 44,
                         display: "flex",
                         alignItems: "center",
-                        gap: 8,
-                        background: "#ECFDF5",
-                        border: "1px solid #D1FAE5",
-                        borderRadius: 8,
-                        padding: "8px 14px",
+                        justifyContent: "center",
+                        gap: 6,
+                        borderRadius: 7,
+                        fontSize: 14,
+                        fontWeight: 500,
+                        cursor: "default",
+                        transition: "background 200ms ease, border-color 200ms ease, color 200ms ease",
+                        ...(buttonState === "sent"
+                          ? {
+                              background: "#F0FDF4",
+                              border: "1px solid #BBF7D0",
+                              color: "#15803D",
+                            }
+                          : buttonState === "sending"
+                          ? {
+                              background: "#0F1729",
+                              border: "1px solid #0F1729",
+                              color: "#FFFFFF",
+                            }
+                          : {
+                              background: "transparent",
+                              border: "1px solid #0F1729",
+                              color: "#0F1729",
+                            }),
                       }}
                     >
-                      <CheckCircle size={14} style={{ color: "#10B981", flexShrink: 0 }} />
-                      <span style={{ fontSize: 12, color: "#065F46" }}>
-                        Notification sent to insurer@example.com
-                      </span>
-                    </motion.div>
+                      {buttonState === "sent" && (
+                        <span style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          background: "#22C55E",
+                          flexShrink: 0,
+                          display: "inline-block",
+                        }} />
+                      )}
+                      {buttonState === "sent"
+                        ? "✓ Notification Sent"
+                        : buttonState === "sending"
+                        ? "Sending..."
+                        : "Send Notification →"}
+                    </div>
 
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3, delay: 0.6 }}
-                      style={{ display: "flex", alignItems: "center", gap: 5 }}
-                    >
-                      <Sparkles size={13} style={{ color: "#10B981", flexShrink: 0 }} />
-                      <span style={{ fontSize: 12, color: "#10B981" }}>
-                        Insurance Agent &mdash; premium review initiated &#10003;
-                      </span>
-                    </motion.div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+                    {/* Progress bar */}
+                    {showProgress && (
+                      <div style={{
+                        marginTop: 6,
+                        width: "100%",
+                        height: 3,
+                        borderRadius: 2,
+                        background: "#EEEFF2",
+                        overflow: "hidden",
+                      }}>
+                        <div style={{
+                          height: "100%",
+                          width: `${progressPct}%`,
+                          background: "#0F1729",
+                          borderRadius: 2,
+                          transition: "width 30ms linear",
+                        }} />
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-          </AnimatePresence>
+            </div>{/* end right column */}
+
+          </div>
         </div>
       </main>
     </div>

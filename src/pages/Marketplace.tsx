@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Clock, X } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
+import AgentBar from "@/components/AgentBar";
 
 /* ─── Data ──────────────────────────────────────────────── */
 
@@ -174,6 +175,29 @@ const BidModal = ({
 const Marketplace = () => {
   const navigate = useNavigate();
   const [selectedBid, setSelectedBid] = useState<(typeof BIDS)[0] | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setElapsed((p) => p + 30), 30);
+    return () => clearInterval(id);
+  }, []);
+
+  // Timing booleans
+  const rfpVisible          = elapsed >= 2500;
+  const bidsHeaderVisible   = elapsed >= 3000;
+  const bid1Visible         = elapsed >= 3200;
+  const bid2Visible         = elapsed >= 3400;
+  const bid3Visible         = elapsed >= 3600;
+  const recommendedVisible  = elapsed >= 3800;
+  const agentComplete       = elapsed >= 4200;
+
+  const bidVisible = [bid1Visible, bid2Visible, bid3Visible];
+
+  const thinkingMessage =
+    elapsed < 800  ? "retrieving active RFPs..."                      :
+    elapsed < 1600 ? "scanning contractor database..."                :
+    elapsed < 2400 ? "matching bids to Exterior Facade project..."    :
+                     "analyzing bid quality and pricing...";
 
   return (
     <div className="flex min-h-screen" style={{ background: "#FFFFFF" }}>
@@ -185,26 +209,32 @@ const Marketplace = () => {
       <main className="flex-1" style={{ marginLeft: 260 }}>
         <div className="mx-auto" style={{ maxWidth: 1200, padding: "48px 60px 60px" }}>
           <TopBar
-            breadcrumb="Buildings › City Gate 1, LMS 195 › Marketplace"
+            breadcrumb="Buildings › Meridian Condominium Association, Inc. › Marketplace"
             activeItem="marketplace"
           />
 
-          {/* Status line */}
-          <p style={{ fontSize: 13, color: "#999", marginBottom: 24 }}>
-            3 bids received · Sorted by bid amount
-          </p>
+          {/* Agent Bar */}
+          <AgentBar
+            agentName="Marketplace Agent"
+            thinkingMessage={thinkingMessage}
+            completeMessage="recommended: Restoration Experts LLC, $438,000"
+            accentColor="#F59E0B"
+            isThinking={!agentComplete}
+            isComplete={agentComplete}
+            isHidden={false}
+          />
 
           {/* RFP Hero Banner */}
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            animate={{ opacity: rfpVisible ? 1 : 0, y: rfpVisible ? 0 : 8 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
             style={{
               borderRadius: 12,
               overflow: "hidden",
               position: "relative",
               marginBottom: 32,
               maxHeight: 150,
+              pointerEvents: rfpVisible ? "auto" : "none",
             }}
           >
             <img
@@ -219,13 +249,7 @@ const Marketplace = () => {
                 display: "block",
               }}
             />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "rgba(10,10,10,0.6)",
-              }}
-            />
+            <div style={{ position: "absolute", inset: 0, background: "rgba(10,10,10,0.6)" }} />
             <div style={{ padding: 16, position: "relative", zIndex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                 <span
@@ -245,37 +269,18 @@ const Marketplace = () => {
                 >
                   Live RFP
                 </span>
-                <p
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 700,
-                    color: "white",
-                    lineHeight: 1.1,
-                    margin: 0,
-                  }}
-                >
+                <p style={{ fontSize: 18, fontWeight: 700, color: "white", lineHeight: 1.1, margin: 0 }}>
                   Exterior Facade &amp; Balconies Restoration
                 </p>
               </div>
-
               {[
-                { label: "Scope", value: "Full exterior restoration, balcony waterproofing, structural repair", color: "#C4CAD8" },
-                { label: "Budget", value: "$425,000 — $480,000", color: "#FFFFFF" },
+                { label: "Scope",    value: "Full exterior restoration, balcony waterproofing, structural repair", color: "#C4CAD8" },
+                { label: "Budget",   value: "$425,000 — $480,000", color: "#FFFFFF" },
                 { label: "Timeline", value: "Q2 2026 — Q4 2026", color: "#C4CAD8" },
                 { label: "Priority", value: "● Critical", color: "#FFFFFF" },
               ].map((row) => (
-                <div
-                  key={row.label}
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    marginBottom: 3,
-                    fontSize: 12,
-                  }}
-                >
-                  <span style={{ color: "#8B92A8", flexShrink: 0, width: 56 }}>
-                    {row.label}
-                  </span>
+                <div key={row.label} style={{ display: "flex", gap: 10, marginBottom: 3, fontSize: 12 }}>
+                  <span style={{ color: "#8B92A8", flexShrink: 0, width: 56 }}>{row.label}</span>
                   <span style={{ color: row.color, fontWeight: row.label === "Budget" ? 500 : 400, fontFamily: row.label === "Budget" ? "monospace" : "inherit" }}>
                     {row.value}
                   </span>
@@ -286,9 +291,8 @@ const Marketplace = () => {
 
           {/* Contractor Bids header */}
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
+            animate={{ opacity: bidsHeaderVisible ? 1 : 0 }}
+            transition={{ duration: 0.4 }}
             style={{ fontSize: 16, fontWeight: 700, color: "#0A0A0A", marginBottom: 12 }}
           >
             Contractor Bids
@@ -296,128 +300,87 @@ const Marketplace = () => {
 
           {/* Bid cards */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {BIDS.map((bid, i) => (
-              <motion.div
-                key={bid.name}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut", delay: 0.3 + i * 0.15 }}
-                onClick={() => setSelectedBid(bid)}
-                style={{
-                  borderRadius: 12,
-                  border: "1px solid #E0E0E0",
-                  background: "#FFFFFF",
-                  padding: "14px 18px",
-                  cursor: "pointer",
-                  transition: "border-color 0.15s ease",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#0A0A0A")}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#E0E0E0")}
-              >
-                {/* Main row */}
-                <div style={{ display: "flex", alignItems: "center", gap: 14, minHeight: 44 }}>
-                  {/* Rank */}
-                  <p
-                    style={{
-                      fontFamily: "monospace",
-                      fontSize: 18,
-                      fontWeight: 700,
-                      color: "#C0C0C0",
-                      width: 24,
-                      flexShrink: 0,
-                      textAlign: "center",
-                      margin: 0,
-                    }}
-                  >
-                    {i + 1}
-                  </p>
-
-                  {/* Photo */}
-                  <img
-                    src={bid.photo}
-                    alt={bid.name}
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      flexShrink: 0,
-                    }}
-                  />
-
-                  {/* Name + stars */}
-                  <div style={{ width: 190, flexShrink: 0 }}>
-                    <p
+            {BIDS.map((bid, i) => {
+              const isRecommended = i === 0 && recommendedVisible;
+              return (
+                <motion.div
+                  key={bid.name}
+                  animate={{ opacity: bidVisible[i] ? 1 : 0, y: bidVisible[i] ? 0 : 8 }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
+                  onClick={() => setSelectedBid(bid)}
+                  style={{
+                    borderRadius: 12,
+                    border: isRecommended ? "1.5px solid #0A0A0A" : "1px solid #E0E0E0",
+                    background: "#FFFFFF",
+                    padding: "14px 18px",
+                    cursor: "pointer",
+                    transition: "border-color 0.2s ease",
+                    pointerEvents: bidVisible[i] ? "auto" : "none",
+                    position: "relative",
+                  }}
+                  onMouseEnter={(e) => { if (!isRecommended) e.currentTarget.style.borderColor = "#0A0A0A"; }}
+                  onMouseLeave={(e) => { if (!isRecommended) e.currentTarget.style.borderColor = "#E0E0E0"; }}
+                >
+                  {/* Recommended badge */}
+                  {isRecommended && (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.25 }}
                       style={{
-                        fontSize: 14,
+                        position: "absolute",
+                        top: -11,
+                        left: 16,
+                        background: "#0A0A0A",
+                        color: "white",
+                        fontSize: 10,
                         fontWeight: 600,
-                        color: "#0A0A0A",
-                        marginBottom: 3,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
+                        letterSpacing: "0.06em",
+                        textTransform: "uppercase",
+                        borderRadius: 4,
+                        padding: "2px 8px",
                       }}
                     >
-                      {bid.name}
+                      ⭐ Recommended
+                    </motion.span>
+                  )}
+
+                  {/* Main row */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, minHeight: 44 }}>
+                    <p style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 700, color: "#C0C0C0", width: 24, flexShrink: 0, textAlign: "center", margin: 0 }}>
+                      {i + 1}
                     </p>
-                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <Star size={12} style={{ color: "#F59E0B", fill: "#F59E0B", flexShrink: 0 }} />
-                      <span style={{ fontSize: 12, color: "#6B7280" }}>{bid.stars}</span>
+                    <img src={bid.photo} alt={bid.name} style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+                    <div style={{ width: 190, flexShrink: 0 }}>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "#0A0A0A", marginBottom: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {bid.name}
+                      </p>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <Star size={12} style={{ color: "#F59E0B", fill: "#F59E0B", flexShrink: 0 }} />
+                        <span style={{ fontSize: 12, color: "#6B7280" }}>{bid.stars}</span>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                      <Clock size={12} style={{ color: "#999" }} />
+                      <span style={{ fontSize: 12, color: "#999", whiteSpace: "nowrap" }}>{bid.responseTime}</span>
+                    </div>
+                    <div style={{ flex: 1 }} />
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <p style={{ fontSize: 10, fontWeight: 500, color: "#999", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>
+                        Bid Amount
+                      </p>
+                      <p style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 600, color: "#0A0A0A", margin: 0 }}>
+                        {bid.amountLabel}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Response time */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
-                    <Clock size={12} style={{ color: "#999" }} />
-                    <span style={{ fontSize: 12, color: "#999", whiteSpace: "nowrap" }}>
-                      {bid.responseTime}
-                    </span>
-                  </div>
-
-                  <div style={{ flex: 1 }} />
-
-                  {/* Bid amount */}
-                  <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <p
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 500,
-                        color: "#999",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
-                        marginBottom: 2,
-                      }}
-                    >
-                      Bid Amount
-                    </p>
-                    <p
-                      style={{
-                        fontFamily: "monospace",
-                        fontSize: 20,
-                        fontWeight: 600,
-                        color: "#0A0A0A",
-                        margin: 0,
-                      }}
-                    >
-                      {bid.amountLabel}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Note */}
-                <p
-                  style={{
-                    marginTop: 8,
-                    fontSize: 12.5,
-                    color: "#6B7280",
-                    lineHeight: 1.5,
-                    paddingLeft: 82,
-                  }}
-                >
-                  {bid.note}
-                </p>
-              </motion.div>
-            ))}
+                  <p style={{ marginTop: 8, fontSize: 12.5, color: "#6B7280", lineHeight: 1.5, paddingLeft: 82 }}>
+                    {bid.note}
+                  </p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </main>
@@ -428,7 +391,7 @@ const Marketplace = () => {
           <BidModal
             bid={selectedBid}
             onClose={() => setSelectedBid(null)}
-            onSelect={() => navigate("/insurance")}
+            onSelect={() => navigate("/funding")}
           />
         )}
       </AnimatePresence>

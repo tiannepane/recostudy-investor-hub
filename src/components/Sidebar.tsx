@@ -91,14 +91,20 @@ const Sidebar = ({ activeItem, visitedItems }: SidebarProps) => {
       </div>
 
       {/* Progress */}
-      <div className="px-6 pb-6">
-        <p className="text-[12px] text-sidebar-text mb-2">
-          {currentIndex + 1} of {navItemsList.length}
-        </p>
-        <div className="h-1 rounded-full" style={{ background: "hsl(var(--sidebar-progress-bg))" }}>
+      <div>
+        <div className="px-6 pb-4">
+          <p className="text-[12px] text-sidebar-text mb-2">
+            {currentIndex + 1} of {navItemsList.length}
+          </p>
+        </div>
+        <div style={{ height: 3, background: "hsl(var(--sidebar-progress-bg))", width: "100%" }}>
           <div
-            className="h-full rounded-full transition-all duration-700"
-            style={{ width: `${progress * 100}%`, background: "#4F6BFF" }}
+            style={{
+              height: "100%",
+              width: `${progress * 100}%`,
+              background: "#0F1729",
+              transition: "width 700ms ease",
+            }}
           />
         </div>
       </div>

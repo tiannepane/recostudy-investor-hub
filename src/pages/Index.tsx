@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Image as ImageIcon, FileText, Mic, Check, Eye, CheckCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
 
@@ -42,25 +41,24 @@ const AGENTS = {
 const COMPLETION_REL = 10500;
 const BUTTON_APPEAR_REL = 12000;
 const FADE_DELAY = 14000;
-const AUTO_INTEGRATE_DELAY = 4000;
 
 const VISION_OBS = [
-  "\u2192 Detected: exterior facade, balcony structures",
-  "\u2192 Identified: HVAC unit, elevator shaft, parking level",
-  "\u2192 Flagged: visible concrete spalling on east elevation",
+  "→ Detected: exterior facade, balcony structures",
+  "→ Identified: HVAC unit, elevator shaft, parking level",
+  "→ Flagged: visible concrete spalling on east elevation",
 ];
 const DOC_OBS = [
-  "\u2192 Extracted: reserve fund balance $2,064,255",
-  "\u2192 Identified: 10 components approaching end of life",
-  "\u2192 Parsed: engineer depreciation report, 2024 baseline",
+  "→ Extracted: reserve fund balance $2,064,255",
+  "→ Identified: 10 components approaching end of life",
+  "→ Parsed: engineer depreciation report, 2024 baseline",
 ];
 const AUDIO_OBS = [
-  "\u2192 Transcribed: 4m 32s site walkthrough audio",
-  "\u2192 Extracted: rooftop membrane showing wear, last serviced 2019",
-  "\u2192 Noted: parkade slab cracking, elevator cab flagged",
+  "→ Transcribed: 4m 32s site walkthrough audio",
+  "→ Extracted: rooftop membrane showing wear, last serviced 2019",
+  "→ Noted: parkade slab cracking, elevator cab flagged",
 ];
 
-/* ─── Agent Processing Card (right column) ──────────────── */
+/* ─── Agent Processing Card ──────────────────────────────── */
 
 const AgentProcessingCard = ({
   name,
@@ -69,6 +67,7 @@ const AgentProcessingCard = ({
   active,
   complete,
   observations,
+  accentColor,
 }: {
   name: string;
   IconComp: React.ElementType;
@@ -76,19 +75,36 @@ const AgentProcessingCard = ({
   active: boolean;
   complete: boolean;
   observations: string[];
+  accentColor: string;
 }) => {
-  const isActive = active || complete;
-  const cardBg = complete ? "#F7F7F7" : active ? "#FAFAFA" : "#FAFAFA";
+  const isPending = !active && !complete;
+
+  // Left accent border only while actively running; clean border otherwise
+  const borderStyle: React.CSSProperties = active
+    ? {
+        borderTop: "1px solid #E5E7EB",
+        borderRight: "1px solid #E5E7EB",
+        borderBottom: "1px solid #E5E7EB",
+        borderLeft: `3px solid ${accentColor}`,
+      }
+    : { border: "1px solid #E5E7EB" };
+
+  const nameColor = isPending ? "#9CA3B8" : "#5A6178";
+  const iconColor = isPending ? "#9CA3B8" : "#0A0A0A";
+  const barColor  = active ? accentColor : "#0A0A0A";
+
   return (
     <div
       style={{
-        background: cardBg,
+        background: "#FAFAFA",
         borderRadius: 12,
-        border: `1px solid ${isActive ? "#0A0A0A" : "#E5E7EB"}`,
+        ...borderStyle,
+        // Compensate 2px extra for 3px left border so content doesn't shift
         padding: 16,
-        opacity: isActive ? 1 : 0.35,
-        boxShadow: isActive ? "0 2px 12px rgba(0,0,0,0.06)" : "none",
-        transition: "opacity 0.5s, box-shadow 0.5s, border-color 0.5s, background 0.5s ease",
+        paddingLeft: active ? 14 : 16,
+        opacity: isPending ? 0.45 : 1,
+        boxShadow: !isPending ? "0 2px 12px rgba(0,0,0,0.06)" : "none",
+        transition: "opacity 0.5s, box-shadow 0.5s, background 0.5s ease",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -104,12 +120,19 @@ const AgentProcessingCard = ({
             flexShrink: 0,
           }}
         >
-          <IconComp size={14} style={{ color: "#0A0A0A" }} />
+          <IconComp size={14} style={{ color: iconColor, transition: "color 0.4s ease" }} />
         </div>
-        <span style={{ fontSize: 13, fontWeight: 600, color: "#0A0A0A", flex: 1 }}>
+        <span
+          style={{
+            fontSize: 13,
+            color: nameColor,
+            flex: 1,
+            transition: "color 0.4s ease",
+          }}
+        >
           {name}
         </span>
-        {isActive && (
+        {(active || complete) && (
           complete ? (
             <motion.span
               initial={{ scale: 0.8, opacity: 0 }}
@@ -159,9 +182,9 @@ const AgentProcessingCard = ({
           style={{
             height: "100%",
             width: `${Math.min(progress * 100, 100)}%`,
-            background: "#0A0A0A",
+            background: barColor,
             borderRadius: 2,
-            transition: "width 0.15s linear",
+            transition: "width 0.15s linear, background 0.4s ease",
           }}
         />
       </div>
@@ -195,7 +218,7 @@ const AgentProcessingCard = ({
   );
 };
 
-/* ─── File Slide Row (left column) ──────────────────────── */
+/* ─── File Slide Row ─────────────────────────────────────── */
 
 const FileSlideRow = ({
   visible,
@@ -290,21 +313,23 @@ const IntegrationCard = ({
   name,
   logoSrc,
   connectState,
+  onConnect,
 }: {
   name: string;
   logoSrc: string;
   connectState: ConnectState;
+  onConnect?: () => void;
 }) => {
   const btnStyle: React.CSSProperties =
     connectState === "connected"
       ? {
           height: 30,
-          padding: "0 14px",
-          background: "#F0F0F0",
-          border: "1px solid #D0D0D0",
-          color: "#0A0A0A",
+          padding: "0 16px",
+          background: "#ECFDF5",
+          border: "1px solid #BBF7D0",
+          color: "#15803D",
           borderRadius: 6,
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: 500,
           cursor: "default",
           transition: "all 0.3s ease",
@@ -312,26 +337,29 @@ const IntegrationCard = ({
       : connectState === "connecting"
       ? {
           height: 30,
-          padding: "0 14px",
-          background: "#0A0A0A",
-          border: "1px solid #0A0A0A",
+          padding: "0 16px",
+          background: "#4F6BFF",
+          border: "1px solid #4F6BFF",
           color: "white",
           borderRadius: 6,
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: 500,
           cursor: "default",
           transition: "all 0.3s ease",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
         }
       : {
           height: 30,
-          padding: "0 14px",
-          background: "transparent",
-          border: "1px solid #E5E7EB",
-          color: "#6B7280",
+          padding: "0 16px",
+          background: "white",
+          border: "1px solid rgba(15,23,41,0.06)",
+          color: "#5A6178",
           borderRadius: 6,
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: 500,
-          cursor: "default",
+          cursor: "pointer",
           transition: "all 0.3s ease",
         };
 
@@ -341,29 +369,47 @@ const IntegrationCard = ({
       transition={{ duration: 0.3 }}
       style={{
         flex: 1,
-        height: 140,
-        borderRadius: 12,
-        border: "1px solid #E5E7EB",
+        borderRadius: 10,
+        border: "1px solid rgba(15,23,41,0.06)",
+        boxShadow: "0 2px 8px rgba(15,23,41,0.05)",
         background: "#FFFFFF",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 8,
+        padding: 16,
+        gap: 0,
       }}
     >
       <img
         src={logoSrc}
         alt={name}
-        style={{ width: 40, height: 40, borderRadius: 8, objectFit: "contain" }}
+        style={{ width: 36, height: 36, borderRadius: 6, objectFit: "contain" }}
       />
-      <p style={{ fontSize: 15, fontWeight: 500, color: "#0A0A0A" }}>{name}</p>
-      <button style={btnStyle}>
-        {connectState === "idle"
-          ? "Connect"
-          : connectState === "connecting"
-          ? "Connecting..."
-          : "\u2713 Connected"}
+      <p style={{ fontSize: 14, fontWeight: 500, color: "#0F1729", marginTop: 8, marginBottom: 8 }}>
+        {name}
+      </p>
+      <button style={btnStyle} onClick={connectState === "idle" ? onConnect : undefined}>
+        {connectState === "connecting" ? (
+          <>
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                border: "2px solid rgba(255,255,255,0.35)",
+                borderTopColor: "white",
+                borderRadius: "50%",
+                display: "inline-block",
+                animation: "spin 0.8s linear infinite",
+              }}
+            />
+            Connecting...
+          </>
+        ) : connectState === "connected" ? (
+          "✓ Connected"
+        ) : (
+          "Connect"
+        )}
       </button>
     </motion.div>
   );
@@ -374,23 +420,21 @@ const IntegrationCard = ({
 type Scene = "welcome" | "upload";
 
 const Index = () => {
-  const navigate = useNavigate();
-  const integrationStarted = useRef(false);
+  const connectStarted = useRef(false);
 
-  const [elapsed,     setElapsed]     = useState(0);
-  const [started,     setStarted]     = useState(false);
-  const [scene, setScene]             = useState<Scene>("welcome");
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalPhase, setModalPhase]   = useState<"prompt" | "integrating">("prompt");
-  const [yardiState, setYardiState]   = useState<ConnectState>("idle");
-  const [appfolioState, setAppfolioState] = useState<ConnectState>("idle");
-  const [setupComplete, setSetupComplete] = useState(false);
-  const [visitedItems, setVisitedItems] = useState<string[]>([]);
+  const [elapsed,          setElapsed]          = useState(0);
+  const [started,          setStarted]          = useState(false);
+  const [scene,            setScene]            = useState<Scene>("welcome");
+  const [visitedItems,     setVisitedItems]     = useState<string[]>([]);
+  const [showIntegrations, setShowIntegrations] = useState(false);
+  const [yardiState,       setYardiState]       = useState<ConnectState>("idle");
+  const [appfolioState,    setAppfolioState]    = useState<ConnectState>("idle");
+  const [bothConnected,    setBothConnected]    = useState(false);
 
   const t = scene === "upload" ? Math.max(0, elapsed - UPLOAD_START) : 0;
 
   // Photo visibility
-  const photoVisible = PHOTO_SLIDE_STARTS.map((start) => t >= start);
+  const photoVisible    = PHOTO_SLIDE_STARTS.map((start) => t >= start);
   const photosInDzFading = t >= 6000;
 
   // Document and voice ghosts
@@ -400,9 +444,9 @@ const Index = () => {
   // Agent progress
   const progress = (start: number, dur: number) =>
     t < start ? 0 : Math.min((t - start) / dur, 1);
-  const visionProgress  = progress(AGENTS.vision.start, AGENTS.vision.duration);
-  const docProgress     = progress(AGENTS.document.start, AGENTS.document.duration);
-  const audioProgress   = progress(AGENTS.audio.start, AGENTS.audio.duration);
+  const visionProgress = progress(AGENTS.vision.start,   AGENTS.vision.duration);
+  const docProgress    = progress(AGENTS.document.start, AGENTS.document.duration);
+  const audioProgress  = progress(AGENTS.audio.start,    AGENTS.audio.duration);
 
   // File visibility
   const photosFileVisible = t >= FILE_TIMES.photos.appear;
@@ -416,36 +460,41 @@ const Index = () => {
   const showCompletion = t >= COMPLETION_REL;
   const showButton     = t >= BUTTON_APPEAR_REL;
   const dzFading       = t >= COMPLETION_REL + FADE_DELAY;
-  const showModal      = elapsed >= UPLOAD_START + COMPLETION_REL + FADE_DELAY;
 
-  // Integration sequence
-  const startIntegration = useCallback(() => {
-    if (integrationStarted.current) return;
-    integrationStarted.current = true;
-    setModalPhase("integrating");
-    setTimeout(() => setYardiState("connecting"),  300);
-    setTimeout(() => setYardiState("connected"),  1100);
-    setTimeout(() => setAppfolioState("connecting"), 1500);
-    setTimeout(() => setAppfolioState("connected"),  2300);
-    setTimeout(() => setSetupComplete(true),          3100);
+  // Integration sequence — Yardi first, AppFolio 1.2s later, each 900ms to complete
+  const startConnect = useCallback(() => {
+    if (connectStarted.current) return;
+    connectStarted.current = true;
+    setYardiState("connecting");
     setTimeout(() => {
-      setModalVisible(false);
-      setVisitedItems(["overview"]);
-      navigate("/inventory");
-    }, 4600);
-  }, [navigate]);
+      setYardiState("connected");
+      setTimeout(() => {
+        setAppfolioState("connecting");
+        setTimeout(() => {
+          setAppfolioState("connected");
+          setBothConnected(true);
+          setVisitedItems(["overview"]);
+        }, 900);
+      }, 1200);
+    }, 900);
+  }, []);
+
+  // Button click: show inline integrations panel, auto-connect after 1.5s
+  const handleConnectButtonClick = useCallback(() => {
+    setShowIntegrations(true);
+    setTimeout(startConnect, 1500);
+  }, [startConnect]);
 
   const reset = useCallback(() => {
-    integrationStarted.current = false;
+    connectStarted.current = false;
     setElapsed(0);
     setStarted(false);
     setScene("welcome");
-    setModalVisible(false);
-    setModalPhase("prompt");
+    setVisitedItems([]);
+    setShowIntegrations(false);
     setYardiState("idle");
     setAppfolioState("idle");
-    setSetupComplete(false);
-    setVisitedItems([]);
+    setBothConnected(false);
   }, []);
 
   useEffect(() => {
@@ -454,14 +503,16 @@ const Index = () => {
     return () => clearInterval(id);
   }, [started]);
 
-  useEffect(() => {
-    if (showModal && !modalVisible) setModalVisible(true);
-    const autoTime = UPLOAD_START + COMPLETION_REL + FADE_DELAY + AUTO_INTEGRATE_DELAY;
-    if (elapsed >= autoTime) startIntegration();
-  }, [elapsed, scene, showModal, modalVisible, startIntegration]);
-
   return (
     <div className="flex min-h-screen" style={{ background: "#FFFFFF" }}>
+      {/* Keyframe for pulsing green dot */}
+      <style>{`
+        @keyframes pulseGreen {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+      `}</style>
+
       <Sidebar activeItem="overview" visitedItems={visitedItems} />
 
       <main className="flex-1" style={{ marginLeft: 260, position: "relative", overflow: "hidden" }}>
@@ -514,155 +565,6 @@ const Index = () => {
           )}
         </AnimatePresence>
 
-        {/* ── Integration modal ── */}
-        <AnimatePresence>
-          {modalVisible && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "rgba(0,0,0,0.35)",
-                backdropFilter: "blur(3px)",
-                zIndex: 50,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-                style={{
-                  maxWidth: 420,
-                  width: "calc(100% - 48px)",
-                  background: "white",
-                  borderRadius: 16,
-                  padding: 32,
-                  boxShadow: "0 8px 40px rgba(0,0,0,0.18)",
-                  position: "relative",
-                }}
-              >
-                <AnimatePresence mode="wait">
-                  {modalPhase === "prompt" && (
-                    <motion.div
-                      key="prompt"
-                      exit={{ opacity: 0, transition: { duration: 0.2 } }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-                        <div
-                          style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: "50%",
-                            background: "#F0F0F0",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <Check size={16} style={{ color: "#0A0A0A" }} />
-                        </div>
-                      </div>
-                      <p style={{ fontSize: 20, fontWeight: 700, color: "#0A0A0A", textAlign: "center", marginBottom: 8 }}>
-                        Building data ready.
-                      </p>
-                      <p style={{ fontSize: 13, color: "#6B7280", textAlign: "center", marginBottom: 20 }}>
-                        Connect your property management tools to sync live data automatically.
-                      </p>
-                      <div style={{ height: 1, background: "#E5E7EB", marginBottom: 16 }} />
-                      <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 20 }}>
-                        {[
-                          { src: "/yardi-logo.png", label: "Yardi" },
-                          { src: "/appfolio-logo.png", label: "AppFolio" },
-                        ].map(({ src, label }) => (
-                          <div key={label} style={{ textAlign: "center" }}>
-                            <img
-                              src={src}
-                              alt={label}
-                              style={{
-                                width: 32,
-                                height: 32,
-                                borderRadius: 6,
-                                objectFit: "contain",
-                                display: "block",
-                                margin: "0 auto 4px",
-                              }}
-                            />
-                            <p style={{ fontSize: 11, color: "#6B7280" }}>{label}</p>
-                          </div>
-                        ))}
-                      </div>
-                      <button
-                        onClick={startIntegration}
-                        style={{
-                          width: "100%",
-                          height: 44,
-                          background: "#0A0A0A",
-                          color: "white",
-                          border: "none",
-                          borderRadius: 8,
-                          fontSize: 14,
-                          fontWeight: 500,
-                          cursor: "pointer",
-                          marginBottom: 8,
-                        }}
-                      >
-                        Connect Yardi &amp; AppFolio
-                      </button>
-                      <p
-                        onClick={startIntegration}
-                        style={{
-                          fontSize: 12,
-                          color: "#999",
-                          textAlign: "center",
-                          cursor: "pointer",
-                          margin: 0,
-                        }}
-                      >
-                        Skip for now
-                      </p>
-                    </motion.div>
-                  )}
-
-                  {modalPhase === "integrating" && (
-                    <motion.div
-                      key="integrating"
-                      initial={{ opacity: 0, transition: { duration: 0.2 } }}
-                      animate={{ opacity: 1, transition: { duration: 0.2 } }}
-                    >
-                      <p style={{ fontSize: 16, fontWeight: 600, color: "#0A0A0A", textAlign: "center", marginBottom: 16 }}>
-                        Connecting your tools...
-                      </p>
-                      <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-                        <IntegrationCard name="Yardi" logoSrc="/yardi-logo.png" connectState={yardiState} />
-                        <IntegrationCard name="AppFolio" logoSrc="/appfolio-logo.png" connectState={appfolioState} />
-                      </div>
-                      <AnimatePresence>
-                        {setupComplete && (
-                          <motion.p
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.3 }}
-                            style={{ fontSize: 13, color: "#0A0A0A", textAlign: "center", margin: 0 }}
-                          >
-                            Setup complete. Taking you to your dashboard...
-                          </motion.p>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* ── Page content ── */}
         <div className="mx-auto" style={{ maxWidth: 1200, padding: "32px 48px" }}>
           <TopBar onReplay={reset} activeItem="overview" />
@@ -674,29 +576,45 @@ const Index = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0, transition: { duration: 0.35 } }}
               >
-                {/* Completion status line */}
+                {/* ── Ingestion complete pill — only after all agents done ── */}
                 <AnimatePresence>
                   {showCompletion && (
-                    <motion.p
+                    <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.5 }}
                       style={{
-                        fontFamily: "monospace",
-                        fontSize: 13,
-                        color: "#0A0A0A",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                        background: "#F0FDF4",
+                        border: "1px solid #BBF7D0",
+                        borderRadius: 6,
+                        padding: "6px 14px",
                         marginBottom: 12,
                       }}
                     >
-                      &#9679; Ingestion Agent &mdash; all data extracted successfully &#10003;
-                    </motion.p>
+                      <span
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          background: "#22C55E",
+                          flexShrink: 0,
+                          animation: "pulseGreen 1.5s ease-in-out infinite",
+                        }}
+                      />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#15803D" }}>
+                        ✓ Ingestion Agent — all data extracted successfully
+                      </span>
+                    </motion.div>
                   )}
                 </AnimatePresence>
 
                 {/* Two-column layout */}
                 <div style={{ display: "flex", gap: "4%" }}>
 
-                  {/* LEFT COLUMN */}
+                  {/* ── LEFT COLUMN ── */}
                   <div style={{ width: "48%", display: "flex", flexDirection: "column" }}>
                     <motion.p
                       initial={{ opacity: 0 }}
@@ -713,8 +631,11 @@ const Index = () => {
                       Building Data
                     </motion.p>
 
-                    <p style={{ fontSize: 16, fontWeight: 700, color: "#0A0A0A", marginBottom: 4 }}>
-                      City Gate 1, LMS 195
+                    <p style={{ fontSize: 16, fontWeight: 700, color: "#0A0A0A", marginBottom: 2 }}>
+                      Meridian Condominium Association, Inc.
+                    </p>
+                    <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 4 }}>
+                      425 East 58th Street, New York, NY 10022
                     </p>
                     <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>
                       Upload building data to begin your reserve fund study.
@@ -882,17 +803,19 @@ const Index = () => {
                       />
                     </div>
 
-                    {/* Connect button — appears after completion */}
-                    <AnimatePresence>
-                      {showButton && (
+                    {/* ── Connect button → inline integrations ── */}
+                    <AnimatePresence mode="wait">
+                      {showButton && !showIntegrations && (
                         <motion.div
+                          key="connect-btn"
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, ease: "easeOut" }}
+                          exit={{ opacity: 0, y: 8 }}
+                          transition={{ duration: 0.35, ease: "easeOut" }}
                           style={{ marginTop: 24 }}
                         >
                           <button
-                            onClick={() => navigate("/inventory")}
+                            onClick={handleConnectButtonClick}
                             style={{
                               width: "100%",
                               padding: "14px 0",
@@ -912,10 +835,63 @@ const Index = () => {
                           </p>
                         </motion.div>
                       )}
+
+                      {showIntegrations && (
+                        <motion.div
+                          key="integrations"
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.35, ease: "easeOut" }}
+                          style={{ marginTop: 24 }}
+                        >
+                          <p
+                            style={{
+                              fontSize: 11,
+                              textTransform: "uppercase" as const,
+                              color: "#9CA3B8",
+                              letterSpacing: "0.08em",
+                              marginBottom: 10,
+                            }}
+                          >
+                            Connect Your Tools
+                          </p>
+                          <div style={{ display: "flex", gap: 12 }}>
+                            <IntegrationCard
+                              name="Yardi"
+                              logoSrc="/yardi-logo.png"
+                              connectState={yardiState}
+                              onConnect={startConnect}
+                            />
+                            <IntegrationCard
+                              name="AppFolio"
+                              logoSrc="/appfolio-logo.png"
+                              connectState={appfolioState}
+                              onConnect={startConnect}
+                            />
+                          </div>
+                          <AnimatePresence>
+                            {bothConnected && (
+                              <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.4 }}
+                                style={{
+                                  fontSize: 12,
+                                  color: "#9CA3B8",
+                                  textAlign: "center",
+                                  marginTop: 12,
+                                }}
+                              >
+                                All sources connected. Use the arrow above to continue &rarr;
+                              </motion.p>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      )}
                     </AnimatePresence>
                   </div>
 
-                  {/* RIGHT COLUMN — AI Processing */}
+                  {/* ── RIGHT COLUMN — AI Processing ── */}
                   <div style={{ width: "48%", display: "flex", flexDirection: "column" }}>
                     <motion.p
                       initial={{ opacity: 0 }}
@@ -940,6 +916,7 @@ const Index = () => {
                         active={t >= AGENTS.vision.start && visionProgress < 1}
                         complete={visionProgress >= 1}
                         observations={VISION_OBS}
+                        accentColor="#6366F1"
                       />
                       <AgentProcessingCard
                         name="Document Agent"
@@ -948,6 +925,7 @@ const Index = () => {
                         active={t >= AGENTS.document.start && docProgress < 1}
                         complete={docProgress >= 1}
                         observations={DOC_OBS}
+                        accentColor="#0EA5E9"
                       />
                       <AgentProcessingCard
                         name="Audio Agent"
@@ -956,6 +934,7 @@ const Index = () => {
                         active={t >= AGENTS.audio.start && audioProgress < 1}
                         complete={audioProgress >= 1}
                         observations={AUDIO_OBS}
+                        accentColor="#8B5CF6"
                       />
                     </div>
 

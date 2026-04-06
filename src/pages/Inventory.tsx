@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
+import AgentBar from "@/components/AgentBar";
 import ConditionIndicator from "@/components/ConditionIndicator";
 import type { Condition } from "@/components/ConditionIndicator";
 
@@ -144,6 +145,46 @@ const inventoryData: InventoryRow[] = [
     notes: "Seals and frames in serviceable condition. No fogging or seal failures noted.",
   },
 ];
+
+/* ─── Shimmer keyframes ────────────────────────────────────── */
+
+const SHIMMER_KEYFRAMES = `
+@keyframes shimmer {
+  0%   { background-position: -300px 0; }
+  100% { background-position:  300px 0; }
+}
+`;
+
+/* ─── Skeleton row ─────────────────────────────────────────── */
+
+const SkeletonCell = ({ w, h = 10 }: { w: number; h?: number }) => (
+  <div
+    style={{
+      width: w,
+      height: h,
+      borderRadius: 4,
+      background: "linear-gradient(90deg, #F1F3F7 25%, rgba(255,255,255,0.7) 50%, #F1F3F7 75%)",
+      backgroundSize: "300px 100%",
+      animation: "shimmer 1.5s infinite linear",
+    }}
+  />
+);
+
+const SkeletonRow = ({ delay }: { delay: number }) => (
+  <tr style={{ borderBottom: "1px solid #F1F3F7" }}>
+    <td style={{ height: 56, padding: "8px 16px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ width: 48, height: 48, borderRadius: 8, background: "#F1F3F7", flexShrink: 0, animation: `shimmer 1.5s ${delay}s infinite linear`, backgroundSize: "300px 100%", backgroundImage: "linear-gradient(90deg, #F1F3F7 25%, rgba(255,255,255,0.7) 50%, #F1F3F7 75%)" }} />
+        <SkeletonCell w={120} h={14} />
+      </div>
+    </td>
+    <td style={{ padding: "8px 16px" }}><SkeletonCell w={56} /></td>
+    <td style={{ padding: "8px 16px" }}><SkeletonCell w={44} /></td>
+    <td style={{ padding: "8px 16px" }}><SkeletonCell w={80} /></td>
+    <td style={{ padding: "8px 16px" }}><SkeletonCell w={36} /></td>
+    <td style={{ padding: "8px 16px" }}><SkeletonCell w={52} /></td>
+  </tr>
+);
 
 /* ─── Helpers ──────────────────────────────────────────────── */
 
@@ -309,10 +350,25 @@ const DetailPanel = ({
 
 const Inventory = () => {
   const [selectedRow, setSelectedRow] = useState<InventoryRow | null>(null);
+  const [elapsed, setElapsed] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const id = setInterval(() => setElapsed((p) => p + 30), 30);
+    return () => clearInterval(id);
+  }, []);
+
+  const tableVisible  = elapsed >= 3200;
+  const agentComplete = elapsed >= 3800;
+
+  const thinkingMessage =
+    elapsed < 1200 ? "scanning uploaded documents..." :
+    elapsed < 2200 ? "identifying 24 components..."   :
+                     "flagging end-of-life components...";
 
   return (
     <div className="flex min-h-screen" style={{ background: "#FFFFFF" }}>
+      <style>{SHIMMER_KEYFRAMES}</style>
       <Sidebar activeItem="inventory" visitedItems={["overview"]} />
 
       {/* Overlay when panel is open */}
@@ -343,9 +399,22 @@ const Inventory = () => {
       <main className="flex-1" style={{ marginLeft: 260 }}>
         <div className="mx-auto" style={{ maxWidth: 1200, padding: 60 }}>
           <TopBar
-            breadcrumb="Buildings › City Gate 1, LMS 195 › Inventory"
+            breadcrumb="Buildings › Meridian Condominium Association, Inc. › Inventory"
             activeItem="inventory"
           />
+
+          {/* Agent Bar */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+            <AgentBar
+              agentName="Inventory Agent"
+              thinkingMessage={thinkingMessage}
+              completeMessage="24 components catalogued, 3 flagged for immediate attention"
+              accentColor="#10B981"
+              isThinking={!agentComplete}
+              isComplete={agentComplete}
+              isHidden={false}
+            />
+          </motion.div>
 
           {/* Table section */}
           <div style={{ marginTop: 32 }}>
@@ -394,112 +463,90 @@ const Inventory = () => {
                   </tr>
                 </thead>
 
-                <tbody>
-                  {inventoryData.map((row, i) => (
-                    <tr
-                      key={row.component}
-                      onClick={() => setSelectedRow(row)}
-                      style={{
-                        borderBottom:
-                          i < inventoryData.length - 1 ? "1px solid #F3F4F6" : "none",
-                        cursor: "pointer",
-                        transition: "background 0.15s",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = "#FAFAFA")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "transparent")
-                      }
+                <AnimatePresence mode="wait">
+                  {!tableVisible ? (
+                    <motion.tbody
+                      key="skeleton"
+                      initial={{ opacity: 1 }}
+                      exit={{ opacity: 0, transition: { duration: 0.3 } }}
                     >
-                      {/* Component name + thumbnail */}
-                      <td style={{ padding: "8px 16px", height: 56 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                          {row.image && (
-                            <img
-                              src={row.image}
-                              alt=""
-                              style={{
-                                width: 48,
-                                height: 48,
-                                borderRadius: 8,
-                                objectFit: "cover",
-                                flexShrink: 0,
-                                background: "#F3F4F6",
-                              }}
-                            />
-                          )}
-                          <span
-                            style={{
-                              fontSize: 14,
-                              fontWeight: 500,
-                              color: "#0A0A0A",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {row.component}
-                          </span>
-                        </div>
-                      </td>
+                      {Array.from({ length: 8 }, (_, i) => (
+                        <SkeletonRow key={i} delay={i * 0.1} />
+                      ))}
+                    </motion.tbody>
+                  ) : (
+                    <motion.tbody key="real">
+                      {inventoryData.map((row, i) => (
+                        <motion.tr
+                          key={row.component}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.35, delay: i * 0.12 }}
+                          onClick={() => setSelectedRow(row)}
+                          style={{
+                            borderBottom: i < inventoryData.length - 1 ? "1px solid #F3F4F6" : "none",
+                            cursor: "pointer",
+                            transition: "background 0.15s",
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "#FAFAFA")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                        >
+                          {/* Component name + thumbnail */}
+                          <td style={{ padding: "8px 16px", height: 56 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                              {row.image && (
+                                <img
+                                  src={row.image}
+                                  alt=""
+                                  style={{
+                                    width: 48,
+                                    height: 48,
+                                    borderRadius: 8,
+                                    objectFit: "cover",
+                                    flexShrink: 0,
+                                    background: "#F3F4F6",
+                                  }}
+                                />
+                              )}
+                              <span
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 500,
+                                  color: "#0A0A0A",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {row.component}
+                              </span>
+                            </div>
+                          </td>
 
-                      <td
-                        style={{
-                          padding: "10px 16px",
-                          fontSize: 13,
-                          color: "#6B7280",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {row.category}
-                      </td>
+                          <td style={{ padding: "10px 16px", fontSize: 13, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {row.category}
+                          </td>
 
-                      <td style={{ padding: "10px 16px" }}>
-                        <ConditionIndicator condition={row.condition} />
-                      </td>
+                          <td style={{ padding: "10px 16px" }}>
+                            <ConditionIndicator condition={row.condition} />
+                          </td>
 
-                      <td
-                        style={{
-                          padding: "10px 16px",
-                          fontSize: 13,
-                          color: "#6B7280",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {row.location}
-                      </td>
+                          <td style={{ padding: "10px 16px", fontSize: 13, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {row.location}
+                          </td>
 
-                      <td
-                        style={{
-                          padding: "10px 16px",
-                          fontSize: 13,
-                          fontFamily: "monospace",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {rulDisplay(row.rul)}
-                      </td>
+                          <td style={{ padding: "10px 16px", fontSize: 13, fontFamily: "monospace", whiteSpace: "nowrap" }}>
+                            {rulDisplay(row.rul)}
+                          </td>
 
-                      <td
-                        style={{
-                          padding: "10px 16px",
-                          fontSize: 13,
-                          fontFamily: "monospace",
-                          fontWeight: 500,
-                          color: "#0A0A0A",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {row.cost}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+                          <td style={{ padding: "10px 16px", fontSize: 13, fontFamily: "monospace", fontWeight: 500, color: "#0A0A0A", whiteSpace: "nowrap" }}>
+                            {row.cost}
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </motion.tbody>
+                  )}
+                </AnimatePresence>
               </table>
             </div>
           </div>

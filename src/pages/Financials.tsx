@@ -1,19 +1,22 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Landmark,
   ChevronDown,
   ChevronUp,
   Building2,
+  AlertTriangle,
 } from "lucide-react";
 import {
-  AreaChart,
+  ComposedChart,
   Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
@@ -60,45 +63,88 @@ const MetricCard = ({
   value,
   index,
   start,
+  variant = "neutral",
+  tag,
 }: {
   label: string;
   value: string;
   index: number;
   start: boolean;
-}) => (
-  <AnimatePresence>
-    {start && (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: "easeOut", delay: index * 0.08 }}
-        style={{
-          padding: "20px 24px",
-          background: "#F7F7F7",
-          borderRadius: 16,
-          flex: "1 1 0",
-          minWidth: 0,
-        }}
-      >
-        <p
+  variant?: "warning" | "danger" | "neutral";
+  tag?: string;
+}) => {
+  const isWarning = variant === "warning";
+  const isDanger  = variant === "danger";
+  const isAccent  = isWarning || isDanger;
+  // warning variant = Percent Funded (red dot per spec), danger = Special Assessment (amber dot)
+  const dotColor  = isWarning ? "#EF4444" : isDanger ? "#F59E0B" : null;
+
+  return (
+    <AnimatePresence>
+      {start && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: "easeOut", delay: index * 0.08 }}
           style={{
-            fontSize: 11,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            marginBottom: 8,
-            color: "#999",
-            fontWeight: 500,
+            padding: "20px 24px",
+            background: isAccent ? "rgba(255, 255, 255, 0.85)" : "#FFFFFF",
+            backdropFilter: isAccent ? "blur(8px)" : undefined,
+            borderRadius: 10,
+            border: isAccent ? "1px solid rgba(249, 115, 22, 0.15)" : "1px solid rgba(15,23,41,0.06)",
+            flex: "1 1 0",
+            minWidth: 0,
+            boxShadow: isAccent
+              ? "0 0 0 1px rgba(249,115,22,0.06), 0 8px 32px rgba(249,115,22,0.10)"
+              : "0 2px 8px rgba(15,23,41,0.05)",
           }}
         >
-          {label}
-        </p>
-        <p style={{ fontSize: 28, fontWeight: 600, lineHeight: 1, color: "#0A0A0A" }}>
-          {value}
-        </p>
-      </motion.div>
-    )}
-  </AnimatePresence>
-);
+          <p
+            style={{
+              fontSize: 11,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              marginBottom: 8,
+              color: "#9CA3B8",
+              fontWeight: 500,
+            }}
+          >
+            {label}
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {dotColor && (
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: dotColor,
+                  flexShrink: 0,
+                }}
+              />
+            )}
+            <p style={{ fontSize: 28, fontWeight: isAccent ? 700 : 600, lineHeight: 1, color: "#0F1729" }}>
+              {value}
+            </p>
+          </div>
+          {tag && (
+            <p
+              style={{
+                marginTop: 6,
+                fontSize: 11,
+                fontStyle: "italic",
+                color: "#9CA3B8",
+              }}
+            >
+              {tag}
+            </p>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 /* ─── Animated metric cards for Financial Overview ──────── */
 
@@ -109,12 +155,30 @@ const AnimatedFundCard = ({ index, start }: { index: number; start: boolean }) =
 
 const AnimatedPercentCard = ({ index, start }: { index: number; start: boolean }) => {
   const raw = useCountUp(135, start, 1500, index * 150);
-  return <MetricCard label="PERCENT FUNDED" value={`${(raw / 10).toFixed(1)}%`} index={index} start={start} />;
+  return (
+    <MetricCard
+      label="PERCENT FUNDED"
+      value={`${(raw / 10).toFixed(1)}%`}
+      index={index}
+      start={start}
+      variant="warning"
+      tag="Below Fannie Mae minimum"
+    />
+  );
 };
 
 const AnimatedYearCard = ({ index, start }: { index: number; start: boolean }) => {
   const v = useCountUp(2028, start, 1500, index * 150);
-  return <MetricCard label="SPECIAL ASSESSMENT YEAR" value={String(Math.max(2024, v))} index={index} start={start} />;
+  return (
+    <MetricCard
+      label="SPECIAL ASSESSMENT YEAR"
+      value={String(Math.max(2024, v))}
+      index={index}
+      start={start}
+      variant="danger"
+      tag="2 years away"
+    />
+  );
 };
 
 const AnimatedRecoCard = ({ index, start }: { index: number; start: boolean }) => {
@@ -124,22 +188,44 @@ const AnimatedRecoCard = ({ index, start }: { index: number; start: boolean }) =
 
 /* ─── Data ──────────────────────────────────────────────── */
 
+// Two-line trajectory: current (declining) vs recommended (growing)
+// Interpolates between the specified anchor points for each series.
+function lerp(anchors: [number, number][], year: number): number {
+  for (let i = 0; i < anchors.length - 1; i++) {
+    const [y0, v0] = anchors[i];
+    const [y1, v1] = anchors[i + 1];
+    if (year <= y1) {
+      const t = (year - y0) / (y1 - y0);
+      return Math.round(v0 + t * (v1 - v0));
+    }
+  }
+  return anchors[anchors.length - 1][1];
+}
+
+const CURRENT_ANCHORS: [number, number][] = [
+  [2026, 2064255], [2028, 1820000], [2031, 1340000],
+  [2036, 890000],  [2041, 420000],  [2046, 0],       [2056, 0],
+];
+const RECOMMENDED_ANCHORS: [number, number][] = [
+  [2026, 2064255], [2031, 2480000], [2036, 2890000],
+  [2041, 3210000], [2046, 3680000], [2051, 4100000],  [2056, 4520000],
+];
+
 const projectionData = Array.from({ length: 31 }, (_, i) => {
   const year = 2026 + i;
-  const t = i / 30;
-  let value: number;
-  if (t < 0.3) value = 2064000 + (t / 0.3) * 300000;
-  else if (t < 0.5) value = 2364000 + ((t - 0.3) / 0.2) * 200000;
-  else if (t < 0.7) value = 2564000 + ((t - 0.5) / 0.2) * 400000;
-  else value = 2964000 + ((t - 0.7) / 0.3) * 500000;
-  return { year, value: Math.round(value) };
+  return {
+    year,
+    current:     Math.max(0, lerp(CURRENT_ANCHORS, year)),
+    recommended: lerp(RECOMMENDED_ANCHORS, year),
+  };
 });
 
 const benchmarkRows = [
-  { label: "HOA Fee / sq ft", cityGate: "$4.82", avg: "$3.95", above: true, goodWhenAbove: false },
-  { label: "Reserve Fund Balance", cityGate: "$2,064,255", avg: "$1,420,000", above: true, goodWhenAbove: true },
-  { label: "Annual CRF Contribution", cityGate: "$511,500", avg: "$380,000", above: true, goodWhenAbove: true },
-  { label: "Reserve Fund / Unit", cityGate: "$11,932", avg: "$8,208", above: true, goodWhenAbove: true },
+  { label: "Percent Funded",          meridian: "13.5%",      avg: "62%",        meridianNum: 13.5,    avgNum: 62,      above: false, goodWhenAbove: true },
+  { label: "HOA Fee / sq ft",         meridian: "$4.82",      avg: "$3.95",      meridianNum: 4.82,    avgNum: 3.95,    above: true,  goodWhenAbove: false },
+  { label: "Reserve Fund Balance",    meridian: "$2,064,255", avg: "$1,420,000", meridianNum: 2064255, avgNum: 1420000, above: true,  goodWhenAbove: true },
+  { label: "Annual CRF Contribution", meridian: "$511,500",   avg: "$380,000",   meridianNum: 511500,  avgNum: 380000,  above: true,  goodWhenAbove: true },
+  { label: "Reserve Fund / Unit",     meridian: "$11,932",    avg: "$8,208",     meridianNum: 11932,   avgNum: 8208,    above: true,  goodWhenAbove: true },
 ];
 
 /* ─── Stakeholder data ──────────────────────────────────── */
@@ -189,6 +275,42 @@ const KEY_METRICS_ROW = [
   { label: "Unfunded / Unit", value: "$12,400" },
 ];
 
+/* ─── Status helpers ───────────────────────────────────── */
+
+function getReqStatus(name: string, pass: boolean): "green" | "amber" | "red" {
+  if (pass) return "green";
+  if (name === "Reserve Contribution Rate" || name === "Insurance Coverage") return "amber";
+  return "red";
+}
+
+const STATUS_CONFIG = {
+  green: { dot: "#16A34A", label: "Met"     },
+  amber: { dot: "#D97706", label: "Review"  },
+  red:   { dot: "#DC2626", label: "At risk" },
+};
+
+const StatusPill = ({ status }: { status: "green" | "amber" | "red" }) => {
+  const c = STATUS_CONFIG[status];
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+      <div style={{ width: 5, height: 5, borderRadius: "50%", background: c.dot, flexShrink: 0 }} />
+      <span style={{ fontSize: 11, color: "#5A6178" }}>{c.label}</span>
+    </div>
+  );
+};
+
+const MetCountPill = ({ met, total }: { met: number; total: number }) => {
+  const ratio = met / total;
+  const status = ratio >= 0.8 ? "green" : ratio >= 0.5 ? "amber" : "red";
+  const c = STATUS_CONFIG[status];
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+      <div style={{ width: 5, height: 5, borderRadius: "50%", background: c.dot, flexShrink: 0 }} />
+      <span style={{ fontSize: 11, color: "#5A6178", whiteSpace: "nowrap" }}>{met} of {total} met</span>
+    </div>
+  );
+};
+
 /* ─── Expandable stakeholder card ─────────────────────── */
 
 const StakeholderCard = ({ s }: { s: StakeholderDef }) => {
@@ -197,10 +319,12 @@ const StakeholderCard = ({ s }: { s: StakeholderDef }) => {
   return (
     <div
       style={{
-        borderRadius: 16,
-        border: "1px solid #E5E7EB",
-        background: "#FFFFFF",
+        borderRadius: 10,
+        border: "1px solid rgba(249, 115, 22, 0.15)",
+        background: "rgba(255, 255, 255, 0.85)",
+        backdropFilter: "blur(8px)",
         overflow: "hidden",
+        boxShadow: "0 0 0 1px rgba(249,115,22,0.06), 0 8px 32px rgba(249,115,22,0.10)",
       }}
     >
       <button
@@ -210,31 +334,30 @@ const StakeholderCard = ({ s }: { s: StakeholderDef }) => {
           display: "flex",
           alignItems: "center",
           gap: 12,
-          padding: "18px 24px",
+          padding: "16px 20px",
+          paddingBottom: open ? 12 : 16,
           background: "transparent",
           border: "none",
+          borderBottom: open ? "1px solid rgba(15,23,41,0.06)" : "none",
           cursor: "pointer",
           textAlign: "left",
         }}
       >
-        <Icon size={18} style={{ color: "#999", flexShrink: 0 }} />
-        <span style={{ fontSize: 15, fontWeight: 600, color: "#0A0A0A", flex: 1 }}>
+        <Icon size={16} style={{ color: "#9CA3B8", flexShrink: 0 }} />
+        <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729", flex: 1 }}>
           {s.name}
         </span>
-        <span style={{ fontSize: 13, color: "#999" }}>
-          {s.metCount} of {s.metTotal} met
-        </span>
+        <MetCountPill met={s.metCount} total={s.metTotal} />
         {open ? (
-          <ChevronUp size={16} style={{ color: "#999", flexShrink: 0, marginLeft: 8 }} />
+          <ChevronUp size={15} style={{ color: "#9CA3B8", flexShrink: 0, marginLeft: 8 }} />
         ) : (
-          <ChevronDown size={16} style={{ color: "#999", flexShrink: 0, marginLeft: 8 }} />
+          <ChevronDown size={15} style={{ color: "#9CA3B8", flexShrink: 0, marginLeft: 8 }} />
         )}
       </button>
 
       {open && (
-        <div style={{ padding: "0 24px 24px" }}>
-          <div style={{ height: 1, background: "#E5E7EB", marginBottom: 16 }} />
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div style={{ padding: "0 20px 20px" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 12 }}>
             <thead>
               <tr>
                 {["Requirement", "Threshold", "Current", "Status"].map((h) => (
@@ -244,10 +367,10 @@ const StakeholderCard = ({ s }: { s: StakeholderDef }) => {
                       fontSize: 11,
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
-                      color: "#999",
+                      color: "#9CA3B8",
                       fontWeight: 500,
                       textAlign: "left",
-                      padding: "0 12px 12px 0",
+                      padding: "0 12px 10px 0",
                     }}
                   >
                     {h}
@@ -256,22 +379,25 @@ const StakeholderCard = ({ s }: { s: StakeholderDef }) => {
               </tr>
             </thead>
             <tbody>
-              {s.requirements.map((r) => (
-                <tr key={r.name}>
-                  <td style={{ fontSize: 14, color: "#0A0A0A", padding: "10px 12px 10px 0", borderTop: "1px solid #F0F0F0" }}>
-                    {r.name}
-                  </td>
-                  <td style={{ fontSize: 14, color: "#0A0A0A", padding: "10px 12px 10px 0", borderTop: "1px solid #F0F0F0" }}>
-                    {r.threshold}
-                  </td>
-                  <td style={{ fontSize: 14, fontWeight: 500, color: "#0A0A0A", padding: "10px 12px 10px 0", borderTop: "1px solid #F0F0F0" }}>
-                    {r.current}
-                  </td>
-                  <td style={{ fontSize: 14, color: "#0A0A0A", padding: "10px 0", borderTop: "1px solid #F0F0F0", textAlign: "center", width: 48 }}>
-                    {r.pass ? "●" : "○"}
-                  </td>
-                </tr>
-              ))}
+              {s.requirements.map((r) => {
+                const status = getReqStatus(r.name, r.pass);
+                return (
+                  <tr key={r.name}>
+                    <td style={{ fontSize: 13, color: "#5A6178", padding: "10px 12px 10px 0", borderTop: "1px solid #F3F4F6" }}>
+                      {r.name}
+                    </td>
+                    <td style={{ fontSize: 13, color: "#5A6178", padding: "10px 12px 10px 0", borderTop: "1px solid #F3F4F6" }}>
+                      {r.threshold}
+                    </td>
+                    <td style={{ fontSize: 13, fontWeight: 500, color: "#0F1729", padding: "10px 12px 10px 0", borderTop: "1px solid #F3F4F6" }}>
+                      {r.current}
+                    </td>
+                    <td style={{ padding: "10px 0", borderTop: "1px solid #F3F4F6", width: 80 }}>
+                      <StatusPill status={status} />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -280,9 +406,37 @@ const StakeholderCard = ({ s }: { s: StakeholderDef }) => {
   );
 };
 
+/* ─── Ghost CTA button ──────────────────────────────────── */
+
+const GhostFundingBtn = ({ onClick }: { onClick: () => void }) => {
+  const [hov, setHov] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        width: "100%",
+        height: 44,
+        border: "1px solid #0F1729",
+        background: hov ? "#0F1729" : "transparent",
+        color: hov ? "#FFFFFF" : "#0F1729",
+        borderRadius: 7,
+        fontSize: 14,
+        fontWeight: 500,
+        cursor: "pointer",
+        transition: "background 200ms, color 200ms",
+      }}
+    >
+      View Funding Options →
+    </button>
+  );
+};
+
 /* ─── Page ──────────────────────────────────────────────── */
 
 const Financials = () => {
+  const navigate = useNavigate();
   const [elapsed, setElapsed] = useState(0);
 
   const reset = useCallback(() => setElapsed(0), []);
@@ -292,9 +446,10 @@ const Financials = () => {
     return () => clearInterval(id);
   }, []);
 
-  const metricsVisible = elapsed >= 1500;
-  const chartVisible = elapsed >= 3500;
-  const benchVisible = elapsed >= 5000;
+  const bannerVisible   = elapsed >= 300;
+  const metricsVisible  = elapsed >= 1500;
+  const chartVisible    = elapsed >= 3500;
+  const benchVisible    = elapsed >= 5000;
   const riskCardVisible = elapsed >= 5000;
 
   return (
@@ -305,7 +460,7 @@ const Financials = () => {
         <div className="mx-auto" style={{ maxWidth: 1200, padding: "48px 60px 60px" }}>
           <TopBar
             onReplay={reset}
-            breadcrumb="Buildings › City Gate 1, LMS 195 › Financials"
+            breadcrumb="Buildings › Meridian Condominium Association, Inc. › Financials"
             activeItem="financials"
           />
 
@@ -336,8 +491,91 @@ const Financials = () => {
             ════════════════════════════════════════════ */}
             <TabsContent value="overview" className="mt-0">
 
+              {/* ── Risk Banner ── */}
+              <AnimatePresence>
+                {bannerVisible && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 0 }}
+                    animate={{
+                      opacity: 1,
+                      x: [0, -2, 2, -2, 2, 0],
+                    }}
+                    transition={{
+                      opacity: { duration: 0.3 },
+                      x: { duration: 0.35, ease: "easeInOut", times: [0, 0.2, 0.4, 0.6, 0.8, 1] },
+                    }}
+                    style={{
+                      background: "rgba(255, 255, 255, 0.85)",
+                      backdropFilter: "blur(8px)",
+                      border: "1px solid rgba(249, 115, 22, 0.15)",
+                      boxShadow: "0 0 0 1px rgba(249,115,22,0.06), 0 8px 32px rgba(249,115,22,0.10)",
+                      borderRadius: 10,
+                      padding: "14px 20px",
+                      marginBottom: 20,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 24,
+                    }}
+                  >
+                    {/* Left: icon + text */}
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                      <AlertTriangle
+                        size={18}
+                        style={{ color: "#F97316", flexShrink: 0, marginTop: 1 }}
+                      />
+                      <div>
+                        <p style={{ fontSize: 14, fontWeight: 700, color: "#92400E", marginBottom: 3 }}>
+                          Funding Risk Detected
+                        </p>
+                        <p style={{ fontSize: 13, color: "#B45309", lineHeight: 1.5 }}>
+                          This building is 13.5% funded against a Fannie Mae minimum reserve requirement
+                          of 70%. A special assessment is projected for 2028.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Right: funding gap bar */}
+                    <div style={{ flexShrink: 0, textAlign: "right" }}>
+                      <p
+                        style={{
+                          fontSize: 10,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          color: "#9CA3B8",
+                          marginBottom: 6,
+                        }}
+                      >
+                        Funded
+                      </p>
+                      <div
+                        style={{
+                          width: 200,
+                          height: 10,
+                          borderRadius: 5,
+                          background: "#EEEFF2",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "13.5%",
+                            height: "100%",
+                            background: "#F97316",
+                            borderRadius: 5,
+                          }}
+                        />
+                      </div>
+                      <p style={{ fontSize: 12, color: "#9CA3B8", marginTop: 5 }}>
+                        13.5% of 70% minimum
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Key Financial Metrics */}
-              <p style={{ fontSize: 18, fontWeight: 600, color: "#0A0A0A", marginBottom: 12 }}>
+              <p style={{ fontSize: 18, fontWeight: 600, color: "#0F1729", marginBottom: 12 }}>
                 Key Financial Metrics
               </p>
 
@@ -352,49 +590,85 @@ const Financials = () => {
               <div
                 style={{
                   padding: 20,
-                  border: "1px solid #E5E7EB",
-                  borderRadius: 12,
+                  border: "1px solid rgba(15,23,41,0.06)",
+                  borderRadius: 10,
                   background: "#FFFFFF",
                   marginBottom: 48,
+                  boxShadow: "0 2px 8px rgba(15,23,41,0.05)",
                 }}
               >
-                <p
-                  style={{
-                    fontSize: 10,
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase",
-                    marginBottom: 12,
-                    color: "#9CA3AF",
-                    fontWeight: 500,
-                  }}
-                >
-                  30-Year Reserve Fund Projection
-                </p>
+                {/* Title + legend */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                  <p
+                    style={{
+                      fontSize: 10,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                      color: "#9CA3AF",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Reserve Fund Trajectory — Action Required
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                    {/* Dashed gray swatch */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <svg width="24" height="10">
+                        <line
+                          x1="0" y1="5" x2="24" y2="5"
+                          stroke="#9CA3B8" strokeWidth="2"
+                          strokeDasharray="4 3"
+                        />
+                      </svg>
+                      <span style={{ fontSize: 12, color: "#9CA3B8" }}>Current Trajectory</span>
+                    </div>
+                    {/* Solid dark swatch */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <svg width="24" height="10">
+                        <line x1="0" y1="5" x2="24" y2="5" stroke="#0F1729" strokeWidth="2" />
+                      </svg>
+                      <span style={{ fontSize: 12, color: "#0F1729" }}>Recommended Path</span>
+                    </div>
+                  </div>
+                </div>
+
                 {chartVisible && (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <AreaChart data={projectionData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <ComposedChart data={projectionData} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
                       <defs>
-                        <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#0A0A0A" stopOpacity={0.08} />
-                          <stop offset="100%" stopColor="#0A0A0A" stopOpacity={0.01} />
+                        <linearGradient id="fillCurrent" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#9CA3B8" stopOpacity={0} />
+                          <stop offset="100%" stopColor="#9CA3B8" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="fillRecommended" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0F1729" stopOpacity={0.04} />
+                          <stop offset="100%" stopColor="#0F1729" stopOpacity={0.01} />
                         </linearGradient>
                       </defs>
+
                       <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+
                       <XAxis
                         dataKey="year"
                         tick={{ fontSize: 10, fill: "#9CA3AF" }}
                         tickLine={false}
                         axisLine={false}
                         interval={4}
+                        domain={[2026, 2056]}
                       />
                       <YAxis
                         tick={{ fontSize: 10, fill: "#9CA3AF" }}
                         tickLine={false}
                         axisLine={false}
+                        domain={[0, 4500000]}
                         tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`}
                       />
+
                       <Tooltip
-                        formatter={(v: number) => [`$${v.toLocaleString()}`, "Reserve Fund"]}
+                        formatter={(v: number, name: string) => [
+                          `$${v.toLocaleString()}`,
+                          name === "current" ? "Current Trajectory" : "Recommended Path",
+                        ]}
                         contentStyle={{
                           fontSize: 12,
                           borderRadius: 8,
@@ -402,21 +676,52 @@ const Financials = () => {
                           background: "#FFFFFF",
                         }}
                       />
+
+                      {/* Special Assessment Risk vertical line */}
+                      <ReferenceLine
+                        x={2028}
+                        stroke="#EEEFF2"
+                        strokeDasharray="4 3"
+                        strokeWidth={1}
+                        label={{
+                          value: "Special Assessment Risk",
+                          position: "top",
+                          fontSize: 11,
+                          fill: "#9CA3B8",
+                          fontWeight: 400,
+                        }}
+                      />
+
+                      {/* Current Trajectory — dashed neutral gray */}
                       <Area
                         type="monotone"
-                        dataKey="value"
-                        stroke="#0A0A0A"
-                        strokeWidth={2}
-                        fill="url(#areaFill)"
+                        dataKey="current"
+                        stroke="#9CA3B8"
+                        strokeWidth={1.5}
+                        strokeDasharray="5 4"
+                        fill="url(#fillCurrent)"
+                        dot={false}
                         animationDuration={2000}
                         animationBegin={0}
                       />
-                    </AreaChart>
+
+                      {/* Recommended Path — solid dark */}
+                      <Area
+                        type="monotone"
+                        dataKey="recommended"
+                        stroke="#0F1729"
+                        strokeWidth={2}
+                        fill="url(#fillRecommended)"
+                        dot={false}
+                        animationDuration={2000}
+                        animationBegin={200}
+                      />
+                    </ComposedChart>
                   </ResponsiveContainer>
                 )}
               </div>
 
-              {/* Benchmarking Section */}
+              {/* ── Benchmarking + Comparable Buildings (two-column) ── */}
               <AnimatePresence>
                 {benchVisible && (
                   <motion.div
@@ -424,183 +729,230 @@ const Financials = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
                   >
-                    <p style={{ fontSize: 16, fontWeight: 600, color: "#0A0A0A", marginBottom: 16 }}>
-                      Benchmarking vs. Similar Buildings
-                    </p>
+                    <div style={{ display: "flex", gap: 24, marginBottom: 24, alignItems: "flex-start" }}>
 
-                    {/* Two-column comparison table */}
-                    <div
-                      style={{
-                        border: "1px solid #E5E7EB",
-                        borderRadius: 12,
-                        background: "#FFFFFF",
-                        overflow: "hidden",
-                        marginBottom: 48,
-                      }}
-                    >
-                      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                        <thead>
-                          <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
-                            <th
-                              style={{
-                                fontSize: 10,
-                                letterSpacing: "0.06em",
-                                textTransform: "uppercase",
-                                color: "#9CA3AF",
-                                fontWeight: 500,
-                                textAlign: "left",
-                                padding: "12px 20px",
-                              }}
-                            >
-                              Metric
-                            </th>
-                            <th
-                              style={{
-                                fontSize: 10,
-                                letterSpacing: "0.06em",
-                                textTransform: "uppercase",
-                                color: "#9CA3AF",
-                                fontWeight: 500,
-                                textAlign: "right",
-                                padding: "12px 20px",
-                              }}
-                            >
-                              City Gate 1
-                            </th>
-                            <th
-                              style={{
-                                fontSize: 10,
-                                letterSpacing: "0.06em",
-                                textTransform: "uppercase",
-                                color: "#9CA3AF",
-                                fontWeight: 500,
-                                textAlign: "right",
-                                padding: "12px 20px",
-                              }}
-                            >
-                              Similar Buildings Avg
-                            </th>
-                            <th style={{ width: 80, padding: "12px 20px" }} />
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {benchmarkRows.map((b, i) => (
-                            <tr
-                              key={b.label}
-                              style={{
-                                borderBottom: i < benchmarkRows.length - 1 ? "1px solid #F3F4F6" : "none",
-                              }}
-                            >
-                              <td style={{ fontSize: 13, color: "#6B7280", padding: "12px 20px" }}>
-                                {b.label}
-                              </td>
-                              <td
-                                style={{
-                                  fontSize: 14,
-                                  fontWeight: 600,
-                                  color: "#0A0A0A",
-                                  fontFamily: "monospace",
-                                  textAlign: "right",
-                                  padding: "12px 20px",
-                                }}
-                              >
-                                {b.cityGate}
-                              </td>
-                              <td
-                                style={{
-                                  fontSize: 13,
-                                  color: "#9CA3AF",
-                                  fontFamily: "monospace",
-                                  textAlign: "right",
-                                  padding: "12px 20px",
-                                }}
-                              >
-                                {b.avg}
-                              </td>
-                              <td
-                                style={{
-                                  fontSize: 11,
-                                  color: (b.above === b.goodWhenAbove) ? "#16803C" : "#B45309",
-                                  fontWeight: 500,
-                                  textAlign: "right",
-                                  padding: "12px 20px",
-                                }}
-                              >
-                                {b.above ? "above avg \u2191" : "below avg \u2193"}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                      {/* ── LEFT 65% — comparison rows ── */}
+                      <div style={{ flex: "0 0 calc(65% - 12px)" }}>
+                        <p style={{ fontSize: 18, fontWeight: 600, color: "#0F1729", marginBottom: 16 }}>
+                          Benchmarking vs. Similar Buildings
+                        </p>
 
-                    {/* How we found comparable buildings */}
-                    <p
-                      style={{
-                        fontSize: 10,
-                        letterSpacing: "0.08em",
-                        textTransform: "uppercase",
-                        color: "#9CA3AF",
-                        fontWeight: 500,
-                        marginBottom: 12,
-                      }}
-                    >
-                      How we found comparable buildings
-                    </p>
-                    <div
-                      style={{
-                        border: "1px solid #E5E7EB",
-                        borderRadius: 12,
-                        background: "#FFFFFF",
-                        padding: 20,
-                        marginBottom: 48,
-                      }}
-                    >
-                      {[
-                        { label: "Location", value: "Vancouver, BC \u2014 Concrete frame mid/high-rise" },
-                        { label: "Building Type", value: "Townhouse and apartment complex" },
-                        { label: "Age Range", value: "Built 1990\u20131995" },
-                        { label: "Size Class", value: "150\u2013200 units" },
-                      ].map((row, i) => (
+                        {/* Column headers */}
                         <div
-                          key={row.label}
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            padding: "10px 0",
-                            borderTop: i > 0 ? "1px solid #F3F4F6" : "none",
+                            padding: "0 0 8px",
+                            borderBottom: "1px solid #F3F4F6",
+                            marginBottom: 2,
                           }}
                         >
-                          <span style={{ fontSize: 13, fontWeight: 500, color: "#0A0A0A", width: 140, flexShrink: 0 }}>
-                            {row.label}
+                          <span style={{ flex: 1, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3B8", fontWeight: 500 }}>
+                            Metric
                           </span>
-                          <span style={{ fontSize: 13, color: "#6B7280" }}>
-                            {row.value}
+                          <span style={{ width: 110, textAlign: "right", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3B8", fontWeight: 500 }}>
+                            This Building
                           </span>
+                          <span style={{ width: 84 }} />
                         </div>
-                      ))}
+
+                        {benchmarkRows.map((b, i) => {
+                          const isPercentFunded = b.label === "Percent Funded";
+                          const badgeColor = isPercentFunded ? "#EF4444" : "#9CA3B8";
+
+                          return (
+                            <div
+                              key={b.label}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                minHeight: 44,
+                                borderBottom: i < benchmarkRows.length - 1 ? "1px solid #F3F4F6" : "none",
+                              }}
+                            >
+                              {/* Metric name */}
+                              <span style={{ flex: 1, fontSize: 13, color: "#5A6178" }}>
+                                {b.label}
+                              </span>
+
+                              {/* This building value */}
+                              <span
+                                style={{
+                                  width: 110,
+                                  textAlign: "right",
+                                  fontSize: 14,
+                                  fontWeight: 600,
+                                  color: "#0F1729",
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                }}
+                              >
+                                {b.meridian}
+                              </span>
+
+                              {/* Badge */}
+                              <span style={{ width: 84, display: "flex", justifyContent: "flex-end" }}>
+                                {b.above ? (
+                                  <span style={{ fontSize: 11, color: "#9CA3B8" }}>above avg ↑</span>
+                                ) : (
+                                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                    <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
+                                    <span style={{ fontSize: 11, color: "#9CA3B8" }}>below avg ↓</span>
+                                  </div>
+                                )}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* ── RIGHT 35% — How we found comparable buildings ── */}
+                      <div style={{ flex: "0 0 calc(35% - 12px)" }}>
+                        <div
+                          style={{
+                            background: "#F8F9FC",
+                            border: "1px solid rgba(15,23,41,0.06)",
+                            borderRadius: 10,
+                            padding: 16,
+                            boxShadow: "0 2px 8px rgba(15,23,41,0.05)",
+                          }}
+                        >
+                          <p
+                            style={{
+                              fontSize: 10,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.08em",
+                              color: "#9CA3B8",
+                              fontWeight: 500,
+                              marginBottom: 12,
+                            }}
+                          >
+                            How We Found Comparable Buildings
+                          </p>
+
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            {[
+                              { label: "Location",      value: "New York, NY \u2014 Concrete frame mid/high-rise" },
+                              { label: "Building Type", value: "Condominium, mid/high-rise" },
+                              { label: "Age Range",     value: "Built 1990\u20131995" },
+                              { label: "Size Class",    value: "100\u2013150 units" },
+                            ].map((row) => (
+                              <div
+                                key={row.label}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "flex-start",
+                                  gap: 8,
+                                  minHeight: 32,
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    fontSize: 12,
+                                    color: "#9CA3B8",
+                                    width: 88,
+                                    flexShrink: 0,
+                                    paddingTop: 1,
+                                  }}
+                                >
+                                  {row.label}
+                                </span>
+                                <span style={{ fontSize: 12, color: "#0F1729", fontWeight: 500, lineHeight: 1.4 }}>
+                                  {row.value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div style={{ height: 1, background: "#E8EBF0", margin: "12px 0" }} />
+                          <p style={{ fontSize: 11, fontStyle: "italic", color: "#9CA3B8" }}>
+                            Matched from 847 comparable NYC properties
+                          </p>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Recommendation */}
+                    {/* ── Recommendation Card ── */}
                     <div
                       style={{
-                        border: "1px solid #E0E0E0",
-                        borderRadius: 16,
                         background: "#FFFFFF",
-                        padding: "28px 28px",
-                        marginBottom: 48,
+                        border: "1px solid rgba(15,23,41,0.06)",
+                        borderRadius: 10,
+                        padding: 24,
+                        marginBottom: 12,
+                        boxShadow: "0 8px 40px rgba(15,23,41,0.18), 0 0 0 1px rgba(15,23,41,0.12)",
                       }}
                     >
-                      <p style={{ fontSize: 15, fontWeight: 600, color: "#0A0A0A", marginBottom: 10 }}>
-                        Our recommendation
+                      <p
+                        style={{
+                          fontSize: 10,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                          color: "#9CA3B8",
+                          fontWeight: 500,
+                          marginBottom: 8,
+                        }}
+                      >
+                        Our Recommendation
                       </p>
-                      <p style={{ fontSize: 14, color: "#374151", lineHeight: 1.7 }}>
-                        Based on the current CRF balance of $2,064,255 and projected replacement costs of $7,335,097
-                        over the next 10 years, we recommend increasing monthly CRF allocations by $87.43 per
-                        unit — bringing the annual contribution to $511,500. This positions the fund at 100%
-                        financial strength over the 30-year horizon.
+                      <p
+                        style={{
+                          fontSize: 18,
+                          fontWeight: 600,
+                          color: "#0F1729",
+                          lineHeight: 1.4,
+                          marginBottom: 12,
+                        }}
+                      >
+                        Increase reserve contributions to avoid a $340,000 special assessment in 2028.
                       </p>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        {[
+                          "Suggested increase: +$2,400/unit/yr",
+                          "Avoids special assessment: 2028",
+                        ].map((text) => (
+                          <div
+                            key={text}
+                            style={{
+                              background: "#F8F9FC",
+                              border: "1px solid rgba(15,23,41,0.06)",
+                              borderRadius: 6,
+                              padding: "8px 14px",
+                            }}
+                          >
+                            <span style={{ fontSize: 12, color: "#5A6178" }}>{text}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
+
+                    {/* ── Standalone CTA ── */}
+                    <button
+                      onClick={() => navigate("/funding")}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: 44,
+                        background: "transparent",
+                        color: "#0F1729",
+                        border: "1px solid #0F1729",
+                        borderRadius: 7,
+                        fontSize: 14,
+                        fontWeight: 500,
+                        cursor: "pointer",
+                        transition: "background 200ms, color 200ms",
+                        marginBottom: 48,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "#0F1729";
+                        e.currentTarget.style.color = "#FFFFFF";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.color = "#0F1729";
+                      }}
+                    >
+                      View Funding Options &rarr;
+                    </button>
 
                   </motion.div>
                 )}
@@ -621,39 +973,58 @@ const Financials = () => {
                     {/* Regulatory Update */}
                     <div
                       style={{
-                        background: "#FFFFFF",
-                        border: "1px solid #E0E0E0",
-                        borderRadius: 16,
-                        padding: "24px 28px",
-                        marginBottom: 48,
+                        background: "#FFF7ED",
+                        border: "1px solid #FED7AA",
+                        borderRadius: 8,
+                        padding: "14px 20px",
+                        marginBottom: 24,
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 10,
                       }}
                     >
-                      <p
-                        style={{
-                          fontSize: 10,
-                          letterSpacing: "0.08em",
-                          textTransform: "uppercase",
-                          color: "#999",
-                          fontWeight: 500,
-                          marginBottom: 8,
-                        }}
-                      >
-                        Regulatory Update
-                      </p>
-                      <p style={{ fontSize: 14, color: "#0A0A0A", lineHeight: 1.7 }}>
-                        January 2027 — Reserve contribution requirement increasing from 10% to 15% of annual budget.
-                      </p>
+                      <AlertTriangle size={14} style={{ color: "#F97316", flexShrink: 0, marginTop: 1 }} />
+                      <div>
+                        <p
+                          style={{
+                            fontSize: 10,
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                            color: "#92400E",
+                            fontWeight: 600,
+                            marginBottom: 4,
+                          }}
+                        >
+                          Regulatory Update
+                        </p>
+                        <p style={{ fontSize: 13, color: "#B45309", lineHeight: 1.6 }}>
+                          January 2027 — Reserve contribution requirement increasing from 10% to 15% of annual budget.
+                        </p>
+                      </div>
                     </div>
 
                     {/* Key Metrics Row */}
                     <div style={{ display: "flex", gap: 12, marginBottom: 48 }}>
-                      {KEY_METRICS_ROW.map((m, i) => (
-                        <MetricCard key={m.label} label={m.label} value={m.value} index={i} start={riskCardVisible} />
-                      ))}
+                      {KEY_METRICS_ROW.map((m, i) => {
+                        const variant =
+                          m.label === "Delinquency Rate" || m.label === "Unfunded / Unit"
+                            ? "danger"
+                            : "neutral";
+                        return (
+                          <MetricCard
+                            key={m.label}
+                            label={m.label}
+                            value={m.value}
+                            index={i}
+                            start={riskCardVisible}
+                            variant={variant}
+                          />
+                        );
+                      })}
                     </div>
 
                     {/* Requirement Tables */}
-                    <p style={{ fontSize: 16, fontWeight: 600, color: "#0A0A0A", marginBottom: 16 }}>
+                    <p style={{ fontSize: 16, fontWeight: 600, color: "#0F1729", marginBottom: 16 }}>
                       Stakeholder Requirements
                     </p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 48 }}>
@@ -665,22 +1036,34 @@ const Financials = () => {
                     {/* Recommendation */}
                     <div
                       style={{
-                        border: "1px solid #E0E0E0",
-                        borderRadius: 16,
+                        border: "1px solid rgba(15,23,41,0.06)",
+                        borderRadius: 10,
                         background: "#FFFFFF",
-                        padding: "28px 28px",
+                        padding: "20px 24px",
+                        marginBottom: 12,
+                        boxShadow: "0 8px 40px rgba(15,23,41,0.18), 0 0 0 1px rgba(15,23,41,0.12)",
                       }}
                     >
-                      <p style={{ fontSize: 15, fontWeight: 600, color: "#0A0A0A", marginBottom: 10 }}>
-                        Our recommendation
+                      <p
+                        style={{
+                          fontSize: 10,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                          color: "#9CA3B8",
+                          fontWeight: 500,
+                          marginBottom: 10,
+                        }}
+                      >
+                        Our Recommendation
                       </p>
-                      <p style={{ fontSize: 14, color: "#374151", lineHeight: 1.7 }}>
+                      <p style={{ fontSize: 14, fontWeight: 500, color: "#0F1729", lineHeight: 1.6 }}>
                         Based on the current CRF balance of $2,064,255 and projected replacement costs of $7,335,097
                         over the next 10 years, we recommend increasing monthly CRF allocations by $87.43 per
                         unit — bringing the annual contribution to $511,500. This positions the fund at 100%
                         financial strength over the 30-year horizon.
                       </p>
                     </div>
+                    <GhostFundingBtn onClick={() => navigate("/funding")} />
                   </motion.div>
                 )}
               </AnimatePresence>

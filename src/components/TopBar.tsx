@@ -18,7 +18,7 @@ interface TopBarProps {
   activeItem?: string;
 }
 
-const TopBar = ({ onReplay, breadcrumb = "Buildings › ABC Condominium Association, Inc. › Onboarding", activeItem }: TopBarProps) => {
+const TopBar = ({ onReplay, breadcrumb = "Buildings › Meridian Condominium Association, Inc. › Onboarding", activeItem }: TopBarProps) => {
   const navigate = useNavigate();
 
   const currentIndex = NAV_ORDER.findIndex((n) => n.id === activeItem);
