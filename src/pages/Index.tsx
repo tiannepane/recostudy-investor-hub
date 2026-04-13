@@ -415,6 +415,11 @@ const IntegrationCard = ({
   );
 };
 
+/* ─── Constants ─────────────────────────────────────────── */
+
+const BG_VIDEO = "https://videos.pexels.com/video-files/3843168/3843168-uhd_2560_1440_25fps.mp4";
+const BG_FALLBACK = "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1920&q=80";
+
 /* ─── Page ───────────────────────────────────────────────── */
 
 type Scene = "welcome" | "upload";
@@ -528,8 +533,8 @@ const Index = () => {
               style={{
                 position: "absolute",
                 inset: 0,
-                background: "#0A0A0A",
                 zIndex: 45,
+                overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -537,30 +542,55 @@ const Index = () => {
                 textAlign: "center",
               }}
             >
-              <h1 style={{ fontSize: 36, fontWeight: 700, color: "#FFFFFF", marginBottom: 8 }}>
-                Welcome to RECOstudy
-              </h1>
-              <p style={{ fontSize: 16, color: "#999", marginBottom: 32 }}>
-                Automated reserve fund studies, powered by AI.
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => { setScene("upload"); setElapsed(UPLOAD_START); setStarted(true); }}
+              {/* Fallback image */}
+              <div
                 style={{
-                  background: "white",
-                  color: "#0A0A0A",
-                  fontSize: 16,
-                  fontWeight: 600,
-                  padding: "14px 32px",
-                  borderRadius: 10,
-                  border: "none",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage: `url(${BG_FALLBACK})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
                 }}
-              >
-                Add a Building &rarr;
-              </motion.button>
+              />
+              {/* Video */}
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                src={BG_VIDEO}
+              />
+              {/* Dark overlay */}
+              <div style={{ position: "absolute", inset: 0, background: "rgba(10,14,26,0.6)" }} />
+
+              {/* Content */}
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <h1 style={{ fontSize: 36, fontWeight: 700, color: "#FFFFFF", marginBottom: 8 }}>
+                  Welcome to RECOstudy
+                </h1>
+                <p style={{ fontSize: 16, color: "rgba(255,255,255,0.65)", marginBottom: 32 }}>
+                  Automated reserve fund studies, powered by AI.
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => { setScene("upload"); setElapsed(UPLOAD_START); setStarted(true); }}
+                  style={{
+                    background: "white",
+                    color: "#0A0A0A",
+                    fontSize: 16,
+                    fontWeight: 600,
+                    padding: "14px 32px",
+                    borderRadius: 10,
+                    border: "none",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+                  }}
+                >
+                  Add a Building &rarr;
+                </motion.button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
