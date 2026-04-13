@@ -10,7 +10,7 @@ import AgentBar from "@/components/AgentBar";
 const THINKING_MESSAGES = [
   "scanning 24 components for insurance implications...",
   "3 components identified as end-of-life or critical...",
-  "Exterior Facade flagged as primary insurance risk...",
+  "Elevator cab flagged as primary insurance risk...",
   "drafting insurer notification...",
   "attaching reserve study and updated inventory...",
 ];
@@ -18,9 +18,9 @@ const THINKING_MESSAGES = [
 /* ─── Left column bullet rows ─────────────────────────────── */
 
 const WHY_ROWS = [
-  "Building classification may change if structural components are not addressed",
+  "End-of-life elevator components increase liability exposure and occupant risk",
   "Current premium is $6,200 above market average for comparable NYC buildings",
-  "Completing the facade project may qualify for premium reduction",
+  "Completing the elevator cab replacement may qualify for a premium reduction",
 ];
 
 /* ─── Email body lines (start at 4200ms, 300ms apart) ─────── */
@@ -31,11 +31,11 @@ const BODY_LINES: { text: string; spacerAfter?: boolean }[] = [
     text: "This is an automated update from RECOstudy to confirm that a critical component has been identified in the building's reserve fund study.",
     spacerAfter: true,
   },
-  { text: "Component: Exterior Facade & Balconies" },
-  { text: "Status: End-of-life · Remaining Useful Life: 1 year" },
-  { text: "Estimated Replacement Cost: $425,000", spacerAfter: true },
+  { text: "Component: Elevator Cab - Townhouse" },
+  { text: "Status: End-of-life · Remaining Useful Life: 0 years" },
+  { text: "Estimated Replacement Cost: $36,000", spacerAfter: true },
   {
-    text: "Updated reserve study and component inventory records are attached for your review. A restoration project has been initiated and submitted to the contractor marketplace.",
+    text: "Updated reserve study and component inventory records are attached for your review. A replacement project has been initiated and submitted to the contractor marketplace.",
     spacerAfter: true,
   },
   { text: "Please update your records accordingly." },
@@ -173,15 +173,15 @@ const Insurance = () => {
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                           <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
                           <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
-                            Exterior Facade &amp; Balconies
+                            Elevator Cab - Townhouse
                           </span>
                         </div>
                         <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
-                          End-of-life &middot; 1 year RUL &middot; $425,000
+                          End-of-life &middot; 0 years RUL &middot; $36,000
                         </p>
                       </div>
 
-                      {/* Row 2 — Elevator Cab */}
+                      {/* Row 2 — Garbage Compactor */}
                       <div style={{
                         background: "#FFFFFF",
                         border: "1px solid rgba(15,23,41,0.06)",
@@ -192,11 +192,11 @@ const Insurance = () => {
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                           <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
                           <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
-                            Elevator Cab, Townhouse
+                            Site Utilities - Garbage Compactor
                           </span>
                         </div>
                         <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
-                          End-of-life &middot; Immediate &middot; $36,000
+                          End-of-life &middot; Immediate &middot; $42,000
                         </p>
                       </div>
 
@@ -340,7 +340,7 @@ const Insurance = () => {
                       },
                       {
                         label: "Subject:",
-                        value: "Building Update: Exterior Facade & Balconies · Meridian Condominium Association, Inc.",
+                        value: "Building Update: Elevator Cab - Townhouse · Meridian Condominium Association, Inc.",
                         valueWeight: 500,
                       },
                     ].map(({ label, value, valueWeight }) => (

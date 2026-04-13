@@ -10,31 +10,31 @@ import AgentBar from "@/components/AgentBar";
 
 const BIDS = [
   {
-    name: "Restoration Experts LLC",
+    name: "Vertical Access Group",
     photo: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=80&h=80&fit=crop",
     stars: 4.8,
     responseTime: "Response within 3 business days",
-    note: "Strong track record with 12 comparable facade restoration projects in the GTA. Best price-to-quality ratio for this scope.",
-    amount: 438000,
-    amountLabel: "$438,000",
+    note: "Strong track record with 11 comparable elevator cab refurbishments in the GTA. Best price-to-quality ratio for this scope.",
+    amount: 38000,
+    amountLabel: "$38,000",
   },
   {
-    name: "Facade Solutions Group",
+    name: "Elite Elevator Interiors",
     photo: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=80&h=80&fit=crop",
     stars: 4.6,
     responseTime: "Response within 5 business days",
-    note: "Competitive pricing with solid structural credentials. Fewer directly comparable facade references but strong overall portfolio.",
-    amount: 455000,
-    amountLabel: "$455,000",
+    note: "Competitive pricing with solid elevator interior credentials. Strong portfolio of townhouse and low-rise cab replacements.",
+    amount: 41000,
+    amountLabel: "$41,000",
   },
   {
-    name: "BuildRight Contractors",
+    name: "BuildRight Elevator Co.",
     photo: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=80&h=80&fit=crop",
     stars: 4.9,
     responseTime: "Response within 4 business days",
-    note: "Highest rated contractor on the platform. Premium pricing reflects demand.",
-    amount: 472000,
-    amountLabel: "$472,000",
+    note: "Highest rated elevator contractor on the platform. Premium pricing reflects demand and TSSA compliance expertise.",
+    amount: 44000,
+    amountLabel: "$44,000",
   },
 ];
 
@@ -196,7 +196,7 @@ const Marketplace = () => {
   const thinkingMessage =
     elapsed < 800  ? "retrieving active RFPs..."                      :
     elapsed < 1600 ? "scanning contractor database..."                :
-    elapsed < 2400 ? "matching bids to Exterior Facade project..."    :
+    elapsed < 2400 ? "matching bids to Elevator Cab Replacement project..." :
                      "analyzing bid quality and pricing...";
 
   return (
@@ -217,7 +217,7 @@ const Marketplace = () => {
           <AgentBar
             agentName="Marketplace Agent"
             thinkingMessage={thinkingMessage}
-            completeMessage="recommended: Restoration Experts LLC, $438,000"
+            completeMessage="recommended: Vertical Access Group, $38,000"
             accentColor="#F59E0B"
             isThinking={!agentComplete}
             isComplete={agentComplete}
@@ -238,7 +238,7 @@ const Marketplace = () => {
             }}
           >
             <img
-              src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&h=300&fit=crop"
+              src="/elevator-cab-townhouse.png"
               alt=""
               style={{
                 position: "absolute",
@@ -270,13 +270,13 @@ const Marketplace = () => {
                   Live RFP
                 </span>
                 <p style={{ fontSize: 18, fontWeight: 700, color: "white", lineHeight: 1.1, margin: 0 }}>
-                  Exterior Facade &amp; Balconies Restoration
+                  Elevator Cab Replacement - Townhouse
                 </p>
               </div>
               {[
-                { label: "Scope",    value: "Full exterior restoration, balcony waterproofing, structural repair", color: "#C4CAD8" },
-                { label: "Budget",   value: "$425,000 - $480,000", color: "#FFFFFF" },
-                { label: "Timeline", value: "Q2 2026 - Q4 2026", color: "#C4CAD8" },
+                { label: "Scope",    value: "Full cab interior replacement — panels, flooring, ceiling, lighting, door finishes", color: "#C4CAD8" },
+                { label: "Budget",   value: "$36,000 - $44,000", color: "#FFFFFF" },
+                { label: "Timeline", value: "Q2 2026 - Q3 2026", color: "#C4CAD8" },
                 { label: "Priority", value: "● Critical", color: "#FFFFFF" },
               ].map((row) => (
                 <div key={row.label} style={{ display: "flex", gap: 10, marginBottom: 3, fontSize: 12 }}>

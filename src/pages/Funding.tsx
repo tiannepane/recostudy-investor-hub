@@ -11,7 +11,7 @@ const THINKING_MESSAGES = [
   "retrieving reserve fund balance...",
   "pulling best bid from marketplace...",
   "calculating funding gap...",
-  "gap identified, $68,000 shortfall",
+  "gap identified, $10,000 shortfall",
   "scanning lending partners for eligibility...",
 ];
 
@@ -44,7 +44,7 @@ const Funding = () => {
   const showGapCard   = elapsed >= 5800;
 
   // Reserve bar proportions
-  const reservePct = (370000 / 438000) * 100; // ~84.5%
+  const reservePct = (28000 / 38000) * 100; // ~74%
 
   return (
     <div className="flex min-h-screen" style={{ background: "#F8F9FC" }}>
@@ -84,7 +84,7 @@ const Funding = () => {
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 20 }}>
                   <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#F59E0B", flexShrink: 0 }} />
                   <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: "#5A6178" }}>
-                    Funding gap: $68,000 identified
+                    Funding gap: $10,000 identified
                   </span>
                 </div>
               </motion.div>
@@ -147,21 +147,21 @@ const Funding = () => {
                     {/* Reserve Balance */}
                     <div style={{ marginBottom: 12 }}>
                       <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 2 }}>Reserve Balance</p>
-                      <p style={{ fontSize: 20, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$370,000</p>
+                      <p style={{ fontSize: 20, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$28,000</p>
                     </div>
                     <div style={{ height: 1, background: "#EEEFF2", marginBottom: 12 }} />
 
                     {/* Best Bid */}
                     <div style={{ marginBottom: 12 }}>
                       <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 2 }}>Best Bid</p>
-                      <p style={{ fontSize: 20, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$438,000</p>
+                      <p style={{ fontSize: 20, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$38,000</p>
                     </div>
                     <div style={{ height: 1, background: "#EEEFF2", marginBottom: 12 }} />
 
                     {/* Shortfall */}
                     <div style={{ marginBottom: 16 }}>
                       <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 2 }}>Shortfall</p>
-                      <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$68,000</p>
+                      <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$10,000</p>
                     </div>
 
                     {/* Coverage bar */}
@@ -169,7 +169,7 @@ const Funding = () => {
                       <div style={{ width: `${reservePct}%`, height: "100%", background: "#0F1729", borderRadius: 3 }} />
                     </div>
                     <p style={{ fontSize: 11, color: "#9CA3B8", marginBottom: 16 }}>
-                      84% covered by reserves
+                      74% covered by reserves
                     </p>
 
                     {/* Context note */}
@@ -288,7 +288,7 @@ const Funding = () => {
                       Up to $25,000 offset &middot; NY Green Bank eligible
                     </p>
                     <p style={{ fontSize: 13, color: "#5A6178", lineHeight: 1.5, marginBottom: 14, flex: 1 }}>
-                      Available for energy-efficient facade and HVAC projects.
+                      Available for energy-efficient boiler and mechanical replacement projects.
                     </p>
                     <div style={{ display: "flex", justifyContent: "flex-end" }}>
                       <button

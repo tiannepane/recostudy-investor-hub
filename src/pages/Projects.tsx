@@ -47,90 +47,90 @@ interface ComponentDef {
 
 const COMPONENTS: ComponentDef[] = [
   {
-    id: "facade",
-    name: "Exterior Facade & Balconies",
-    category: "Structural",
-    condition: "Poor",
-    rul: "1 year RUL",
+    id: "elevator-cab",
+    name: "Elevator Cab - Townhouse",
+    category: "Services",
+    condition: "Fair",
+    rul: "End of life",
     rulColor: "#EF4444",
-    location: "Main Building Exterior",
-    cost: "$425,000",
+    location: "Townhouse Elevator Shaft",
+    cost: "$36,000",
     lastInspection: "March 2025",
     risk: "Critical",
     riskColor: "#EF4444",
     sources: [
-      { icon: "image",     label: "Facade inspection photos (3)",       bg: "#EFF6FF", color: "#3B82F6" },
-      { icon: "file",      label: "Structural assessment report.pdf",   bg: "#FEF2F2", color: "#EF4444" },
-      { icon: "clipboard", label: "Maintenance history 2019-2025",    bg: "#F3E8FF", color: "#8B5CF6" },
+      { icon: "image",     label: "Elevator cab inspection photos (2)", bg: "#EFF6FF", color: "#3B82F6" },
+      { icon: "file",      label: "Elevator condition report.pdf",      bg: "#FEF2F2", color: "#EF4444" },
+      { icon: "clipboard", label: "Maintenance history 2019-2025",      bg: "#F3E8FF", color: "#8B5CF6" },
     ],
     rfp: {
       id: "RFP-2026-001",
-      title: "Exterior Facade & Balconies Restoration",
+      title: "Elevator Cab Replacement - Townhouse",
       scope:
-        "Complete restoration of exterior facade and balcony structures. Includes waterproofing membrane replacement, concrete spall repair, railing replacement, and protective coating application across all building elevations.",
-      area: "Main Building Exterior",
-      budget: "$425,000 - $480,000",
-      timeline: "Q2 2026 - Q4 2026",
+        "Full replacement of elevator cab interior in the townhouse elevator shaft. Includes new wall panels, flooring, ceiling tiles, lighting fixtures, and door finishes to meet current code requirements.",
+      area: "Townhouse Elevator Shaft",
+      budget: "$36,000 - $44,000",
+      timeline: "Q2 2026 - Q3 2026",
       priority: "Critical",
-      attachments: ["Structural Assessment Report", "Facade Inspection Photos"],
+      attachments: ["Elevator Condition Report", "Cab Inspection Photos"],
     },
   },
   {
-    id: "roof",
-    name: "Roof Membrane",
-    category: "Roofing",
-    condition: "Fair",
-    rul: "3 years RUL",
-    rulColor: "#F59E0B",
-    location: "Full Rooftop, Level 20",
-    cost: "$180,000",
-    lastInspection: "January 2025",
-    risk: "Moderate",
-    riskColor: "#F59E0B",
+    id: "garbage",
+    name: "Site Utilities - Garbage Compactor",
+    category: "Site Improvements",
+    condition: "Poor",
+    rul: "End of life",
+    rulColor: "#EF4444",
+    location: "Garbage Room",
+    cost: "$42,000",
+    lastInspection: "February 2025",
+    risk: "Critical",
+    riskColor: "#EF4444",
     sources: [
-      { icon: "image",     label: "Roof inspection photos (5)",         bg: "#EFF6FF", color: "#3B82F6" },
-      { icon: "file",      label: "Roofing condition report.pdf",       bg: "#FEF2F2", color: "#EF4444" },
-      { icon: "clipboard", label: "Warranty records 2017-2025",       bg: "#F3E8FF", color: "#8B5CF6" },
+      { icon: "image",     label: "Compactor inspection photos (3)",    bg: "#EFF6FF", color: "#3B82F6" },
+      { icon: "file",      label: "Equipment assessment report.pdf",    bg: "#FEF2F2", color: "#EF4444" },
+      { icon: "clipboard", label: "Service history 2018-2025",          bg: "#F3E8FF", color: "#8B5CF6" },
     ],
     rfp: {
       id: "RFP-2026-002",
-      title: "Roof Membrane Replacement",
+      title: "Garbage Compactor Replacement",
       scope:
-        "Full replacement of rooftop waterproofing membrane across all roof sections. Includes removal of existing membrane, substrate inspection and repair, installation of new TPO membrane system, and drainage improvements.",
-      area: "Full Rooftop, Level 20",
-      budget: "$180,000 - $210,000",
-      timeline: "Q3 2026 - Q4 2026",
-      priority: "Moderate",
-      attachments: ["Roofing Condition Report", "Warranty Records"],
+        "Full replacement of garbage compactor unit including motor, hydraulic system, and control panel. Includes disposal of existing unit and installation of new commercial-grade compactor with updated safety controls.",
+      area: "Garbage Room",
+      budget: "$42,000 - $52,000",
+      timeline: "Q2 2026 - Q3 2026",
+      priority: "Critical",
+      attachments: ["Equipment Assessment Report", "Hydraulic System Inspection"],
     },
   },
   {
-    id: "elevator",
-    name: "Elevator Systems",
-    category: "Mechanical",
+    id: "boiler",
+    name: "Boiler",
+    category: "Services",
     condition: "Fair",
-    rul: "5 years RUL",
+    rul: "1 year RUL",
     rulColor: "#F59E0B",
-    location: "All 4 Elevator Shafts",
-    cost: "$290,000",
-    lastInspection: "February 2025",
-    risk: "Moderate",
-    riskColor: "#F59E0B",
+    location: "Mechanical Room",
+    cost: "$100,000",
+    lastInspection: "January 2025",
+    risk: "Critical",
+    riskColor: "#EF4444",
     sources: [
-      { icon: "image",     label: "Elevator inspection photos (2)",     bg: "#EFF6FF", color: "#3B82F6" },
+      { icon: "image",     label: "Boiler inspection photos (4)",       bg: "#EFF6FF", color: "#3B82F6" },
       { icon: "file",      label: "Mechanical systems audit.pdf",       bg: "#FEF2F2", color: "#EF4444" },
-      { icon: "clipboard", label: "Service history 2018-2025",        bg: "#F3E8FF", color: "#8B5CF6" },
+      { icon: "clipboard", label: "Service history 2019-2025",          bg: "#F3E8FF", color: "#8B5CF6" },
     ],
     rfp: {
       id: "RFP-2026-003",
-      title: "Elevator Systems Modernization",
+      title: "Boiler Replacement",
       scope:
-        "Full modernization of all 4 elevator systems including cab refurbishment, control system upgrade, door operator replacement, and safety system compliance updates per TSSA requirements.",
-      area: "All 4 Elevator Shafts",
-      budget: "$290,000 - $330,000",
-      timeline: "Q1 2027 - Q3 2027",
-      priority: "Moderate",
-      attachments: ["Mechanical Systems Audit", "Service History"],
+        "Full replacement of aging boiler system in the mechanical room. Includes removal of existing unit, installation of high-efficiency replacement boiler, piping connections, controls upgrade, and full commissioning.",
+      area: "Mechanical Room",
+      budget: "$100,000 - $120,000",
+      timeline: "Q3 2026 - Q1 2027",
+      priority: "Critical",
+      attachments: ["Mechanical Systems Audit", "Heat Exchanger Report"],
     },
   },
 ];
@@ -145,11 +145,11 @@ const SOURCE_ICON_MAP: Record<SourceIcon, React.ElementType> = {
 
 /* ─── RFP text data ──────────────────────────────────────── */
 
-const TITLE_TEXT  = "Exterior Facade & Balconies Restoration";
+const TITLE_TEXT  = "Elevator Cab Replacement - Townhouse";
 const SCOPE_LINES = [
-  "Complete restoration of exterior facade and balcony structures.",
-  "Includes waterproofing membrane replacement, concrete spall repair,",
-  "railing replacement, and protective coating across all elevations.",
+  "Full replacement of elevator cab interior in the townhouse elevator shaft.",
+  "Includes new wall panels, flooring, ceiling tiles, lighting fixtures,",
+  "and door finishes to meet current code requirements.",
 ];
 
 /* ─── Compact scan card rows ─────────────────────────────── */
@@ -176,7 +176,7 @@ const Projects = () => {
   const navigate = useNavigate();
 
   const [elapsed, setElapsed]               = useState(0);
-  const [selectedId, setSelectedId]         = useState("facade");
+  const [selectedId, setSelectedId]         = useState("elevator-cab");
   const [hasSwitched, setHasSwitched]       = useState(false);
   const [hoveredCard, setHoveredCard]       = useState<string | null>(null);
 
@@ -260,7 +260,7 @@ const Projects = () => {
           <AgentBar
             agentName="Compliance Agent"
             thinkingMessage={thinkingMsg}
-            completeMessage="1 critical component flagged: Exterior Facade &amp; Balconies"
+            completeMessage="3 critical components flagged: Elevator Cab, Garbage Compactor, Boiler"
             accentColor="#6366F1"
             isThinking={agentIsThinking}
             isComplete={agentIsComplete}
@@ -299,11 +299,11 @@ const Projects = () => {
                               Critical: Action Required
                             </p>
                             <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", lineHeight: 1.2, marginBottom: 8 }}>
-                              Exterior Facade &amp; Balconies
+                              Elevator Cab - Townhouse
                             </p>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                               <span style={{ fontSize: 12, color: "#5A6178", background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "2px 8px" }}>
-                                Structural
+                                Services
                               </span>
                               <ConditionIndicator condition="Poor" />
                             </div>
@@ -312,13 +312,13 @@ const Projects = () => {
                             <div style={{ display: "flex", alignItems: "center", height: 36, borderBottom: "1px solid #F8F9FC" }}>
                               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F59E0B", flexShrink: 0, marginRight: 8, display: "inline-block" }} />
                               <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>Remaining Useful Life</span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729" }}>1 year</span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729" }}>End of life</span>
                             </div>
                             {/* Estimated Cost row */}
                             <div style={{ display: "flex", alignItems: "center", height: 36 }}>
                               <DollarSign size={14} style={{ color: "#9CA3B8", flexShrink: 0, marginRight: 8 }} />
                               <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>Estimated Cost</span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$425,000</span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$36,000</span>
                             </div>
                           </motion.div>
                         ) : (
@@ -533,9 +533,9 @@ const Projects = () => {
                                     </p>
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 16px", marginBottom: 10 }}>
                                       {[
-                                        { label: "Building Area", value: "Main Building Exterior" },
-                                        { label: "Est. Budget",   value: "$425,000 - $480,000"   },
-                                        { label: "Timeline",      value: "Q2 2026 - Q4 2026"     },
+                                        { label: "Building Area", value: "Townhouse Elevator Shaft" },
+                                        { label: "Est. Budget",   value: "$36,000 - $44,000"      },
+                                        { label: "Timeline",      value: "Q2 2026 - Q3 2026"      },
                                         { label: "Priority",      value: "Critical"               },
                                       ].map((spec) => (
                                         <div key={spec.label}>
@@ -555,7 +555,7 @@ const Projects = () => {
                                       Attachments
                                     </p>
                                     <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 12 }}>
-                                      {["Structural Assessment Report", "Facade Inspection Photos"].map((att) => (
+                                      {["Elevator Condition Report", "Cab Inspection Photos"].map((att) => (
                                         <div key={att} style={{ display: "flex", alignItems: "center", gap: 5, background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "4px 9px" }}>
                                           <Paperclip size={11} style={{ color: "#9CA3B8" }} />
                                           <span style={{ fontSize: 12, color: "#5A6178" }}>{att}</span>
