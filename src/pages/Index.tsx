@@ -187,7 +187,6 @@ const PdfGroupRow = ({ visible, done, docAppears }: { visible: boolean; done: bo
           <FileText size={22} style={{ color: "#2E1A47" }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 20, fontWeight: 500, color: "#2E1A47", marginBottom: 6 }}>4 PDF Documents</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {PDF_DOCS.map((doc, i) => (
               <AnimatePresence key={doc}>
@@ -501,10 +500,10 @@ const Index = () => {
                           initial={{ x: -1500, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ duration: 0.8, ease: "easeOut" }}
-                          style={{ position: "absolute", bottom: 12, left: "calc(50% - 190px)", zIndex: 6, display: "flex", alignItems: "flex-end", gap: 10 }}
+                          style={{ position: "absolute", bottom: 10, left: "calc(50% - 160px)", zIndex: 6, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}
                         >
                           {/* Stacked PDF file icons */}
-                          <div style={{ position: "relative", width: 44, height: 56, flexShrink: 0 }}>
+                          <div style={{ position: "relative", width: 46, height: 58 }}>
                             {[2, 1, 0].map((offset) => (
                               <div key={offset} style={{
                                 position: "absolute",
@@ -521,12 +520,20 @@ const Index = () => {
                               </div>
                             ))}
                           </div>
-                          <div>
-                            <p style={{ fontSize: 13, fontWeight: 700, color: "#1E293B", margin: "0 0 2px" }}>4 PDF Documents</p>
-                            <p style={{ fontSize: 11, color: "#94A3B8", margin: 0, lineHeight: 1.5 }}>
-                              Financial Statement<br />
-                              Reserve Study · Minutes · Audit
-                            </p>
+                          {/* Names below icons */}
+                          <div style={{ textAlign: "center" }}>
+                            {PDF_DOCS.map((doc, i) => (
+                              <AnimatePresence key={doc}>
+                                {pdfDocAppears[i] && (
+                                  <motion.p
+                                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
+                                    style={{ fontSize: 9, color: "#64748B", margin: 0, lineHeight: 1.6, whiteSpace: "nowrap" }}
+                                  >
+                                    {doc}
+                                  </motion.p>
+                                )}
+                              </AnimatePresence>
+                            ))}
                           </div>
                         </motion.div>
                       )}
@@ -537,22 +544,20 @@ const Index = () => {
                           initial={{ x: -1500, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ duration: 0.8, ease: "easeOut" }}
-                          style={{ position: "absolute", bottom: 12, left: "calc(50% + 30px)", zIndex: 6, display: "flex", alignItems: "flex-end", gap: 10 }}
+                          style={{ position: "absolute", bottom: 10, left: "calc(50% + 50px)", zIndex: 6, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}
                         >
                           {/* Single MP4 file icon */}
-                          <div style={{ width: 40, height: 50, borderRadius: 5, background: "white", border: "1px solid #E5E7EB", boxShadow: "0 2px 6px rgba(0,0,0,0.10)", overflow: "hidden", flexShrink: 0, position: "relative" }}>
+                          <div style={{ width: 40, height: 50, borderRadius: 5, background: "white", border: "1px solid #E5E7EB", boxShadow: "0 2px 6px rgba(0,0,0,0.10)", overflow: "hidden", position: "relative" }}>
                             <div style={{ position: "absolute", top: 0, right: 0, width: 10, height: 10, background: "#F1F5F9", borderLeft: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", borderBottomLeftRadius: 3 }} />
                             <div style={{ position: "absolute", top: 10, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
-                              <Video size={16} style={{ color: "#94A3B8" }} />
+                              <Video size={14} style={{ color: "#94A3B8" }} />
                             </div>
                             <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 14, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <span style={{ fontSize: 8, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>MP4</span>
                             </div>
                           </div>
-                          <div>
-                            <p style={{ fontSize: 13, fontWeight: 700, color: "#1E293B", margin: "0 0 2px" }}>site-walkthrough.mp4</p>
-                            <p style={{ fontSize: 11, color: "#94A3B8", margin: 0 }}>Video Recording · 3.2 MB</p>
-                          </div>
+                          {/* Name below icon */}
+                          <p style={{ fontSize: 9, color: "#64748B", margin: 0, whiteSpace: "nowrap" }}>site-walkthrough.mp4</p>
                         </motion.div>
                       )}
                     </motion.div>
