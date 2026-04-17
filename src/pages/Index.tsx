@@ -567,7 +567,7 @@ const Index = () => {
               {/* Content */}
               <div style={{ position: "relative", zIndex: 1 }}>
                 <h1 style={{ fontSize: 48, fontWeight: 700, color: "#FFFFFF", marginBottom: 8 }}>
-                  Welcome to RECOstudy
+                  Welcome to RECOstudy™
                 </h1>
                 <p style={{ fontSize: 22, color: "rgba(255,255,255,0.65)", marginBottom: 32 }}>
                   Automated reserve fund studies, powered by AI.
