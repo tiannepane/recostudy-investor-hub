@@ -9,12 +9,12 @@ const S1_IN   = 400;
 const S1_OUT  = 6400;   // ~10 words + animated counter + timeline
 
 const S2_IN   = 6800;
-const S2_OUT  = 11300;  // ~10 words
+const S2_OUT  = 12300;  // 11 words → 5.5s
 
-const S3_IN   = 11700;
-const S3_OUT  = 17200;  // ~12 words + emoji stagger
+const S3_IN   = 12700;
+const S3_OUT  = 18200;  // 12 words + emoji stagger → 5.5s
 
-// Problems — one at a time, duration scaled by word count (2 words → 1600ms, 3 words → 2000ms)
+// Problems — one at a time, duration scaled by word count (2 words → 1800ms, 3 words → 2400ms)
 const PROBLEMS = [
   "Deferred Maintenance",        // 2 words
   "Surprise Levies",             // 2 words
@@ -25,16 +25,16 @@ const PROBLEMS = [
   "Stalled Sales",               // 2 words
 ] as const;
 
-const PROB_DURATIONS = [1600, 1600, 1600, 1600, 2000, 2000, 1600];
+const PROB_DURATIONS = [1800, 1800, 1800, 1800, 2400, 2400, 1800];
 const PROB_OFFSETS: number[] = [];
 let _cum = 0;
 for (const d of PROB_DURATIONS) { PROB_OFFSETS.push(_cum); _cum += d; }
-const PROB_TOTAL = _cum; // 12000ms
+const PROB_TOTAL = _cum; // 13800ms
 
 const CYCLE_COLORS = ["#EF4444", "#F97316", "#FBBF24"];
 const PROB_COLORS = PROBLEMS.map((_, i) => CYCLE_COLORS[i % 3]);
 
-const PROB_START = 17600;
+const PROB_START = 18600;
 
 const S5_IN  = PROB_START + PROB_TOTAL + 400;
 const S5_OUT = S5_IN + 3200;  // "Until now." — 2 words, punchy
@@ -273,8 +273,7 @@ const Intro = () => {
       {/* ── Scene 2: So is their model ── */}
       <Scene visible={s2}>
         <h1 style={{ fontSize: "clamp(28px, 4.5vw, 60px)", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.2, maxWidth: 860 }}>
-          So is their operating, compliance{" "}
-          <span style={{ color: "#4D6BA9" }}>and capital planning model.</span>
+          So is their operating, compliance and capital planning model.
         </h1>
       </Scene>
 
@@ -415,14 +414,6 @@ const Intro = () => {
                 {ch}
               </motion.span>
             ))}
-            <motion.sup
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9 }}
-              style={{ fontSize: "clamp(14px, 2vw, 22px)", color: "#FFFFFF", marginLeft: 4 }}
-            >
-              ™
-            </motion.sup>
           </div>
 
           {/* Animated underline */}
@@ -441,7 +432,7 @@ const Intro = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7 }}
                 style={{
-                  fontSize: "clamp(16px, 2.2vw, 28px)",
+                  fontSize: "clamp(22px, 3vw, 38px)",
                   fontWeight: 400,
                   color: "#94A3B8",
                   textAlign: "center",
