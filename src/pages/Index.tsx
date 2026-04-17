@@ -14,7 +14,7 @@ const PHOTO_URLS = [
   "/exterior-windows-aluminum.png",
   "/elevator-machinery-townhouse.png",
   "/roofing-inverted.png",
-  "/boiler.png",
+  "/building-corridor.png",
 ];
 // 3 × 2 grid, each photo 88 × 76 px
 const PHOTO_POSITIONS = [
