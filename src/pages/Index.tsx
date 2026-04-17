@@ -583,7 +583,7 @@ const Index = () => {
                             <span style={{ fontSize: 7, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>MP4</span>
                           </div>
                         </div>
-                        <div style={{ flex: 1 }} />
+                        <p style={{ fontSize: 15, color: "#64748B", margin: 0, flex: 1 }}>site-walkthrough.mp4</p>
                         <div style={{ flexShrink: 0 }}>
                           {!voiceFileDone ? (
                             <div style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #E5E7EB", borderTopColor: "#2E1A47", animation: "spin 0.8s linear infinite" }} />
@@ -600,7 +600,7 @@ const Index = () => {
                   <SideAgentPanel
                     name="Video Agent" Icon={Video} color="#8B5CF6"
                     progress={audioProgress} visible={t >= AUDIO_START}
-                    filename="site-walkthrough.mp4"
+
                     observations={[
                       "→ Transcribing 4m 32s walkthrough...",
                       "→ Rooftop membrane: last serviced 2019",
