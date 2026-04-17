@@ -7,27 +7,38 @@ import Sidebar from "@/components/Sidebar";
 
 const UPLOAD_START = 1500;
 
-const PHOTO_SLIDE_STARTS = [400, 850, 1300, 1750];
+const PHOTO_SLIDE_STARTS = [400, 700, 1000, 1300, 1600, 1900];
 const PHOTO_URLS = [
   "/suspended-slab-waterproofing.png",
   "/parkade-roof-deck.png",
   "/exterior-windows-aluminum.png",
   "/elevator-machinery-townhouse.png",
+  "/roofing-inverted.png",
+  "/boiler.png",
 ];
+// 3 × 2 grid, each photo 88 × 76 px
 const PHOTO_POSITIONS = [
-  { top: 4,  left: "calc(50% - 114px)" },
-  { top: 4,  left: "calc(50% + 4px)"   },
-  { top: 94, left: "calc(50% - 114px)" },
-  { top: 94, left: "calc(50% + 4px)"   },
+  { top: 4,  left: "calc(50% - 136px)" },
+  { top: 4,  left: "calc(50% - 44px)"  },
+  { top: 4,  left: "calc(50% + 48px)"  },
+  { top: 88, left: "calc(50% - 136px)" },
+  { top: 88, left: "calc(50% - 44px)"  },
+  { top: 88, left: "calc(50% + 48px)"  },
+];
+
+// PDF sub-docs appear one by one within the single PDF row
+const PDF_DOC_APPEARS = [4600, 5100, 5600, 6100];
+const PDF_DOCS = [
+  "Financial Statement.pdf",
+  "Reserve Study.pdf",
+  "Meeting Minutes.pdf",
+  "Audit Report.pdf",
 ];
 
 const FILE_TIMES = {
-  photos:    { appear: 2500, done: 4100 },
-  financial: { appear: 4600, done: 6000 },
-  reserve:   { appear: 5000, done: 6400 },
-  minutes:   { appear: 5400, done: 6800 },
-  audit:     { appear: 5800, done: 7200 },
-  voice:     { appear: 7700, done: 9300 },
+  photos: { appear: 2500, done: 4100 },
+  pdfs:   { appear: 4600, done: 7000 },  // group row: appears with first doc, done after last
+  voice:  { appear: 7500, done: 9100 },
 };
 
 const DZ_FADE = 9800;
@@ -152,6 +163,60 @@ const FileRow = ({
             <Check size={14} color="white" />
           </motion.div>
         )}
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+/* ─── PDF Group Row ────────────────────────────────────────── */
+
+const PdfGroupRow = ({ visible, done, docAppears }: { visible: boolean; done: boolean; docAppears: boolean[] }) => (
+  <AnimatePresence>
+    {visible && (
+      <motion.div
+        initial={{ x: -20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        style={{
+          display: "flex", alignItems: "flex-start", gap: 12,
+          padding: "12px 16px", background: "white",
+          borderRadius: 10, border: "1px solid #E5E7EB",
+        }}
+      >
+        <div style={{ width: 40, height: 40, borderRadius: 8, background: "#F5F5F5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
+          <FileText size={22} style={{ color: "#2E1A47" }} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: 20, fontWeight: 500, color: "#2E1A47", marginBottom: 6 }}>4 PDF Documents</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {PDF_DOCS.map((doc, i) => (
+              <AnimatePresence key={doc}>
+                {docAppears[i] && (
+                  <motion.p
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    style={{ fontSize: 16, color: "#94A3B8", margin: 0 }}
+                  >
+                    {doc}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            ))}
+          </div>
+        </div>
+        <div style={{ paddingTop: 8, flexShrink: 0 }}>
+          {!done ? (
+            <div style={{ width: 24, height: 24, borderRadius: "50%", border: "2px solid #E5E7EB", borderTopColor: "#2E1A47", animation: "spin 0.8s linear infinite" }} />
+          ) : (
+            <motion.div
+              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3 }}
+              style={{ width: 24, height: 24, borderRadius: "50%", background: "#2E1A47", display: "flex", alignItems: "center", justifyContent: "center" }}
+            >
+              <Check size={14} color="white" />
+            </motion.div>
+          )}
+        </div>
       </motion.div>
     )}
   </AnimatePresence>
@@ -299,18 +364,13 @@ const Index = () => {
   const photoVisible      = PHOTO_SLIDE_STARTS.map((s) => t >= s);
   const photosInDzFading  = t >= DZ_FADE;
 
-  const photosFileVisible    = t >= FILE_TIMES.photos.appear;
-  const photosFileDone       = t >= FILE_TIMES.photos.done;
-  const financialFileVisible = t >= FILE_TIMES.financial.appear;
-  const financialFileDone    = t >= FILE_TIMES.financial.done;
-  const reserveFileVisible   = t >= FILE_TIMES.reserve.appear;
-  const reserveFileDone      = t >= FILE_TIMES.reserve.done;
-  const minutesFileVisible   = t >= FILE_TIMES.minutes.appear;
-  const minutesFileDone      = t >= FILE_TIMES.minutes.done;
-  const auditFileVisible     = t >= FILE_TIMES.audit.appear;
-  const auditFileDone        = t >= FILE_TIMES.audit.done;
-  const voiceFileVisible     = t >= FILE_TIMES.voice.appear;
-  const voiceFileDone        = t >= FILE_TIMES.voice.done;
+  const photosFileVisible = t >= FILE_TIMES.photos.appear;
+  const photosFileDone    = t >= FILE_TIMES.photos.done;
+  const pdfsVisible       = t >= FILE_TIMES.pdfs.appear;
+  const pdfsDone          = t >= FILE_TIMES.pdfs.done;
+  const pdfDocAppears     = PDF_DOC_APPEARS.map((ts) => t >= ts);
+  const voiceFileVisible  = t >= FILE_TIMES.voice.appear;
+  const voiceFileDone     = t >= FILE_TIMES.voice.done;
 
   const prog = (start: number, dur: number) =>
     t < start ? 0 : Math.min((t - start) / dur, 1);
@@ -413,7 +473,7 @@ const Index = () => {
                   {!photosInDzFading && (
                     <motion.div
                       exit={{ opacity: 0, transition: { duration: 0.6 } }}
-                      style={{ position: "relative", width: "100%", height: 180, borderRadius: 12, border: "1px dashed #C0C0C0", background: "#FAFAFA", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12 }}
+                      style={{ position: "relative", width: "100%", height: 172, borderRadius: 12, border: "1px dashed #C0C0C0", background: "#FAFAFA", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12 }}
                     >
                       <Upload size={36} style={{ color: "#C0C0C0" }} />
                       <p style={{ fontSize: 18, color: "#94A3B8" }}>Drop files here</p>
@@ -426,7 +486,7 @@ const Index = () => {
                             initial={{ x: -1500, opacity: 0 }}
                             animate={{ x: 0, opacity: 1, scale: [1, 1, 1.03, 1] }}
                             transition={{ x: { duration: 0.8, ease: "easeOut" }, opacity: { duration: 0.8 }, scale: { duration: 0.3, delay: 0.8 } }}
-                            style={{ position: "absolute", top: pos.top, left: pos.left, width: 110, height: 82, borderRadius: 8, border: "2px solid white", boxShadow: "0 4px 16px rgba(0,0,0,0.12)", overflow: "hidden", zIndex: 5 }}
+                            style={{ position: "absolute", top: pos.top, left: pos.left, width: 88, height: 76, borderRadius: 8, border: "2px solid white", boxShadow: "0 4px 16px rgba(0,0,0,0.12)", overflow: "hidden", zIndex: 5 }}
                           >
                             <img src={url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                           </motion.div>
@@ -438,12 +498,9 @@ const Index = () => {
 
                 {/* File rows */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
-                  <FileRow visible={photosFileVisible}    done={photosFileDone}    name="6 building inspection photos"  detail="Images · 24.5 MB"         IconComp={ImageIcon} />
-                  <FileRow visible={financialFileVisible} done={financialFileDone} name="Financial Statement.pdf"       detail="PDF Document · 3.1 MB"     IconComp={FileText}  />
-                  <FileRow visible={reserveFileVisible}   done={reserveFileDone}   name="Reserve Study.pdf"             detail="PDF Document · 8.7 MB"     IconComp={FileText}  />
-                  <FileRow visible={minutesFileVisible}   done={minutesFileDone}   name="Meeting Minutes.pdf"           detail="PDF Document · 1.4 MB"     IconComp={FileText}  />
-                  <FileRow visible={auditFileVisible}     done={auditFileDone}     name="Audit Report.pdf"              detail="PDF Document · 2.2 MB"     IconComp={FileText}  />
-                  <FileRow visible={voiceFileVisible}     done={voiceFileDone}     name="site-walkthrough-notes.m4a"    detail="Voice Recording · 3.2 MB"  IconComp={Mic}       />
+                  <FileRow    visible={photosFileVisible} done={photosFileDone} name="6 building inspection photos" detail="Images · 24.5 MB"          IconComp={ImageIcon} />
+                  <PdfGroupRow visible={pdfsVisible}      done={pdfsDone}       docAppears={pdfDocAppears} />
+                  <FileRow    visible={voiceFileVisible}  done={voiceFileDone}  name="site-walkthrough-notes.m4a"  detail="Voice Recording · 3.2 MB"   IconComp={Mic}       />
                 </div>
 
                 {/* Agent section */}
