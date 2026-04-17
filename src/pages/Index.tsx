@@ -22,31 +22,31 @@ const PHOTO_POSITIONS = [
 ];
 
 const FILE_TIMES = {
-  photos: { appear: 2500, done: 3100 },
-  pdf:    { appear: 3600, done: 4200 },
-  voice:  { appear: 4700, done: 5300 },
+  photos: { appear: 2500, done: 4100 },   // +1s processing
+  pdf:    { appear: 4600, done: 6200 },   // +1s processing
+  voice:  { appear: 6700, done: 8300 },   // +1s processing
 };
 
-const DZ_FADE = 5800;
+const DZ_FADE = 8800;
 
-const VISION_START = 5800;
-const VISION_DUR   = 2500;
-const VISION_END   = VISION_START + VISION_DUR;   // 8300
+const VISION_START = 8800;
+const VISION_DUR   = 3500;                          // +1s
+const VISION_END   = VISION_START + VISION_DUR;    // 12300
 
-const DOC_START = VISION_END + 300;                // 8600
-const DOC_DUR   = 2500;
-const DOC_END   = DOC_START + DOC_DUR;             // 11100
+const DOC_START = VISION_END + 300;                 // 12600
+const DOC_DUR   = 3500;                             // +1s
+const DOC_END   = DOC_START + DOC_DUR;              // 16100
 
-const AUDIO_START = DOC_END + 300;                 // 11400
-const AUDIO_DUR   = 2500;
-const AUDIO_END   = AUDIO_START + AUDIO_DUR;       // 13900
+const AUDIO_START = DOC_END + 300;                  // 16400
+const AUDIO_DUR   = 3500;                           // +1s
+const AUDIO_END   = AUDIO_START + AUDIO_DUR;        // 19900
 
-const QA_START = AUDIO_END + 400;                  // 14300
-const QA_DUR   = 2400;
-const QA_END   = QA_START + QA_DUR;               // 16700
+const QA_START = AUDIO_END + 400;                   // 20300
+const QA_DUR   = 3400;                              // +1s
+const QA_END   = QA_START + QA_DUR;                // 23700
 
-const COMPLETION_AT    = QA_END + 400;             // 17100
-const BUTTON_APPEAR_AT = COMPLETION_AT + 1800;     // 18900
+const COMPLETION_AT    = QA_END + 400;              // 24100
+const BUTTON_APPEAR_AT = COMPLETION_AT + 1800;      // 25900
 
 /* ─── Agent config ─────────────────────────────────────────── */
 
