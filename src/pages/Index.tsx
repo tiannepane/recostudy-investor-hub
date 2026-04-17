@@ -107,22 +107,26 @@ const PdfGroupRow = ({ visible, done, docAppears }: { visible: boolean; done: bo
         transition={{ duration: 0.5, ease: "easeOut" }}
         style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 14px", background: "white", borderRadius: 10, border: "1px solid #E5E7EB" }}
       >
-        {/* 4 PDF file icons appearing one by one */}
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flex: 1 }}>
-          {[0, 1, 2, 3].map((i) => (
-            <AnimatePresence key={i}>
+        {/* Stacked PDF icon */}
+        <div style={{ position: "relative", width: 46, height: 52, flexShrink: 0 }}>
+          {[2, 1, 0].map((offset) => (
+            <div key={offset} style={{ position: "absolute", top: offset * 3, left: offset * 3, width: 36, height: 46, borderRadius: 5, background: "white", border: "1px solid #E5E7EB", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 0, right: 0, width: 9, height: 9, background: "#F1F5F9", borderLeft: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", borderBottomLeftRadius: 3 }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 13, background: "#E53E3E", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 7, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>PDF</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Doc names appear one by one */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {PDF_DOCS.map((doc, i) => (
+            <AnimatePresence key={doc}>
               {docAppears[i] && (
-                <motion.div
-                  initial={{ scale: 0.6, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  style={{ width: 36, height: 46, borderRadius: 5, background: "white", border: "1px solid #E5E7EB", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", overflow: "hidden", position: "relative", flexShrink: 0 }}
-                >
-                  <div style={{ position: "absolute", top: 0, right: 0, width: 9, height: 9, background: "#F1F5F9", borderLeft: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", borderBottomLeftRadius: 3 }} />
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 13, background: "#E53E3E", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontSize: 7, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>PDF</span>
-                  </div>
-                </motion.div>
+                <motion.p initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}
+                  style={{ fontSize: 15, color: "#64748B", margin: "0 0 2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {doc}
+                </motion.p>
               )}
             </AnimatePresence>
           ))}
