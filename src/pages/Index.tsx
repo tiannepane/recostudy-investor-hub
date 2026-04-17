@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Image as ImageIcon, FileText, Mic, Check, Eye, ShieldCheck } from "lucide-react";
+import { Upload, Image as ImageIcon, FileText, Mic, Check, Eye, ShieldCheck, Video } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 
 /* ─── Timing (ms) ──────────────────────────────────────────── */
@@ -473,10 +473,12 @@ const Index = () => {
                   {!photosInDzFading && (
                     <motion.div
                       exit={{ opacity: 0, transition: { duration: 0.6 } }}
-                      style={{ position: "relative", width: "100%", height: 172, borderRadius: 12, border: "1px dashed #C0C0C0", background: "#FAFAFA", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12 }}
+                      style={{ position: "relative", width: "100%", height: 228, borderRadius: 12, border: "1px dashed #C0C0C0", background: "#FAFAFA", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 12 }}
                     >
                       <Upload size={36} style={{ color: "#C0C0C0" }} />
                       <p style={{ fontSize: 18, color: "#94A3B8" }}>Drop files here</p>
+
+                      {/* Photo thumbnails — 3×2 grid */}
                       {PHOTO_URLS.map((url, i) => {
                         if (!photoVisible[i]) return null;
                         const pos = PHOTO_POSITIONS[i];
@@ -492,6 +494,38 @@ const Index = () => {
                           </motion.div>
                         );
                       })}
+
+                      {/* PDF chip — flies up after photos */}
+                      {pdfsVisible && (
+                        <motion.div
+                          initial={{ y: 40, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ duration: 0.5, ease: "easeOut" }}
+                          style={{ position: "absolute", bottom: 14, left: "calc(50% - 180px)", display: "flex", alignItems: "center", gap: 7, background: "white", borderRadius: 8, border: "1px solid #E5E7EB", padding: "7px 14px", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", zIndex: 6 }}
+                        >
+                          <FileText size={18} style={{ color: "#2E1A47", flexShrink: 0 }} />
+                          <div>
+                            <p style={{ fontSize: 14, fontWeight: 600, color: "#2E1A47", margin: 0, lineHeight: 1.2 }}>4 PDF Documents</p>
+                            <p style={{ fontSize: 12, color: "#94A3B8", margin: 0 }}>Financial Statement · Reserve Study · Minutes · Audit</p>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* MP4 chip — flies up after PDFs */}
+                      {voiceFileVisible && (
+                        <motion.div
+                          initial={{ y: 40, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ duration: 0.5, ease: "easeOut" }}
+                          style={{ position: "absolute", bottom: 14, left: "calc(50% + 20px)", display: "flex", alignItems: "center", gap: 7, background: "white", borderRadius: 8, border: "1px solid #E5E7EB", padding: "7px 14px", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", zIndex: 6 }}
+                        >
+                          <Video size={18} style={{ color: "#2E1A47", flexShrink: 0 }} />
+                          <div>
+                            <p style={{ fontSize: 14, fontWeight: 600, color: "#2E1A47", margin: 0, lineHeight: 1.2 }}>site-walkthrough.mp4</p>
+                            <p style={{ fontSize: 12, color: "#94A3B8", margin: 0 }}>Video · 3.2 MB</p>
+                          </div>
+                        </motion.div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -500,7 +534,7 @@ const Index = () => {
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
                   <FileRow    visible={photosFileVisible} done={photosFileDone} name="6 building inspection photos" detail="Images · 24.5 MB"          IconComp={ImageIcon} />
                   <PdfGroupRow visible={pdfsVisible}      done={pdfsDone}       docAppears={pdfDocAppears} />
-                  <FileRow    visible={voiceFileVisible}  done={voiceFileDone}  name="site-walkthrough-notes.m4a"  detail="Voice Recording · 3.2 MB"   IconComp={Mic}       />
+                  <FileRow    visible={voiceFileVisible}  done={voiceFileDone}  name="site-walkthrough.mp4"        detail="Video Recording · 3.2 MB"   IconComp={Video}     />
                 </div>
 
                 {/* Agent section */}
