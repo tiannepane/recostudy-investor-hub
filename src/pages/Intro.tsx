@@ -272,9 +272,30 @@ const Intro = () => {
 
       {/* ── Scene 2: So is their model ── */}
       <Scene visible={s2}>
-        <h1 style={{ fontSize: "clamp(28px, 4.5vw, 60px)", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.2, maxWidth: 860 }}>
-          So is their operating, compliance and capital planning model.
-        </h1>
+        <div style={{ textAlign: "center" }}>
+          {[
+            { text: "So is their",                weight: 400, size: "clamp(22px, 3.2vw, 44px)" },
+            { text: "operating,",                 weight: 700, size: "clamp(32px, 5vw, 68px)"  },
+            { text: "compliance",                 weight: 700, size: "clamp(32px, 5vw, 68px)"  },
+            { text: "and capital planning model.",weight: 700, size: "clamp(32px, 5vw, 68px)"  },
+          ].map((line, i) => (
+            <motion.p
+              key={i}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + i * 0.6, duration: 0.5, ease: "easeOut" }}
+              style={{
+                fontSize: line.size,
+                fontWeight: line.weight,
+                color: "#FFFFFF",
+                lineHeight: 1.25,
+                margin: "0 0 4px",
+              }}
+            >
+              {line.text}
+            </motion.p>
+          ))}
+        </div>
       </Scene>
 
       {/* ── Scene 3: Manually ── */}
