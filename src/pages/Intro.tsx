@@ -31,7 +31,8 @@ let _cum = 0;
 for (const d of PROB_DURATIONS) { PROB_OFFSETS.push(_cum); _cum += d; }
 const PROB_TOTAL = _cum; // 12000ms
 
-const PROB_COLORS = ["#EF4444", "#F97316", "#FB923C", "#FB923C", "#94A3B8", "#64748B", "#475569"];
+const CYCLE_COLORS = ["#EF4444", "#F97316", "#FBBF24"];
+const PROB_COLORS = PROBLEMS.map((_, i) => CYCLE_COLORS[i % 3]);
 
 const PROB_START = 17600;
 
@@ -248,7 +249,7 @@ const Intro = () => {
           transition={{ delay: 1.4, duration: 0.6 }}
           style={{ display: "flex", alignItems: "center", gap: 16 }}
         >
-          <span style={{ fontSize: "clamp(24px, 3.5vw, 44px)" }}>🏚️</span>
+          <span style={{ fontSize: "clamp(24px, 3.5vw, 44px)", filter: "grayscale(1)" }}>🏚️</span>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {["1940", "1960", "1980", "2000", "2010", "2020", "2026"].map((yr, i, arr) => (
               <motion.div
@@ -258,7 +259,7 @@ const Intro = () => {
                 transition={{ delay: 1.6 + i * 0.12 }}
                 style={{ display: "flex", alignItems: "center", gap: 10 }}
               >
-                <span style={{ fontSize: "clamp(16px, 2.2vw, 26px)", color: i === arr.length - 1 ? "#FFFFFF" : "#94A3B8", fontWeight: i === arr.length - 1 ? 700 : 400 }}>
+                <span style={{ fontSize: "clamp(22px, 3.2vw, 38px)", color: i === arr.length - 1 ? "#FFFFFF" : "#94A3B8", fontWeight: i === arr.length - 1 ? 700 : 400 }}>
                   {yr}
                 </span>
                 {i < arr.length - 1 && <span style={{ color: "#475569", fontSize: "clamp(12px, 1.4vw, 18px)" }}>──</span>}
@@ -287,14 +288,15 @@ const Intro = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.6 }}
-          style={{ display: "flex", gap: 20, fontSize: "clamp(28px, 4vw, 52px)" }}
+          style={{ display: "flex", gap: 28, fontSize: "clamp(38px, 5.5vw, 72px)" }}
         >
-          {["🗂️", "📋", "🗃️", "📠", "🗄️"].map((emoji, i) => (
+          {["☎️", "📟", "💾", "📠", "📼"].map((emoji, i) => (
             <motion.span
               key={emoji}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 1.0 + i * 0.12, duration: 0.4 }}
+              style={{ filter: "grayscale(1)" }}
             >
               {emoji}
             </motion.span>
@@ -309,10 +311,10 @@ const Intro = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
           style={{
-            fontSize: "clamp(14px, 1.8vw, 20px)",
-            color: "#475569",
-            letterSpacing: "0.06em",
-            marginBottom: 28,
+            fontSize: "clamp(20px, 2.8vw, 36px)",
+            color: "#94A3B8",
+            letterSpacing: "0.04em",
+            marginBottom: 32,
             fontWeight: 500,
           }}
         >
@@ -391,24 +393,24 @@ const Intro = () => {
 
           {/* Logo text */}
           <div style={{ display: "flex", alignItems: "baseline", position: "relative" }}>
-            {"RECO".split("").map((ch, i) => (
+            {"RE".split("").map((ch, i) => (
               <motion.span
                 key={`r${i}`}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07, duration: 0.5, ease: "easeOut" }}
-                style={{ fontSize: "clamp(48px, 8vw, 100px)", fontWeight: 800, color: "#FFFFFF", letterSpacing: "-0.02em", lineHeight: 1 }}
+                style={{ fontSize: "clamp(48px, 8vw, 100px)", fontWeight: 800, color: "#4D6BA9", letterSpacing: "-0.02em", lineHeight: 1 }}
               >
                 {ch}
               </motion.span>
             ))}
-            {"study".split("").map((ch, i) => (
+            {"collab".split("").map((ch, i) => (
               <motion.span
                 key={`s${i}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.28 + i * 0.07, duration: 0.5, ease: "easeOut" }}
-                style={{ fontSize: "clamp(48px, 8vw, 100px)", fontWeight: 800, color: "#4D6BA9", letterSpacing: "-0.02em", lineHeight: 1 }}
+                transition={{ delay: 0.14 + i * 0.07, duration: 0.5, ease: "easeOut" }}
+                style={{ fontSize: "clamp(48px, 8vw, 100px)", fontWeight: 800, color: "#FFFFFF", letterSpacing: "-0.02em", lineHeight: 1 }}
               >
                 {ch}
               </motion.span>
@@ -417,7 +419,7 @@ const Intro = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9 }}
-              style={{ fontSize: "clamp(14px, 2vw, 22px)", color: "#4D6BA9", marginLeft: 4 }}
+              style={{ fontSize: "clamp(14px, 2vw, 22px)", color: "#FFFFFF", marginLeft: 4 }}
             >
               ™
             </motion.sup>
@@ -447,7 +449,7 @@ const Intro = () => {
                   lineHeight: 1.5,
                 }}
               >
-                We automate reserve fund studies — and connect buildings with the{" "}
+                <span style={{ color: "#4D6BA9", fontWeight: 600 }}>RE</span>collab automates reserve fund studies — and connects buildings with the{" "}
                 <span style={{ color: "#FFFFFF", fontWeight: 500 }}>markets that fund, insure, and retrofit them.</span>
               </motion.p>
             )}
