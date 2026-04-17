@@ -495,34 +495,63 @@ const Index = () => {
                         );
                       })}
 
-                      {/* PDF chip — flies up after photos */}
+                      {/* PDF file stack — slides in from left after photos */}
                       {pdfsVisible && (
                         <motion.div
-                          initial={{ y: 40, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ duration: 0.5, ease: "easeOut" }}
-                          style={{ position: "absolute", bottom: 14, left: "calc(50% - 180px)", display: "flex", alignItems: "center", gap: 7, background: "white", borderRadius: 8, border: "1px solid #E5E7EB", padding: "7px 14px", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", zIndex: 6 }}
+                          initial={{ x: -1500, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
+                          style={{ position: "absolute", bottom: 12, left: "calc(50% - 190px)", zIndex: 6, display: "flex", alignItems: "flex-end", gap: 10 }}
                         >
-                          <FileText size={18} style={{ color: "#2E1A47", flexShrink: 0 }} />
+                          {/* Stacked PDF file icons */}
+                          <div style={{ position: "relative", width: 44, height: 56, flexShrink: 0 }}>
+                            {[2, 1, 0].map((offset) => (
+                              <div key={offset} style={{
+                                position: "absolute",
+                                top: offset * 3, left: offset * 3,
+                                width: 40, height: 50, borderRadius: 5,
+                                background: "white", border: "1px solid #E5E7EB",
+                                boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
+                                overflow: "hidden",
+                              }}>
+                                <div style={{ position: "absolute", top: 0, right: 0, width: 10, height: 10, background: "#F1F5F9", borderLeft: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", borderBottomLeftRadius: 3 }} />
+                                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 14, background: "#E53E3E", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  <span style={{ fontSize: 8, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>PDF</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                           <div>
-                            <p style={{ fontSize: 14, fontWeight: 600, color: "#2E1A47", margin: 0, lineHeight: 1.2 }}>4 PDF Documents</p>
-                            <p style={{ fontSize: 12, color: "#94A3B8", margin: 0 }}>Financial Statement · Reserve Study · Minutes · Audit</p>
+                            <p style={{ fontSize: 13, fontWeight: 700, color: "#1E293B", margin: "0 0 2px" }}>4 PDF Documents</p>
+                            <p style={{ fontSize: 11, color: "#94A3B8", margin: 0, lineHeight: 1.5 }}>
+                              Financial Statement<br />
+                              Reserve Study · Minutes · Audit
+                            </p>
                           </div>
                         </motion.div>
                       )}
 
-                      {/* MP4 chip — flies up after PDFs */}
+                      {/* MP4 file icon — slides in from left after PDFs */}
                       {voiceFileVisible && (
                         <motion.div
-                          initial={{ y: 40, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ duration: 0.5, ease: "easeOut" }}
-                          style={{ position: "absolute", bottom: 14, left: "calc(50% + 20px)", display: "flex", alignItems: "center", gap: 7, background: "white", borderRadius: 8, border: "1px solid #E5E7EB", padding: "7px 14px", boxShadow: "0 2px 10px rgba(0,0,0,0.08)", zIndex: 6 }}
+                          initial={{ x: -1500, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
+                          style={{ position: "absolute", bottom: 12, left: "calc(50% + 30px)", zIndex: 6, display: "flex", alignItems: "flex-end", gap: 10 }}
                         >
-                          <Video size={18} style={{ color: "#2E1A47", flexShrink: 0 }} />
+                          {/* Single MP4 file icon */}
+                          <div style={{ width: 40, height: 50, borderRadius: 5, background: "white", border: "1px solid #E5E7EB", boxShadow: "0 2px 6px rgba(0,0,0,0.10)", overflow: "hidden", flexShrink: 0, position: "relative" }}>
+                            <div style={{ position: "absolute", top: 0, right: 0, width: 10, height: 10, background: "#F1F5F9", borderLeft: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", borderBottomLeftRadius: 3 }} />
+                            <div style={{ position: "absolute", top: 10, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+                              <Video size={16} style={{ color: "#94A3B8" }} />
+                            </div>
+                            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 14, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <span style={{ fontSize: 8, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>MP4</span>
+                            </div>
+                          </div>
                           <div>
-                            <p style={{ fontSize: 14, fontWeight: 600, color: "#2E1A47", margin: 0, lineHeight: 1.2 }}>site-walkthrough.mp4</p>
-                            <p style={{ fontSize: 12, color: "#94A3B8", margin: 0 }}>Video · 3.2 MB</p>
+                            <p style={{ fontSize: 13, fontWeight: 700, color: "#1E293B", margin: "0 0 2px" }}>site-walkthrough.mp4</p>
+                            <p style={{ fontSize: 11, color: "#94A3B8", margin: 0 }}>Video Recording · 3.2 MB</p>
                           </div>
                         </motion.div>
                       )}
