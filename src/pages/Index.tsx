@@ -22,31 +22,34 @@ const PHOTO_POSITIONS = [
 ];
 
 const FILE_TIMES = {
-  photos: { appear: 2500, done: 4100 },   // +1s processing
-  pdf:    { appear: 4600, done: 6200 },   // +1s processing
-  voice:  { appear: 6700, done: 8300 },   // +1s processing
+  photos:    { appear: 2500, done: 4100 },
+  financial: { appear: 4600, done: 6000 },
+  reserve:   { appear: 5000, done: 6400 },
+  minutes:   { appear: 5400, done: 6800 },
+  audit:     { appear: 5800, done: 7200 },
+  voice:     { appear: 7700, done: 9300 },
 };
 
-const DZ_FADE = 8800;
+const DZ_FADE = 9800;
 
-const VISION_START = 8800;
-const VISION_DUR   = 3500;                          // +1s
-const VISION_END   = VISION_START + VISION_DUR;    // 12300
+const VISION_START = 9800;
+const VISION_DUR   = 3500;
+const VISION_END   = VISION_START + VISION_DUR;    // 13300
 
-const DOC_START = VISION_END + 300;                 // 12600
-const DOC_DUR   = 3500;                             // +1s
-const DOC_END   = DOC_START + DOC_DUR;              // 16100
+const DOC_START = VISION_END + 300;                 // 13600
+const DOC_DUR   = 3500;
+const DOC_END   = DOC_START + DOC_DUR;              // 17100
 
-const AUDIO_START = DOC_END + 300;                  // 16400
-const AUDIO_DUR   = 3500;                           // +1s
-const AUDIO_END   = AUDIO_START + AUDIO_DUR;        // 19900
+const AUDIO_START = DOC_END + 300;                  // 17400
+const AUDIO_DUR   = 3500;
+const AUDIO_END   = AUDIO_START + AUDIO_DUR;        // 20900
 
-const QA_START = AUDIO_END + 400;                   // 20300
-const QA_DUR   = 3400;                              // +1s
-const QA_END   = QA_START + QA_DUR;                // 23700
+const QA_START = AUDIO_END + 400;                   // 21300
+const QA_DUR   = 3400;
+const QA_END   = QA_START + QA_DUR;                // 24700
 
-const COMPLETION_AT    = QA_END + 400;              // 24100
-const BUTTON_APPEAR_AT = COMPLETION_AT + 1800;      // 25900
+const COMPLETION_AT    = QA_END + 400;              // 25100
+const BUTTON_APPEAR_AT = COMPLETION_AT + 1800;      // 26900
 
 /* ─── Agent config ─────────────────────────────────────────── */
 
@@ -295,12 +298,19 @@ const Index = () => {
 
   const photoVisible      = PHOTO_SLIDE_STARTS.map((s) => t >= s);
   const photosInDzFading  = t >= DZ_FADE;
-  const photosFileVisible = t >= FILE_TIMES.photos.appear;
-  const photosFileDone    = t >= FILE_TIMES.photos.done;
-  const pdfFileVisible    = t >= FILE_TIMES.pdf.appear;
-  const pdfFileDone       = t >= FILE_TIMES.pdf.done;
-  const voiceFileVisible  = t >= FILE_TIMES.voice.appear;
-  const voiceFileDone     = t >= FILE_TIMES.voice.done;
+
+  const photosFileVisible    = t >= FILE_TIMES.photos.appear;
+  const photosFileDone       = t >= FILE_TIMES.photos.done;
+  const financialFileVisible = t >= FILE_TIMES.financial.appear;
+  const financialFileDone    = t >= FILE_TIMES.financial.done;
+  const reserveFileVisible   = t >= FILE_TIMES.reserve.appear;
+  const reserveFileDone      = t >= FILE_TIMES.reserve.done;
+  const minutesFileVisible   = t >= FILE_TIMES.minutes.appear;
+  const minutesFileDone      = t >= FILE_TIMES.minutes.done;
+  const auditFileVisible     = t >= FILE_TIMES.audit.appear;
+  const auditFileDone        = t >= FILE_TIMES.audit.done;
+  const voiceFileVisible     = t >= FILE_TIMES.voice.appear;
+  const voiceFileDone        = t >= FILE_TIMES.voice.done;
 
   const prog = (start: number, dur: number) =>
     t < start ? 0 : Math.min((t - start) / dur, 1);
@@ -428,9 +438,12 @@ const Index = () => {
 
                 {/* File rows */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 32 }}>
-                  <FileRow visible={photosFileVisible} done={photosFileDone} name="6 building inspection photos"  detail="Images · 24.5 MB"      IconComp={ImageIcon} />
-                  <FileRow visible={pdfFileVisible}    done={pdfFileDone}    name="existing-reserve-study.pdf"    detail="PDF Document · 8.7 MB" IconComp={FileText}  />
-                  <FileRow visible={voiceFileVisible}  done={voiceFileDone}  name="site-walkthrough-notes.m4a"    detail="Voice Recording · 3.2 MB" IconComp={Mic}    />
+                  <FileRow visible={photosFileVisible}    done={photosFileDone}    name="6 building inspection photos"  detail="Images · 24.5 MB"         IconComp={ImageIcon} />
+                  <FileRow visible={financialFileVisible} done={financialFileDone} name="Financial Statement.pdf"       detail="PDF Document · 3.1 MB"     IconComp={FileText}  />
+                  <FileRow visible={reserveFileVisible}   done={reserveFileDone}   name="Reserve Study.pdf"             detail="PDF Document · 8.7 MB"     IconComp={FileText}  />
+                  <FileRow visible={minutesFileVisible}   done={minutesFileDone}   name="Meeting Minutes.pdf"           detail="PDF Document · 1.4 MB"     IconComp={FileText}  />
+                  <FileRow visible={auditFileVisible}     done={auditFileDone}     name="Audit Report.pdf"              detail="PDF Document · 2.2 MB"     IconComp={FileText}  />
+                  <FileRow visible={voiceFileVisible}     done={voiceFileDone}     name="site-walkthrough-notes.m4a"    detail="Voice Recording · 3.2 MB"  IconComp={Mic}       />
                 </div>
 
                 {/* Agent section */}
