@@ -132,21 +132,21 @@ const FileRow = ({
           borderRadius: 10, border: "1px solid #E5E7EB",
         }}
       >
-        <div style={{ width: 36, height: 36, borderRadius: 8, background: "#F5F5F5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <IconComp size={20} style={{ color: "#2E1A47" }} />
+        <div style={{ width: 40, height: 40, borderRadius: 8, background: "#F5F5F5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <IconComp size={22} style={{ color: "#2E1A47" }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 17, fontWeight: 500, color: "#2E1A47", marginBottom: 1 }}>{name}</p>
-          <p style={{ fontSize: 15, color: "#94A3B8" }}>{detail}</p>
+          <p style={{ fontSize: 20, fontWeight: 500, color: "#2E1A47", marginBottom: 2 }}>{name}</p>
+          <p style={{ fontSize: 17, color: "#94A3B8" }}>{detail}</p>
         </div>
         {!done ? (
-          <div style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #E5E7EB", borderTopColor: "#2E1A47", flexShrink: 0, animation: "spin 0.8s linear infinite" }} />
+          <div style={{ width: 24, height: 24, borderRadius: "50%", border: "2px solid #E5E7EB", borderTopColor: "#2E1A47", flexShrink: 0, animation: "spin 0.8s linear infinite" }} />
         ) : (
           <motion.div
             initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3 }}
-            style={{ width: 22, height: 22, borderRadius: "50%", background: "#2E1A47", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{ width: 24, height: 24, borderRadius: "50%", background: "#2E1A47", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
           >
-            <Check size={13} color="white" />
+            <Check size={14} color="white" />
           </motion.div>
         )}
       </motion.div>
@@ -176,16 +176,16 @@ const ActiveAgentCard = ({
     }}
   >
     {/* Header */}
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-      <Icon size={18} style={{ color, flexShrink: 0 }} />
-      <span style={{ fontSize: 18, fontWeight: 600, color: "#1E293B", flex: 1 }}>{name}</span>
-      <span style={{ fontSize: 14, color, fontWeight: 500, letterSpacing: "0.04em" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+      <Icon size={22} style={{ color, flexShrink: 0 }} />
+      <span style={{ fontSize: 21, fontWeight: 600, color: "#1E293B", flex: 1 }}>{name}</span>
+      <span style={{ fontSize: 16, color, fontWeight: 500, letterSpacing: "0.04em" }}>
         Processing...
       </span>
     </div>
 
     {/* Progress bar */}
-    <div style={{ width: "100%", height: 3, background: "#E5E7EB", borderRadius: 2, overflow: "hidden", marginBottom: 14 }}>
+    <div style={{ width: "100%", height: 4, background: "#E5E7EB", borderRadius: 2, overflow: "hidden", marginBottom: 16 }}>
       <motion.div
         style={{ height: "100%", background: color, borderRadius: 2 }}
         animate={{ width: `${Math.min(progress * 100, 100)}%` }}
@@ -194,7 +194,7 @@ const ActiveAgentCard = ({
     </div>
 
     {/* Observations */}
-    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 15, color: "#64748B", lineHeight: 1.8 }}>
+    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 17, color: "#64748B", lineHeight: 1.9 }}>
       {observations.map((obs, i) => (
         <div
           key={i}
@@ -228,13 +228,13 @@ const CompletedAgentLine = ({
       borderBottom: "1px solid #F1F5F9",
     }}
   >
-    <div style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0 }} />
-    <span style={{ fontSize: 16, fontWeight: 600, color: "#334155", flexShrink: 0 }}>{name}</span>
-    <span style={{ fontSize: 15, color: "#CBD5E1", flexShrink: 0 }}>—</span>
-    <span style={{ fontSize: 15, color: "#94A3B8", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+    <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+    <span style={{ fontSize: 19, fontWeight: 600, color: "#334155", flexShrink: 0 }}>{name}</span>
+    <span style={{ fontSize: 17, color: "#CBD5E1", flexShrink: 0 }}>—</span>
+    <span style={{ fontSize: 17, color: "#94A3B8", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
       {summary}
     </span>
-    <Check size={14} style={{ color: "#22C55E", flexShrink: 0 }} />
+    <Check size={16} style={{ color: "#22C55E", flexShrink: 0 }} />
   </motion.div>
 );
 
@@ -249,10 +249,10 @@ const IntegrationCard = ({
 }) => {
   const btnStyle: React.CSSProperties =
     connectState === "connected"
-      ? { height: 36, padding: "0 18px", background: "#ECFDF5", border: "1px solid #BBF7D0", color: "#15803D", borderRadius: 6, fontSize: 16, fontWeight: 500, cursor: "default" }
+      ? { height: 40, padding: "0 20px", background: "#ECFDF5", border: "1px solid #BBF7D0", color: "#15803D", borderRadius: 6, fontSize: 18, fontWeight: 500, cursor: "default" }
       : connectState === "connecting"
-      ? { height: 36, padding: "0 18px", background: "#4D6BA9", border: "1px solid #4D6BA9", color: "white", borderRadius: 6, fontSize: 16, fontWeight: 500, cursor: "default", display: "flex", alignItems: "center", gap: 6 }
-      : { height: 36, padding: "0 18px", background: "white", border: "1px solid #E5E7EB", color: "#334155", borderRadius: 6, fontSize: 16, fontWeight: 500, cursor: "pointer" };
+      ? { height: 40, padding: "0 20px", background: "#4D6BA9", border: "1px solid #4D6BA9", color: "white", borderRadius: 6, fontSize: 18, fontWeight: 500, cursor: "default", display: "flex", alignItems: "center", gap: 6 }
+      : { height: 40, padding: "0 20px", background: "white", border: "1px solid #E5E7EB", color: "#334155", borderRadius: 6, fontSize: 18, fontWeight: 500, cursor: "pointer" };
 
   return (
     <motion.div
@@ -260,8 +260,8 @@ const IntegrationCard = ({
       transition={{ duration: 0.3 }}
       style={{ flex: 1, borderRadius: 10, border: "1px solid #E5E7EB", background: "#FFFFFF", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 16, gap: 8 }}
     >
-      <img src={logoSrc} alt={name} style={{ width: 44, height: 44, borderRadius: 6, objectFit: "contain" }} />
-      <p style={{ fontSize: 17, fontWeight: 500, color: "#2E1A47", margin: 0 }}>{name}</p>
+      <img src={logoSrc} alt={name} style={{ width: 52, height: 52, borderRadius: 6, objectFit: "contain" }} />
+      <p style={{ fontSize: 20, fontWeight: 500, color: "#2E1A47", margin: 0 }}>{name}</p>
       <button style={btnStyle} onClick={connectState === "idle" ? onConnect : undefined}>
         {connectState === "connecting" ? (
           <><span style={{ width: 10, height: 10, border: "2px solid rgba(255,255,255,0.35)", borderTopColor: "white", borderRadius: "50%", display: "inline-block", animation: "spin 0.8s linear infinite" }} />Connecting...</>
@@ -439,7 +439,7 @@ const Index = () => {
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
 
                       {/* Section label */}
-                      <p style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.1em", color: "#CBD5E1", marginBottom: 16 }}>
+                      <p style={{ fontSize: 15, textTransform: "uppercase", letterSpacing: "0.1em", color: "#CBD5E1", marginBottom: 18 }}>
                         3 Specialist Agents + QA
                       </p>
 
@@ -490,7 +490,7 @@ const Index = () => {
                             }}
                           >
                             <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E", flexShrink: 0 }} />
-                            <span style={{ fontSize: 17, fontWeight: 600, color: "#15803D" }}>
+                            <span style={{ fontSize: 19, fontWeight: 600, color: "#15803D" }}>
                               QA Agent: all data validated — 24 components catalogued
                             </span>
                           </motion.div>
@@ -503,11 +503,11 @@ const Index = () => {
                           <motion.div key="connect-btn" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
                             <button
                               onClick={handleConnectButtonClick}
-                              style={{ width: "100%", padding: "16px 0", background: "#0A0A0A", color: "#FFFFFF", border: "none", borderRadius: 999, fontSize: 18, fontWeight: 600, cursor: "pointer" }}
+                              style={{ width: "100%", padding: "18px 0", background: "#0A0A0A", color: "#FFFFFF", border: "none", borderRadius: 999, fontSize: 20, fontWeight: 600, cursor: "pointer" }}
                             >
                               Connect to property management tools &rarr;
                             </button>
-                            <p style={{ fontSize: 15, color: "#94A3B8", textAlign: "center", marginTop: 8 }}>
+                            <p style={{ fontSize: 17, color: "#94A3B8", textAlign: "center", marginTop: 10 }}>
                               Sync with AppFolio, Yardi, or Buildium
                             </p>
                           </motion.div>
@@ -515,7 +515,7 @@ const Index = () => {
 
                         {showIntegrations && (
                           <motion.div key="integrations" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-                            <p style={{ fontSize: 14, textTransform: "uppercase", color: "#94A3B8", letterSpacing: "0.08em", marginBottom: 10 }}>
+                            <p style={{ fontSize: 15, textTransform: "uppercase", color: "#94A3B8", letterSpacing: "0.08em", marginBottom: 10 }}>
                               Connect Your Tools
                             </p>
                             <div style={{ display: "flex", gap: 12 }}>
