@@ -515,18 +515,6 @@ const Index = () => {
                               </div>
                             ))}
                           </div>
-                          <div style={{ textAlign: "center" }}>
-                            {PDF_DOCS.map((doc, i) => (
-                              <AnimatePresence key={doc}>
-                                {pdfDocAppears[i] && (
-                                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
-                                    style={{ fontSize: 9, color: "#64748B", margin: 0, lineHeight: 1.6, whiteSpace: "nowrap" }}>
-                                    {doc}
-                                  </motion.p>
-                                )}
-                              </AnimatePresence>
-                            ))}
-                          </div>
                         </motion.div>
                       )}
 
