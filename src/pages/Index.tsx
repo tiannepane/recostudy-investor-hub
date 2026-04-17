@@ -96,7 +96,7 @@ const FileRow = ({
   </AnimatePresence>
 );
 
-/* ─── PDF Group Row ────────────────────────────────────────── */
+/* ─── PDF Group Row — icon stack only ─────────────────────── */
 
 const PdfGroupRow = ({ visible, done, docAppears }: { visible: boolean; done: boolean; docAppears: boolean[] }) => (
   <AnimatePresence>
@@ -105,24 +105,34 @@ const PdfGroupRow = ({ visible, done, docAppears }: { visible: boolean; done: bo
         initial={{ x: -16, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 14px", background: "white", borderRadius: 10, border: "1px solid #E5E7EB" }}
+        style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 14px", background: "white", borderRadius: 10, border: "1px solid #E5E7EB" }}
       >
-        <div style={{ width: 36, height: 36, borderRadius: 8, background: "#F5F5F5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 2 }}>
-          <FileText size={20} style={{ color: "#2E1A47" }} />
+        {/* Stacked PDF file icons */}
+        <div style={{ position: "relative", width: 46, height: 52, flexShrink: 0 }}>
+          {[2, 1, 0].map((offset) => (
+            <div key={offset} style={{ position: "absolute", top: offset * 3, left: offset * 3, width: 36, height: 46, borderRadius: 5, background: "white", border: "1px solid #E5E7EB", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 0, right: 0, width: 9, height: 9, background: "#F1F5F9", borderLeft: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", borderBottomLeftRadius: 3 }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 13, background: "#E53E3E", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 7, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>PDF</span>
+              </div>
+            </div>
+          ))}
         </div>
+        {/* Doc names appear one by one */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {PDF_DOCS.map((doc, i) => (
             <AnimatePresence key={doc}>
               {docAppears[i] && (
                 <motion.p initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}
-                  style={{ fontSize: 15, color: "#64748B", margin: "0 0 2px" }}>
+                  style={{ fontSize: 14, color: "#94A3B8", margin: "0 0 1px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   {doc}
                 </motion.p>
               )}
             </AnimatePresence>
           ))}
         </div>
-        <div style={{ paddingTop: 6, flexShrink: 0 }}>
+        {/* Spinner / check */}
+        <div style={{ flexShrink: 0 }}>
           {!done ? (
             <div style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #E5E7EB", borderTopColor: "#2E1A47", animation: "spin 0.8s linear infinite" }} />
           ) : (
@@ -568,8 +578,35 @@ const Index = () => {
                     ]}
                   />
 
-                  {/* Video row */}
-                  <FileRow visible={voiceFileVisible} done={voiceFileDone} name="site-walkthrough.mp4" detail="Video Recording · 3.2 MB" IconComp={Video} />
+                  {/* Video row — icon only */}
+                  <AnimatePresence>
+                    {voiceFileVisible && (
+                      <motion.div initial={{ x: -16, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }}
+                        style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 14px", background: "white", borderRadius: 10, border: "1px solid #E5E7EB" }}>
+                        {/* MP4 file icon */}
+                        <div style={{ width: 36, height: 46, borderRadius: 5, background: "white", border: "1px solid #E5E7EB", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", overflow: "hidden", position: "relative", flexShrink: 0 }}>
+                          <div style={{ position: "absolute", top: 0, right: 0, width: 9, height: 9, background: "#F1F5F9", borderLeft: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", borderBottomLeftRadius: 3 }} />
+                          <div style={{ position: "absolute", top: 8, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+                            <Video size={14} style={{ color: "#94A3B8" }} />
+                          </div>
+                          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 13, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <span style={{ fontSize: 7, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>MP4</span>
+                          </div>
+                        </div>
+                        <p style={{ fontSize: 14, color: "#94A3B8", margin: 0, flex: 1 }}>site-walkthrough.mp4</p>
+                        <div style={{ flexShrink: 0 }}>
+                          {!voiceFileDone ? (
+                            <div style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #E5E7EB", borderTopColor: "#2E1A47", animation: "spin 0.8s linear infinite" }} />
+                          ) : (
+                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3 }}
+                              style={{ width: 22, height: 22, borderRadius: "50%", background: "#2E1A47", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <Check size={13} color="white" />
+                            </motion.div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   <SideAgentPanel
                     name="Video Agent" Icon={Video} color="#8B5CF6"
                     progress={audioProgress} visible={t >= AUDIO_START}
