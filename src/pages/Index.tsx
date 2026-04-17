@@ -150,10 +150,10 @@ const PdfGroupRow = ({ visible, done, docAppears }: { visible: boolean; done: bo
 /* ─── Side Agent Panel ─────────────────────────────────────── */
 
 const SideAgentPanel = ({
-  name, Icon, color, progress, observations, visible,
+  name, Icon, color, progress, observations, visible, filename,
 }: {
   name: string; Icon: React.ElementType; color: string;
-  progress: number; observations: readonly string[]; visible: boolean;
+  progress: number; observations: readonly string[]; visible: boolean; filename?: string;
 }) => {
   const complete = progress >= 1;
   if (!visible) return <div style={{ flex: 1 }} />;
@@ -176,7 +176,10 @@ const SideAgentPanel = ({
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: complete ? 0 : 10 }}>
           <Icon size={16} style={{ color, flexShrink: 0 }} />
-          <span style={{ fontSize: 15, fontWeight: 600, color: "#1E293B", flex: 1 }}>{name}</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ fontSize: 15, fontWeight: 600, color: "#1E293B" }}>{name}</span>
+            {filename && <p style={{ fontSize: 12, color: "#94A3B8", margin: 0, marginTop: 1 }}>{filename}</p>}
+          </div>
           {complete ? (
             <span style={{ fontSize: 13, color: "#22C55E", fontWeight: 600 }}>✓ Done</span>
           ) : (
@@ -532,7 +535,6 @@ const Index = () => {
                               <span style={{ fontSize: 8, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>MP4</span>
                             </div>
                           </div>
-                          <p style={{ fontSize: 9, color: "#64748B", margin: 0, whiteSpace: "nowrap" }}>site-walkthrough.mp4</p>
                         </motion.div>
                       )}
                     </motion.div>
@@ -598,6 +600,7 @@ const Index = () => {
                   <SideAgentPanel
                     name="Video Agent" Icon={Video} color="#8B5CF6"
                     progress={audioProgress} visible={t >= AUDIO_START}
+                    filename="site-walkthrough.mp4"
                     observations={[
                       "→ Transcribing 4m 32s walkthrough...",
                       "→ Rooftop membrane: last serviced 2019",
