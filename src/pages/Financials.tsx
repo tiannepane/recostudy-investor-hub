@@ -101,11 +101,11 @@ const MetricCard = ({
         >
           <p
             style={{
-              fontSize: 11,
+              fontSize: 16,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               marginBottom: 8,
-              color: "#9CA3B8",
+              color: "#64748B",
               fontWeight: 500,
             }}
           >
@@ -124,7 +124,7 @@ const MetricCard = ({
                 }}
               />
             )}
-            <p style={{ fontSize: 28, fontWeight: isAccent ? 700 : 600, lineHeight: 1, color: "#0F1729" }}>
+            <p style={{ fontSize: 36, fontWeight: isAccent ? 700 : 600, lineHeight: 1, color: "#2E1A47" }}>
               {value}
             </p>
           </div>
@@ -132,9 +132,9 @@ const MetricCard = ({
             <p
               style={{
                 marginTop: 6,
-                fontSize: 11,
+                fontSize: 16,
                 fontStyle: "italic",
-                color: "#9CA3B8",
+                color: "#64748B",
               }}
             >
               {tag}
@@ -294,7 +294,7 @@ const StatusPill = ({ status }: { status: "green" | "amber" | "red" }) => {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
       <div style={{ width: 5, height: 5, borderRadius: "50%", background: c.dot, flexShrink: 0 }} />
-      <span style={{ fontSize: 11, color: "#5A6178" }}>{c.label}</span>
+      <span style={{ fontSize: 16, color: "#334155" }}>{c.label}</span>
     </div>
   );
 };
@@ -306,7 +306,7 @@ const MetCountPill = ({ met, total }: { met: number; total: number }) => {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
       <div style={{ width: 5, height: 5, borderRadius: "50%", background: c.dot, flexShrink: 0 }} />
-      <span style={{ fontSize: 11, color: "#5A6178", whiteSpace: "nowrap" }}>{met} of {total} met</span>
+      <span style={{ fontSize: 16, color: "#334155", whiteSpace: "nowrap" }}>{met} of {total} met</span>
     </div>
   );
 };
@@ -343,15 +343,15 @@ const StakeholderCard = ({ s }: { s: StakeholderDef }) => {
           textAlign: "left",
         }}
       >
-        <Icon size={16} style={{ color: "#9CA3B8", flexShrink: 0 }} />
-        <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729", flex: 1 }}>
+        <Icon size={22} style={{ color: "#64748B", flexShrink: 0 }} />
+        <span style={{ fontSize: 19, fontWeight: 600, color: "#2E1A47", flex: 1 }}>
           {s.name}
         </span>
         <MetCountPill met={s.metCount} total={s.metTotal} />
         {open ? (
-          <ChevronUp size={15} style={{ color: "#9CA3B8", flexShrink: 0, marginLeft: 8 }} />
+          <ChevronUp size={20} style={{ color: "#64748B", flexShrink: 0, marginLeft: 8 }} />
         ) : (
-          <ChevronDown size={15} style={{ color: "#9CA3B8", flexShrink: 0, marginLeft: 8 }} />
+          <ChevronDown size={20} style={{ color: "#64748B", flexShrink: 0, marginLeft: 8 }} />
         )}
       </button>
 
@@ -364,10 +364,10 @@ const StakeholderCard = ({ s }: { s: StakeholderDef }) => {
                   <th
                     key={h}
                     style={{
-                      fontSize: 11,
+                      fontSize: 16,
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
-                      color: "#9CA3B8",
+                      color: "#64748B",
                       fontWeight: 500,
                       textAlign: "left",
                       padding: "0 12px 10px 0",
@@ -383,13 +383,13 @@ const StakeholderCard = ({ s }: { s: StakeholderDef }) => {
                 const status = getReqStatus(r.name, r.pass);
                 return (
                   <tr key={r.name}>
-                    <td style={{ fontSize: 13, color: "#5A6178", padding: "10px 12px 10px 0", borderTop: "1px solid #F3F4F6" }}>
+                    <td style={{ fontSize: 18, color: "#334155", padding: "10px 12px 10px 0", borderTop: "1px solid #F3F4F6" }}>
                       {r.name}
                     </td>
-                    <td style={{ fontSize: 13, color: "#5A6178", padding: "10px 12px 10px 0", borderTop: "1px solid #F3F4F6" }}>
+                    <td style={{ fontSize: 18, color: "#334155", padding: "10px 12px 10px 0", borderTop: "1px solid #F3F4F6" }}>
                       {r.threshold}
                     </td>
-                    <td style={{ fontSize: 13, fontWeight: 500, color: "#0F1729", padding: "10px 12px 10px 0", borderTop: "1px solid #F3F4F6" }}>
+                    <td style={{ fontSize: 18, fontWeight: 500, color: "#2E1A47", padding: "10px 12px 10px 0", borderTop: "1px solid #F3F4F6" }}>
                       {r.current}
                     </td>
                     <td style={{ padding: "10px 0", borderTop: "1px solid #F3F4F6", width: 80 }}>
@@ -418,11 +418,11 @@ const GhostFundingBtn = ({ onClick }: { onClick: () => void }) => {
       style={{
         width: "100%",
         height: 44,
-        border: "1px solid #0F1729",
-        background: hov ? "#0F1729" : "transparent",
-        color: hov ? "#FFFFFF" : "#0F1729",
+        border: "1px solid #2E1A47",
+        background: hov ? "#2E1A47" : "transparent",
+        color: hov ? "#FFFFFF" : "#2E1A47",
         borderRadius: 7,
-        fontSize: 14,
+        fontSize: 19,
         fontWeight: 500,
         cursor: "pointer",
         transition: "background 200ms, color 200ms",
@@ -456,8 +456,8 @@ const Financials = () => {
     <div className="flex min-h-screen" style={{ background: "#FFFFFF" }}>
       <Sidebar activeItem="financials" visitedItems={["overview", "inventory"]} />
 
-      <main className="flex-1" style={{ marginLeft: 260 }}>
-        <div className="mx-auto" style={{ maxWidth: 1200, padding: "48px 60px 60px" }}>
+      <main className="flex-1" style={{ marginLeft: 320 }}>
+        <div className="mx-auto" style={{ maxWidth: 1560, padding: "40px 40px 60px" }}>
           <TopBar
             onReplay={reset}
             breadcrumb="Buildings › Meridian Condominium Association, Inc. › Financials"
@@ -472,15 +472,15 @@ const Financials = () => {
             >
               <TabsTrigger
                 value="overview"
-                className="bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-[#0A0A0A] data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 pb-2 pt-0 text-[13px]"
-                style={{ color: "#9CA3AF", fontWeight: 500 }}
+                className="bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-[#0A0A0A] data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 pb-2 pt-0 text-[18px]"
+                style={{ color: "#64748B", fontWeight: 500 }}
               >
                 Financial Overview
               </TabsTrigger>
               <TabsTrigger
                 value="stakeholder"
-                className="bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-[#0A0A0A] data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 pb-2 pt-0 text-[13px]"
-                style={{ color: "#9CA3AF", fontWeight: 500 }}
+                className="bg-transparent rounded-none border-b-2 border-transparent data-[state=active]:border-[#0A0A0A] data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 pb-2 pt-0 text-[18px]"
+                style={{ color: "#64748B", fontWeight: 500 }}
               >
                 Stakeholder Standing
               </TabsTrigger>
@@ -525,10 +525,10 @@ const Financials = () => {
                         style={{ color: "#F97316", flexShrink: 0, marginTop: 1 }}
                       />
                       <div>
-                        <p style={{ fontSize: 14, fontWeight: 700, color: "#92400E", marginBottom: 3 }}>
+                        <p style={{ fontSize: 19, fontWeight: 700, color: "#92400E", marginBottom: 3 }}>
                           Funding Risk Detected
                         </p>
-                        <p style={{ fontSize: 13, color: "#B45309", lineHeight: 1.5 }}>
+                        <p style={{ fontSize: 18, color: "#B45309", lineHeight: 1.5 }}>
                           This building is 13.5% funded against a Fannie Mae minimum reserve requirement
                           of 70%. A special assessment is projected for 2028.
                         </p>
@@ -539,10 +539,10 @@ const Financials = () => {
                     <div style={{ flexShrink: 0, textAlign: "right" }}>
                       <p
                         style={{
-                          fontSize: 10,
+                          fontSize: 20,
                           textTransform: "uppercase",
                           letterSpacing: "0.06em",
-                          color: "#9CA3B8",
+                          color: "#64748B",
                           marginBottom: 6,
                         }}
                       >
@@ -566,7 +566,7 @@ const Financials = () => {
                           }}
                         />
                       </div>
-                      <p style={{ fontSize: 12, color: "#9CA3B8", marginTop: 5 }}>
+                      <p style={{ fontSize: 17, color: "#64748B", marginTop: 5 }}>
                         13.5% of 70% minimum
                       </p>
                     </div>
@@ -575,7 +575,7 @@ const Financials = () => {
               </AnimatePresence>
 
               {/* Key Financial Metrics */}
-              <p style={{ fontSize: 18, fontWeight: 600, color: "#0F1729", marginBottom: 12 }}>
+              <p style={{ fontSize: 24, fontWeight: 600, color: "#2E1A47", marginBottom: 12 }}>
                 Key Financial Metrics
               </p>
 
@@ -601,10 +601,10 @@ const Financials = () => {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                   <p
                     style={{
-                      fontSize: 10,
+                      fontSize: 20,
                       letterSpacing: "0.06em",
                       textTransform: "uppercase",
-                      color: "#9CA3AF",
+                      color: "#64748B",
                       fontWeight: 500,
                     }}
                   >
@@ -620,21 +620,21 @@ const Financials = () => {
                           strokeDasharray="4 3"
                         />
                       </svg>
-                      <span style={{ fontSize: 12, color: "#9CA3B8" }}>Current Trajectory</span>
+                      <span style={{ fontSize: 17, color: "#9CA3B8" }}>Current Trajectory</span>
                     </div>
                     {/* Solid dark swatch */}
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <svg width="24" height="10">
                         <line x1="0" y1="5" x2="24" y2="5" stroke="#0F1729" strokeWidth="2" />
                       </svg>
-                      <span style={{ fontSize: 12, color: "#0F1729" }}>Recommended Path</span>
+                      <span style={{ fontSize: 17, color: "#0F1729" }}>Recommended Path</span>
                     </div>
                   </div>
                 </div>
 
                 {chartVisible && (
-                  <ResponsiveContainer width="100%" height={220}>
-                    <ComposedChart data={projectionData} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <ComposedChart data={projectionData} margin={{ top: 24, right: 16, left: 16, bottom: 0 }}>
                       <defs>
                         <linearGradient id="fillCurrent" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#9CA3B8" stopOpacity={0} />
@@ -650,14 +650,14 @@ const Financials = () => {
 
                       <XAxis
                         dataKey="year"
-                        tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                        tick={{ fontSize: 20, fill: "#64748B" }}
                         tickLine={false}
                         axisLine={false}
                         interval={4}
                         domain={[2026, 2056]}
                       />
                       <YAxis
-                        tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                        tick={{ fontSize: 20, fill: "#64748B" }}
                         tickLine={false}
                         axisLine={false}
                         domain={[0, 4500000]}
@@ -670,7 +670,7 @@ const Financials = () => {
                           name === "current" ? "Current Trajectory" : "Recommended Path",
                         ]}
                         contentStyle={{
-                          fontSize: 12,
+                          fontSize: 17,
                           borderRadius: 8,
                           border: "1px solid #E5E7EB",
                           background: "#FFFFFF",
@@ -686,7 +686,7 @@ const Financials = () => {
                         label={{
                           value: "Special Assessment Risk",
                           position: "top",
-                          fontSize: 11,
+                          fontSize: 14,
                           fill: "#9CA3B8",
                           fontWeight: 400,
                         }}
@@ -733,7 +733,7 @@ const Financials = () => {
 
                       {/* ── LEFT 65% — comparison rows ── */}
                       <div style={{ flex: "0 0 calc(65% - 12px)" }}>
-                        <p style={{ fontSize: 18, fontWeight: 600, color: "#0F1729", marginBottom: 16 }}>
+                        <p style={{ fontSize: 24, fontWeight: 600, color: "#2E1A47", marginBottom: 16 }}>
                           Benchmarking vs. Similar Buildings
                         </p>
 
@@ -747,62 +747,52 @@ const Financials = () => {
                             marginBottom: 2,
                           }}
                         >
-                          <span style={{ flex: 1, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3B8", fontWeight: 500 }}>
+                          <span style={{ flex: 1, fontSize: 17, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3B8", fontWeight: 500 }}>
                             Metric
                           </span>
-                          <span style={{ width: 110, textAlign: "right", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3B8", fontWeight: 500 }}>
+                          <span style={{ width: 130, textAlign: "right", fontSize: 17, textTransform: "uppercase", letterSpacing: "0.07em", color: "#9CA3B8", fontWeight: 500 }}>
                             This Building
                           </span>
-                          <span style={{ width: 84 }} />
+                          <span style={{ width: 90 }} />
                         </div>
 
-                        {benchmarkRows.map((b, i) => {
-                          const isPercentFunded = b.label === "Percent Funded";
-                          const badgeColor = isPercentFunded ? "#EF4444" : "#9CA3B8";
-
-                          return (
-                            <div
-                              key={b.label}
+                        {benchmarkRows.map((b, i) => (
+                          <div
+                            key={b.label}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              minHeight: 48,
+                              borderBottom: i < benchmarkRows.length - 1 ? "1px solid #F3F4F6" : "none",
+                            }}
+                          >
+                            <span style={{ flex: 1, fontSize: 18, color: "#5A6178" }}>
+                              {b.label}
+                            </span>
+                            <span
                               style={{
-                                display: "flex",
-                                alignItems: "center",
-                                minHeight: 44,
-                                borderBottom: i < benchmarkRows.length - 1 ? "1px solid #F3F4F6" : "none",
+                                width: 130,
+                                textAlign: "right",
+                                fontSize: 19,
+                                fontWeight: 600,
+                                color: "#0F1729",
+                                fontFamily: "'JetBrains Mono', monospace",
                               }}
                             >
-                              {/* Metric name */}
-                              <span style={{ flex: 1, fontSize: 13, color: "#5A6178" }}>
-                                {b.label}
-                              </span>
-
-                              {/* This building value */}
-                              <span
-                                style={{
-                                  width: 110,
-                                  textAlign: "right",
-                                  fontSize: 14,
-                                  fontWeight: 600,
-                                  color: "#0F1729",
-                                  fontFamily: "'JetBrains Mono', monospace",
-                                }}
-                              >
-                                {b.meridian}
-                              </span>
-
-                              {/* Badge */}
-                              <span style={{ width: 84, display: "flex", justifyContent: "flex-end" }}>
-                                {b.above ? (
-                                  <span style={{ fontSize: 11, color: "#9CA3B8" }}>above avg ↑</span>
-                                ) : (
-                                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                                    <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
-                                    <span style={{ fontSize: 11, color: "#9CA3B8" }}>below avg ↓</span>
-                                  </div>
-                                )}
-                              </span>
-                            </div>
-                          );
-                        })}
+                              {b.meridian}
+                            </span>
+                            <span style={{ width: 90, display: "flex", justifyContent: "flex-end" }}>
+                              {b.above ? (
+                                <span style={{ fontSize: 16, color: "#9CA3B8" }}>above avg ↑</span>
+                              ) : (
+                                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
+                                  <span style={{ fontSize: 16, color: "#9CA3B8" }}>below avg ↓</span>
+                                </div>
+                              )}
+                            </span>
+                          </div>
+                        ))}
                       </div>
 
                       {/* ── RIGHT 35% — How we found comparable buildings ── */}
@@ -818,10 +808,10 @@ const Financials = () => {
                         >
                           <p
                             style={{
-                              fontSize: 10,
+                              fontSize: 20,
                               textTransform: "uppercase",
                               letterSpacing: "0.08em",
-                              color: "#9CA3B8",
+                              color: "#64748B",
                               fontWeight: 500,
                               marginBottom: 12,
                             }}
@@ -847,8 +837,8 @@ const Financials = () => {
                               >
                                 <span
                                   style={{
-                                    fontSize: 12,
-                                    color: "#9CA3B8",
+                                    fontSize: 17,
+                                    color: "#64748B",
                                     width: 88,
                                     flexShrink: 0,
                                     paddingTop: 1,
@@ -856,7 +846,7 @@ const Financials = () => {
                                 >
                                   {row.label}
                                 </span>
-                                <span style={{ fontSize: 12, color: "#0F1729", fontWeight: 500, lineHeight: 1.4 }}>
+                                <span style={{ fontSize: 17, color: "#2E1A47", fontWeight: 500, lineHeight: 1.4 }}>
                                   {row.value}
                                 </span>
                               </div>
@@ -864,7 +854,7 @@ const Financials = () => {
                           </div>
 
                           <div style={{ height: 1, background: "#E8EBF0", margin: "12px 0" }} />
-                          <p style={{ fontSize: 11, fontStyle: "italic", color: "#9CA3B8" }}>
+                          <p style={{ fontSize: 16, fontStyle: "italic", color: "#64748B" }}>
                             Matched from 847 comparable NYC properties
                           </p>
                         </div>
@@ -884,10 +874,10 @@ const Financials = () => {
                     >
                       <p
                         style={{
-                          fontSize: 10,
+                          fontSize: 20,
                           textTransform: "uppercase",
                           letterSpacing: "0.08em",
-                          color: "#9CA3B8",
+                          color: "#64748B",
                           fontWeight: 500,
                           marginBottom: 8,
                         }}
@@ -896,9 +886,9 @@ const Financials = () => {
                       </p>
                       <p
                         style={{
-                          fontSize: 18,
+                          fontSize: 24,
                           fontWeight: 600,
-                          color: "#0F1729",
+                          color: "#2E1A47",
                           lineHeight: 1.4,
                           marginBottom: 12,
                         }}
@@ -919,7 +909,7 @@ const Financials = () => {
                               padding: "8px 14px",
                             }}
                           >
-                            <span style={{ fontSize: 12, color: "#5A6178" }}>{text}</span>
+                            <span style={{ fontSize: 17, color: "#334155" }}>{text}</span>
                           </div>
                         ))}
                       </div>
@@ -933,22 +923,22 @@ const Financials = () => {
                         width: "100%",
                         height: 44,
                         background: "transparent",
-                        color: "#0F1729",
-                        border: "1px solid #0F1729",
+                        color: "#2E1A47",
+                        border: "1px solid #2E1A47",
                         borderRadius: 7,
-                        fontSize: 14,
+                        fontSize: 19,
                         fontWeight: 500,
                         cursor: "pointer",
                         transition: "background 200ms, color 200ms",
                         marginBottom: 48,
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "#0F1729";
+                        e.currentTarget.style.background = "#2E1A47";
                         e.currentTarget.style.color = "#FFFFFF";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.background = "transparent";
-                        e.currentTarget.style.color = "#0F1729";
+                        e.currentTarget.style.color = "#2E1A47";
                       }}
                     >
                       View Funding Options &rarr;
@@ -983,11 +973,11 @@ const Financials = () => {
                         gap: 10,
                       }}
                     >
-                      <AlertTriangle size={14} style={{ color: "#F97316", flexShrink: 0, marginTop: 1 }} />
+                      <AlertTriangle size={19} style={{ color: "#F97316", flexShrink: 0, marginTop: 1 }} />
                       <div>
                         <p
                           style={{
-                            fontSize: 10,
+                            fontSize: 20,
                             letterSpacing: "0.08em",
                             textTransform: "uppercase",
                             color: "#92400E",
@@ -997,7 +987,7 @@ const Financials = () => {
                         >
                           Regulatory Update
                         </p>
-                        <p style={{ fontSize: 13, color: "#B45309", lineHeight: 1.6 }}>
+                        <p style={{ fontSize: 18, color: "#B45309", lineHeight: 1.6 }}>
                           January 2027: Reserve contribution requirement increasing from 10% to 15% of annual budget.
                         </p>
                       </div>
@@ -1024,7 +1014,7 @@ const Financials = () => {
                     </div>
 
                     {/* Requirement Tables */}
-                    <p style={{ fontSize: 16, fontWeight: 600, color: "#0F1729", marginBottom: 16 }}>
+                    <p style={{ fontSize: 22, fontWeight: 600, color: "#2E1A47", marginBottom: 16 }}>
                       Stakeholder Requirements
                     </p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 48 }}>
@@ -1046,17 +1036,17 @@ const Financials = () => {
                     >
                       <p
                         style={{
-                          fontSize: 10,
+                          fontSize: 20,
                           textTransform: "uppercase",
                           letterSpacing: "0.08em",
-                          color: "#9CA3B8",
+                          color: "#64748B",
                           fontWeight: 500,
                           marginBottom: 10,
                         }}
                       >
                         Our Recommendation
                       </p>
-                      <p style={{ fontSize: 14, fontWeight: 500, color: "#0F1729", lineHeight: 1.6 }}>
+                      <p style={{ fontSize: 19, fontWeight: 500, color: "#2E1A47", lineHeight: 1.6 }}>
                         Based on the current CRF balance of $2,064,255 and projected replacement costs of $7,335,097
                         over the next 10 years, we recommend increasing monthly CRF allocations by $87.43 per
                         unit, bringing the annual contribution to $511,500. This positions the fund at 100%

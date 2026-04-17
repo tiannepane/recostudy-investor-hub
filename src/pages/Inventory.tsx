@@ -198,7 +198,7 @@ function rulDisplay(rul: number) {
       </span>
     );
   return (
-    <span style={{ color: "#6B7280" }}>
+    <span style={{ color: "#4B5563" }}>
       {rul} <span style={{ opacity: 0.6 }}>yrs</span>
     </span>
   );
@@ -248,13 +248,13 @@ const DetailPanel = ({
         cursor: "pointer",
         padding: 6,
         borderRadius: 8,
-        color: "#6B7280",
+        color: "#4B5563",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
       }}
     >
-      <X size={16} />
+      <X size={22} />
     </button>
 
     {/* Image — first thing, edge to edge */}
@@ -272,7 +272,7 @@ const DetailPanel = ({
             display: "block",
           }}
         />
-        <p style={{ fontSize: 11, color: "#9CA3AF", padding: "8px 24px 0" }}>
+        <p style={{ fontSize: 16, color: "#64748B", padding: "8px 24px 0" }}>
           Photo from inspection report
         </p>
       </div>
@@ -280,7 +280,7 @@ const DetailPanel = ({
 
     {/* Header */}
     <div style={{ padding: "20px 24px 0" }}>
-      <h2 style={{ fontSize: 20, fontWeight: 700, color: "#0A0A0A", lineHeight: 1.3, margin: 0 }}>
+      <h2 style={{ fontSize: 27, fontWeight: 700, color: "#2E1A47", lineHeight: 1.3, margin: 0 }}>
         {row.component}
       </h2>
       <div style={{ marginTop: 8 }}>
@@ -306,20 +306,20 @@ const DetailPanel = ({
         { label: "Replacement Cost", value: row.cost },
       ].map(({ label, value }) => (
         <div key={label}>
-          <p style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, letterSpacing: "0.04em", margin: 0 }}>
+          <p style={{ fontSize: 16, color: "#64748B", fontWeight: 500, letterSpacing: "0.04em", margin: 0 }}>
             {label}
           </p>
-          <p style={{ fontSize: 14, color: "#0A0A0A", fontWeight: 500, margin: "4px 0 0" }}>{value}</p>
+          <p style={{ fontSize: 19, color: "#2E1A47", fontWeight: 500, margin: "4px 0 0" }}>{value}</p>
         </div>
       ))}
     </div>
 
     {/* Condition Notes */}
     <div style={{ padding: "24px 24px 0" }}>
-      <p style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500, letterSpacing: "0.04em", margin: 0 }}>
+      <p style={{ fontSize: 16, color: "#64748B", fontWeight: 500, letterSpacing: "0.04em", margin: 0 }}>
         Condition Notes
       </p>
-      <p style={{ fontSize: 14, color: "#0A0A0A", lineHeight: 1.5, margin: "6px 0 0" }}>
+      <p style={{ fontSize: 19, color: "#2E1A47", lineHeight: 1.5, margin: "6px 0 0" }}>
         {row.notes}
       </p>
     </div>
@@ -335,7 +335,7 @@ const DetailPanel = ({
           color: "#FFFFFF",
           border: "none",
           borderRadius: 8,
-          fontSize: 14,
+          fontSize: 19,
           fontWeight: 600,
           cursor: "pointer",
         }}
@@ -396,8 +396,8 @@ const Inventory = () => {
         )}
       </AnimatePresence>
 
-      <main className="flex-1" style={{ marginLeft: 260 }}>
-        <div className="mx-auto" style={{ maxWidth: 1200, padding: 60 }}>
+      <main className="flex-1" style={{ marginLeft: 320 }}>
+        <div className="mx-auto" style={{ maxWidth: 1560, padding: "40px 40px" }}>
           <TopBar
             breadcrumb="Buildings › Meridian Condominium Association, Inc. › Inventory"
             activeItem="inventory"
@@ -418,7 +418,7 @@ const Inventory = () => {
 
           {/* Table section */}
           <div style={{ marginTop: 32 }}>
-            <p style={{ fontSize: 20, fontWeight: 600, color: "#0A0A0A", marginBottom: 16 }}>
+            <p style={{ fontSize: 27, fontWeight: 600, color: "#2E1A47", marginBottom: 16 }}>
               Component Inventory
             </p>
 
@@ -447,10 +447,10 @@ const Inventory = () => {
                         <th
                           key={label}
                           style={{
-                            fontSize: 11,
+                            fontSize: 16,
                             fontWeight: 600,
                             letterSpacing: "0.06em",
-                            color: "#9CA3AF",
+                            color: "#64748B",
                             textAlign: "left",
                             padding: "12px 16px",
                             whiteSpace: "nowrap",
@@ -510,9 +510,9 @@ const Inventory = () => {
                               )}
                               <span
                                 style={{
-                                  fontSize: 14,
+                                  fontSize: 19,
                                   fontWeight: 500,
-                                  color: "#0A0A0A",
+                                  color: "#2E1A47",
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
@@ -523,7 +523,7 @@ const Inventory = () => {
                             </div>
                           </td>
 
-                          <td style={{ padding: "10px 16px", fontSize: 13, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "10px 16px", fontSize: 18, color: "#4B5563", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {row.category}
                           </td>
 
@@ -531,15 +531,15 @@ const Inventory = () => {
                             <ConditionIndicator condition={row.condition} />
                           </td>
 
-                          <td style={{ padding: "10px 16px", fontSize: 13, color: "#6B7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "10px 16px", fontSize: 18, color: "#4B5563", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {row.location}
                           </td>
 
-                          <td style={{ padding: "10px 16px", fontSize: 13, fontFamily: "monospace", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "10px 16px", fontSize: 18, fontFamily: "monospace", whiteSpace: "nowrap" }}>
                             {rulDisplay(row.rul)}
                           </td>
 
-                          <td style={{ padding: "10px 16px", fontSize: 13, fontFamily: "monospace", fontWeight: 500, color: "#0A0A0A", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "10px 16px", fontSize: 18, fontFamily: "monospace", fontWeight: 500, color: "#2E1A47", whiteSpace: "nowrap" }}>
                             {row.cost}
                           </td>
                         </motion.tr>

@@ -89,9 +89,9 @@ const AgentProcessingCard = ({
       }
     : { border: "1px solid #E5E7EB" };
 
-  const nameColor = isPending ? "#9CA3B8" : "#5A6178";
-  const iconColor = isPending ? "#9CA3B8" : "#0A0A0A";
-  const barColor  = active ? accentColor : "#0A0A0A";
+  const nameColor = isPending ? "#64748B" : "#334155";
+  const iconColor = isPending ? "#64748B" : "#2E1A47";
+  const barColor  = active ? accentColor : "#2E1A47";
 
   return (
     <div
@@ -110,8 +110,8 @@ const AgentProcessingCard = ({
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <div
           style={{
-            width: 28,
-            height: 28,
+            width: 36,
+            height: 36,
             borderRadius: 8,
             background: "#F0F0F0",
             display: "flex",
@@ -120,11 +120,11 @@ const AgentProcessingCard = ({
             flexShrink: 0,
           }}
         >
-          <IconComp size={14} style={{ color: iconColor, transition: "color 0.4s ease" }} />
+          <IconComp size={19} style={{ color: iconColor, transition: "color 0.4s ease" }} />
         </div>
         <span
           style={{
-            fontSize: 13,
+            fontSize: 18,
             color: nameColor,
             flex: 1,
             transition: "color 0.4s ease",
@@ -139,12 +139,12 @@ const AgentProcessingCard = ({
               animate={{ scale: [0.8, 1.08, 1.0], opacity: 1 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
               style={{
-                fontSize: 11,
+                fontSize: 16,
                 fontWeight: 500,
-                padding: "2px 8px",
+                padding: "3px 10px",
                 borderRadius: 4,
                 background: "#F0F0F0",
-                color: "#0A0A0A",
+                color: "#2E1A47",
                 whiteSpace: "nowrap",
               }}
             >
@@ -153,12 +153,12 @@ const AgentProcessingCard = ({
           ) : (
             <span
               style={{
-                fontSize: 11,
+                fontSize: 16,
                 fontWeight: 500,
-                padding: "2px 8px",
+                padding: "3px 10px",
                 borderRadius: 4,
                 background: "#F0F0F0",
-                color: "#0A0A0A",
+                color: "#2E1A47",
                 whiteSpace: "nowrap",
               }}
             >
@@ -193,10 +193,10 @@ const AgentProcessingCard = ({
         style={{
           marginTop: 10,
           fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 12,
-          color: "#6B7280",
+          fontSize: 17,
+          color: "#4B5563",
           lineHeight: 1.7,
-          minHeight: 58,
+          minHeight: 72,
         }}
       >
         {observations.map((obs, i) => {
@@ -261,22 +261,22 @@ const FileSlideRow = ({
             justifyContent: "center",
           }}
         >
-          <IconComp size={18} style={{ color: "#0A0A0A" }} />
+          <IconComp size={24} style={{ color: "#2E1A47" }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 13, fontWeight: 500, color: "#0A0A0A", marginBottom: 2 }}>
+          <p style={{ fontSize: 18, fontWeight: 500, color: "#2E1A47", marginBottom: 2 }}>
             {name}
           </p>
-          <p style={{ fontSize: 11, color: "#999" }}>{detail}</p>
+          <p style={{ fontSize: 16, color: "#4B5563" }}>{detail}</p>
         </div>
         {!done ? (
           <div
             style={{
-              width: 18,
-              height: 18,
+              width: 26,
+              height: 26,
               borderRadius: "50%",
               border: "2px solid #E5E7EB",
-              borderTopColor: "#0A0A0A",
+              borderTopColor: "#2E1A47",
               flexShrink: 0,
               animation: "spin 0.8s linear infinite",
             }}
@@ -287,17 +287,17 @@ const FileSlideRow = ({
             animate={{ scale: 1 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             style={{
-              width: 18,
-              height: 18,
+              width: 26,
+              height: 26,
               borderRadius: "50%",
-              background: "#0A0A0A",
+              background: "#2E1A47",
               flexShrink: 0,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Check size={10} color="white" />
+            <Check size={16} color="white" />
           </motion.div>
         )}
       </motion.div>
@@ -323,26 +323,26 @@ const IntegrationCard = ({
   const btnStyle: React.CSSProperties =
     connectState === "connected"
       ? {
-          height: 30,
-          padding: "0 16px",
+          height: 38,
+          padding: "0 20px",
           background: "#ECFDF5",
           border: "1px solid #BBF7D0",
           color: "#15803D",
           borderRadius: 6,
-          fontSize: 13,
+          fontSize: 18,
           fontWeight: 500,
           cursor: "default",
           transition: "all 0.3s ease",
         }
       : connectState === "connecting"
       ? {
-          height: 30,
-          padding: "0 16px",
-          background: "#4F6BFF",
-          border: "1px solid #4F6BFF",
+          height: 38,
+          padding: "0 20px",
+          background: "#4D6BA9",
+          border: "1px solid #4D6BA9",
           color: "white",
           borderRadius: 6,
-          fontSize: 13,
+          fontSize: 18,
           fontWeight: 500,
           cursor: "default",
           transition: "all 0.3s ease",
@@ -351,13 +351,13 @@ const IntegrationCard = ({
           gap: 6,
         }
       : {
-          height: 30,
-          padding: "0 16px",
+          height: 38,
+          padding: "0 20px",
           background: "white",
           border: "1px solid rgba(15,23,41,0.06)",
-          color: "#5A6178",
+          color: "#334155",
           borderRadius: 6,
-          fontSize: 13,
+          fontSize: 18,
           fontWeight: 500,
           cursor: "pointer",
           transition: "all 0.3s ease",
@@ -384,9 +384,9 @@ const IntegrationCard = ({
       <img
         src={logoSrc}
         alt={name}
-        style={{ width: 36, height: 36, borderRadius: 6, objectFit: "contain" }}
+        style={{ width: 48, height: 48, borderRadius: 6, objectFit: "contain" }}
       />
-      <p style={{ fontSize: 14, fontWeight: 500, color: "#0F1729", marginTop: 8, marginBottom: 8 }}>
+      <p style={{ fontSize: 19, fontWeight: 500, color: "#2E1A47", marginTop: 8, marginBottom: 8 }}>
         {name}
       </p>
       <button style={btnStyle} onClick={connectState === "idle" ? onConnect : undefined}>
@@ -520,7 +520,7 @@ const Index = () => {
 
       <Sidebar activeItem="overview" visitedItems={visitedItems} />
 
-      <main className="flex-1" style={{ marginLeft: 260, position: "relative", overflow: "hidden" }}>
+      <main className="flex-1" style={{ marginLeft: 320, position: "relative", overflow: "hidden" }}>
 
         {/* ── Welcome overlay ── */}
         <AnimatePresence>
@@ -566,10 +566,10 @@ const Index = () => {
 
               {/* Content */}
               <div style={{ position: "relative", zIndex: 1 }}>
-                <h1 style={{ fontSize: 36, fontWeight: 700, color: "#FFFFFF", marginBottom: 8 }}>
+                <h1 style={{ fontSize: 48, fontWeight: 700, color: "#FFFFFF", marginBottom: 8 }}>
                   Welcome to RECOstudy
                 </h1>
-                <p style={{ fontSize: 16, color: "rgba(255,255,255,0.65)", marginBottom: 32 }}>
+                <p style={{ fontSize: 22, color: "rgba(255,255,255,0.65)", marginBottom: 32 }}>
                   Automated reserve fund studies, powered by AI.
                 </p>
                 <motion.button
@@ -579,9 +579,9 @@ const Index = () => {
                   style={{
                     background: "white",
                     color: "#0A0A0A",
-                    fontSize: 16,
-                    fontWeight: 600,
-                    padding: "14px 32px",
+                    fontSize: 20,
+                    fontWeight: 700,
+                    padding: "18px 40px",
                     borderRadius: 10,
                     border: "none",
                     cursor: "pointer",
@@ -596,7 +596,7 @@ const Index = () => {
         </AnimatePresence>
 
         {/* ── Page content ── */}
-        <div className="mx-auto" style={{ maxWidth: 1200, padding: "32px 48px" }}>
+        <div className="mx-auto" style={{ maxWidth: 1560, padding: "32px 36px" }}>
           <TopBar onReplay={reset} activeItem="overview" />
 
           <AnimatePresence>
@@ -634,7 +634,7 @@ const Index = () => {
                           animation: "pulseGreen 1.5s ease-in-out infinite",
                         }}
                       />
-                      <span style={{ fontSize: 13, fontWeight: 600, color: "#15803D" }}>
+                      <span style={{ fontSize: 18, fontWeight: 600, color: "#15803D" }}>
                         ✓ Ingestion Agent: all data extracted successfully
                       </span>
                     </motion.div>
@@ -651,9 +651,9 @@ const Index = () => {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
                       style={{
-                        fontSize: 13,
+                        fontSize: 18,
                         textTransform: "uppercase" as const,
-                        color: "#999",
+                        color: "#4B5563",
                         letterSpacing: "0.06em",
                         marginBottom: 16,
                       }}
@@ -661,13 +661,13 @@ const Index = () => {
                       Building Data
                     </motion.p>
 
-                    <p style={{ fontSize: 16, fontWeight: 700, color: "#0A0A0A", marginBottom: 2 }}>
+                    <p style={{ fontSize: 21, fontWeight: 700, color: "#2E1A47", marginBottom: 2 }}>
                       Meridian Condominium Association, Inc.
                     </p>
-                    <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 4 }}>
+                    <p style={{ fontSize: 18, color: "#4B5563", marginBottom: 4 }}>
                       425 East 58th Street, New York, NY 10022
                     </p>
-                    <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>
+                    <p style={{ fontSize: 18, color: "#4B5563", marginBottom: 16 }}>
                       Upload building data to begin your reserve fund study.
                     </p>
 
@@ -690,8 +690,8 @@ const Index = () => {
                             gap: 8,
                           }}
                         >
-                          <Upload size={32} style={{ color: "#C0C0C0" }} />
-                          <p style={{ fontSize: 14, color: "#999" }}>Drop files here</p>
+                          <Upload size={40} style={{ color: "#C0C0C0" }} />
+                          <p style={{ fontSize: 19, color: "#4B5563" }}>Drop files here</p>
 
                           {/* Photos slide in */}
                           {PHOTO_URLS.map((url, i) => {
@@ -766,7 +766,7 @@ const Index = () => {
                                   zIndex: 5,
                                 }}
                               >
-                                <FileText size={32} style={{ color: "#0A0A0A" }} />
+                                <FileText size={32} style={{ color: "#2E1A47" }} />
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -800,7 +800,7 @@ const Index = () => {
                                   zIndex: 5,
                                 }}
                               >
-                                <Mic size={32} style={{ color: "#0A0A0A" }} />
+                                <Mic size={32} style={{ color: "#2E1A47" }} />
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -848,19 +848,19 @@ const Index = () => {
                             onClick={handleConnectButtonClick}
                             style={{
                               width: "100%",
-                              padding: "14px 0",
+                              padding: "18px 0",
                               background: "#0A0A0A",
                               color: "#FFFFFF",
                               border: "none",
                               borderRadius: 999,
-                              fontSize: 14,
+                              fontSize: 19,
                               fontWeight: 600,
                               cursor: "pointer",
                             }}
                           >
                             Connect to property management tools &rarr;
                           </button>
-                          <p style={{ fontSize: 12, color: "#999", textAlign: "center", marginTop: 8 }}>
+                          <p style={{ fontSize: 17, color: "#4B5563", textAlign: "center", marginTop: 8 }}>
                             Sync with AppFolio, Yardi, or Buildium to auto-populate your data
                           </p>
                         </motion.div>
@@ -876,9 +876,9 @@ const Index = () => {
                         >
                           <p
                             style={{
-                              fontSize: 11,
+                              fontSize: 16,
                               textTransform: "uppercase" as const,
-                              color: "#9CA3B8",
+                              color: "#64748B",
                               letterSpacing: "0.08em",
                               marginBottom: 10,
                             }}
@@ -911,9 +911,9 @@ const Index = () => {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
                       style={{
-                        fontSize: 13,
+                        fontSize: 18,
                         textTransform: "uppercase" as const,
-                        color: "#999",
+                        color: "#4B5563",
                         letterSpacing: "0.06em",
                         marginBottom: 16,
                       }}
@@ -968,8 +968,8 @@ const Index = () => {
                             gap: 8,
                           }}
                         >
-                          <CheckCircle size={16} style={{ color: "#0A0A0A", flexShrink: 0 }} />
-                          <span style={{ fontSize: 13, fontWeight: 600, color: "#0A0A0A" }}>
+                          <CheckCircle size={22} style={{ color: "#2E1A47", flexShrink: 0 }} />
+                          <span style={{ fontSize: 18, fontWeight: 600, color: "#2E1A47" }}>
                             Ingestion complete: 3 sources processed by 3 AI agents
                           </span>
                         </motion.div>

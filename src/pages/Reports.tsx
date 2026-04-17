@@ -81,9 +81,9 @@ const GenBtn = () => {
       onMouseLeave={() => setH(false)}
       style={{
         background: "white",
-        color: h ? "#0F1729" : "#5A6178",
-        border: `1px solid ${h ? "#0F1729" : "rgba(15,23,41,0.06)"}`,
-        fontSize: 12,
+        color: h ? "#2E1A47" : "#334155",
+        border: `1px solid ${h ? "#2E1A47" : "rgba(15,23,41,0.06)"}`,
+        fontSize: 17,
         fontWeight: 500,
         borderRadius: 6,
         padding: "4px 12px",
@@ -105,7 +105,7 @@ const RegulatorRow = () => {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontSize: 13, color: "#9CA3B8", fontStyle: "italic", flex: 1 }}>
+        <span style={{ fontSize: 18, color: "#64748B", fontStyle: "italic", flex: 1 }}>
           Compliance Resource Center
         </span>
         <a
@@ -118,18 +118,18 @@ const RegulatorRow = () => {
             display: "flex",
             alignItems: "center",
             gap: 3,
-            fontSize: 12,
-            color: "#5A6178",
+            fontSize: 17,
+            color: "#334155",
             textDecoration: hov ? "underline" : "none",
             flexShrink: 0,
             cursor: "pointer",
           }}
         >
-          <ExternalLink size={12} />
+          <ExternalLink size={22} />
           Open
         </a>
       </div>
-      <p style={{ fontSize: 11, color: "#9CA3B8", marginTop: 4 }}>
+      <p style={{ fontSize: 16, color: "#64748B", marginTop: 4 }}>
         Direct links to NYC DOB compliance requirements
       </p>
     </div>
@@ -145,7 +145,7 @@ const ReportRow = ({ name, isLast }: { name: string; isLast: boolean }) => {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        height: 40,
+        height: 56,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -157,7 +157,7 @@ const ReportRow = ({ name, isLast }: { name: string; isLast: boolean }) => {
         padding: "0 4px",
       }}
     >
-      <span style={{ fontSize: 13, color: "#0F1729" }}>{name}</span>
+      <span style={{ fontSize: 18, color: "#2E1A47" }}>{name}</span>
       <GenBtn />
     </div>
   );
@@ -167,7 +167,7 @@ const ReportRow = ({ name, isLast }: { name: string; isLast: boolean }) => {
 
 const LibraryCard = ({ card }: { card: LibraryCardDef }) => {
   const Icon = card.IconComp;
-  const titleColor = card.isRegulators ? "#9CA3B8" : "#0F1729";
+  const titleColor = card.isRegulators ? "#64748B" : "#2E1A47";
   const cardBorder = card.isRegulators ? "1px dashed rgba(15,23,41,0.06)" : "1px solid rgba(15,23,41,0.06)";
   return (
     <div
@@ -181,7 +181,7 @@ const LibraryCard = ({ card }: { card: LibraryCardDef }) => {
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
         <Icon size={20} style={{ color: titleColor, flexShrink: 0 }} />
-        <span style={{ fontSize: 15, fontWeight: 600, color: titleColor }}>{card.category}</span>
+        <span style={{ fontSize: 20, fontWeight: 600, color: titleColor }}>{card.category}</span>
       </div>
       <div style={{ height: 1, background: "#EEEFF2", marginBottom: 10 }} />
       {card.isRegulators ? (
@@ -206,7 +206,7 @@ const RecentRow = ({ req }: { req: { text: string; date: string } }) => {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        height: 36,
+        height: 52,
         display: "flex",
         alignItems: "center",
         padding: "0 10px",
@@ -216,8 +216,8 @@ const RecentRow = ({ req }: { req: { text: string; date: string } }) => {
         transition: "background 150ms",
       }}
     >
-      <span style={{ fontSize: 13, color: "#0F1729", flex: 1 }}>{req.text}</span>
-      <span style={{ fontSize: 12, color: "#9CA3B8", flexShrink: 0 }}>{req.date}</span>
+      <span style={{ fontSize: 18, color: "#2E1A47", flex: 1 }}>{req.text}</span>
+      <span style={{ fontSize: 17, color: "#64748B", flexShrink: 0 }}>{req.date}</span>
     </div>
   );
 };
@@ -231,8 +231,8 @@ const ViewLink = () => {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        fontSize: 12,
-        color: "#5A6178",
+        fontSize: 17,
+        color: "#334155",
         cursor: "pointer",
         textDecoration: hov ? "underline" : "none",
         flexShrink: 0,
@@ -281,12 +281,12 @@ const Reports = () => {
         ]}
       />
 
-      <main className="flex-1" style={{ marginLeft: 260, overflowY: "auto", minHeight: "100vh" }}>
+      <main className="flex-1" style={{ marginLeft: 320, overflowY: "auto", minHeight: "100vh" }}>
         <div
           style={{
-            maxWidth: 1100,
+            maxWidth: 1560,
             margin: "0 auto",
-            padding: "32px 44px 48px",
+            padding: "32px 36px 48px",
             display: "flex",
             flexDirection: "column",
           }}
@@ -298,11 +298,11 @@ const Reports = () => {
           />
 
           {/* ── Page title + subtitle — full width, above everything ── */}
-          <div style={{ maxWidth: 900, width: "100%", margin: "0 auto", marginBottom: 12 }}>
-            <h1 style={{ fontSize: 20, fontWeight: 600, color: "#0A0A0A", margin: 0, marginBottom: 3 }}>
+          <div style={{ width: "100%", marginBottom: 12 }}>
+            <h1 style={{ fontSize: 27, fontWeight: 600, color: "#2E1A47", margin: 0, marginBottom: 3 }}>
               Reports
             </h1>
-            <p style={{ fontSize: 14, color: "#9CA3B8", margin: 0 }}>
+            <p style={{ fontSize: 19, color: "#64748B", margin: 0 }}>
               Your building data, formatted for every stakeholder.
             </p>
           </div>
@@ -315,7 +315,6 @@ const Reports = () => {
             style={{
               display: "flex",
               flexDirection: "column",
-              maxWidth: 900,
               width: "100%",
               margin: "0 auto",
             }}
@@ -337,7 +336,7 @@ const Reports = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
               style={{
-                height: 44,
+                height: 64,
                 width: "100%",
                 background: "#FFFFFF",
                 border: "1px solid rgba(15,23,41,0.06)",
@@ -352,24 +351,24 @@ const Reports = () => {
                 boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
               }}
             >
-              <Inbox size={16} style={{ color: "#9CA3B8", flexShrink: 0 }} />
-              <span style={{ fontSize: 12, fontWeight: 500, color: "#9CA3B8", flexShrink: 0 }}>
+              <Inbox size={22} style={{ color: "#64748B", flexShrink: 0 }} />
+              <span style={{ fontSize: 17, fontWeight: 500, color: "#64748B", flexShrink: 0 }}>
                 New request
               </span>
               <div style={{ width: 1, height: 16, background: "#EEEFF2", flexShrink: 0 }} />
-              <span style={{ fontSize: 13, color: "#0F1729", flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <span style={{ fontSize: 18, color: "#2E1A47", flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 Unit 4B is under contract; buyer&apos;s attorney has requested a Status Certificate.
               </span>
-              <span style={{ fontSize: 12, color: "#9CA3B8", flexShrink: 0 }}>Today, 9:37 AM</span>
+              <span style={{ fontSize: 17, color: "#64748B", flexShrink: 0 }}>Today, 9:37 AM</span>
               <ViewLink />
             </motion.div>
 
             {/* ─── RECENT REQUESTS label + rows ─── */}
             <div style={{ marginBottom: 20, flexShrink: 0 }}>
-              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 4 }}>
+              <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 4 }}>
                 Recent Requests
               </p>
-              <div style={{ maxHeight: 120, overflow: "hidden" }}>
+              <div style={{ maxHeight: 170, overflow: "hidden" }}>
                 {RECENT_REQUESTS.map((req, i) => (
                   <AnimatePresence key={i}>
                     {recentVisible[i] && (
@@ -404,10 +403,10 @@ const Reports = () => {
                         flexShrink: 0,
                       }}
                     >
-                      <span style={{ fontSize: 18, fontWeight: 700, color: "#0F1729" }}>
+                      <span style={{ fontSize: 24, fontWeight: 700, color: "#2E1A47" }}>
                         Status Certificate Package
                       </span>
-                      <span style={{ fontSize: 11, color: "#9CA3B8", fontStyle: "italic" }}>
+                      <span style={{ fontSize: 16, color: "#64748B", fontStyle: "italic" }}>
                         Auto-assembled by Reporting Agent
                       </span>
                     </motion.div>
@@ -451,7 +450,7 @@ const Reports = () => {
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
                           {isDone ? (
-                            <CheckCircle size={15} style={{ color: "#0F1729", flexShrink: 0 }} />
+                            <CheckCircle size={20} style={{ color: "#2E1A47", flexShrink: 0 }} />
                           ) : (
                             <div
                               className="animate-spin"
@@ -460,17 +459,17 @@ const Reports = () => {
                                 height: 15,
                                 borderRadius: "50%",
                                 border: "2px solid #EEEFF2",
-                                borderTopColor: "#0F1729",
+                                borderTopColor: "#2E1A47",
                                 flexShrink: 0,
                               }}
                             />
                           )}
                           <div style={{ minWidth: 0 }}>
-                            <span style={{ fontSize: 14, fontWeight: 500, color: "#0F1729", display: "block" }}>
+                            <span style={{ fontSize: 19, fontWeight: 500, color: "#2E1A47", display: "block" }}>
                               {item.label}
                             </span>
                             {isDone && (
-                              <span style={{ fontSize: 12, color: "#9CA3B8" }}>{item.sublabel}</span>
+                              <span style={{ fontSize: 17, color: "#64748B" }}>{item.sublabel}</span>
                             )}
                           </div>
                         </div>
@@ -488,8 +487,8 @@ const Reports = () => {
                                 marginLeft: 8,
                               }}
                             >
-                              <Download size={12} style={{ color: "#9CA3B8" }} />
-                              <span style={{ fontSize: 12, color: "#9CA3B8" }}>Ready</span>
+                              <Download size={22} style={{ color: "#64748B" }} />
+                              <span style={{ fontSize: 17, color: "#64748B" }}>Ready</span>
                             </motion.div>
                           )}
                         </AnimatePresence>
@@ -508,15 +507,15 @@ const Reports = () => {
                         <div style={{ height: 1, background: "#EEEFF2", margin: "4px 0 14px" }} />
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <Send size={13} style={{ color: "#9CA3B8", flexShrink: 0 }} />
-                            <span style={{ fontSize: 12, color: "#9CA3B8" }}>
+                            <Send size={18} style={{ color: "#64748B", flexShrink: 0 }} />
+                            <span style={{ fontSize: 17, color: "#64748B" }}>
                               Ready to send to: buyer-attorney@legalfirm.com
                             </span>
                           </div>
                           <button style={{
                             background: "#0F1729",
                             color: "white",
-                            fontSize: 14,
+                            fontSize: 19,
                             fontWeight: 500,
                             borderRadius: 7,
                             height: 40,
@@ -546,7 +545,7 @@ const Reports = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
-                style={{ maxWidth: 900, width: "100%", margin: "16px auto 0" }}
+                style={{ width: "100%", margin: "16px auto 0" }}
               >
                 {/* Trigger row */}
                 <div
@@ -566,13 +565,13 @@ const Reports = () => {
                     userSelect: "none",
                   }}
                 >
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
+                  <span style={{ fontSize: 19, fontWeight: 600, color: "#2E1A47" }}>
                     All Report Types
                   </span>
                   <ChevronDown
-                    size={16}
+                    size={22}
                     style={{
-                      color: "#9CA3B8",
+                      color: "#64748B",
                       transform: libraryOpen ? "rotate(180deg)" : "rotate(0deg)",
                       transition: "transform 350ms ease-in-out",
                       flexShrink: 0,

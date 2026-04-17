@@ -9,13 +9,13 @@ const bodyStyle: React.CSSProperties = {
   fontFamily: BODY_FONT,
   color: CHARCOAL,
   lineHeight: 1.9,
-  fontSize: 17,
+  fontSize: 22,
   margin: 0,
 };
 
 const sectionHeadingStyle: React.CSSProperties = {
   fontFamily: HEADING_FONT,
-  fontSize: 36,
+  fontSize: 46,
   fontWeight: 600,
   color: CHARCOAL,
   margin: "0 0 28px 0",
@@ -66,7 +66,7 @@ const Recollab = () => {
           style={{
             display: "inline-block",
             fontFamily: BODY_FONT,
-            fontSize: 14,
+            fontSize: 19,
             color: GOLD,
             textDecoration: "none",
             marginBottom: 48,
@@ -78,11 +78,11 @@ const Recollab = () => {
 
         {/* ── HERO ─────────────────────────────────────────── */}
         <div style={{ marginBottom: 72 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🏢</div>
+          <div style={{ fontSize: 62, marginBottom: 16 }}>🏢</div>
           <h1
             style={{
               fontFamily: HEADING_FONT,
-              fontSize: 52,
+              fontSize: 68,
               fontWeight: 600,
               color: CHARCOAL,
               margin: "0 0 10px 0",
@@ -94,7 +94,7 @@ const Recollab = () => {
           <p
             style={{
               fontFamily: BODY_FONT,
-              fontSize: 18,
+              fontSize: 24,
               color: "#6B6B6B",
               margin: "0 0 20px 0",
               lineHeight: 1.6,
@@ -106,7 +106,7 @@ const Recollab = () => {
             style={{
               display: "inline-block",
               fontFamily: BODY_FONT,
-              fontSize: 11,
+              fontSize: 16,
               fontWeight: 600,
               color: GOLD,
               background: "#FFF8EC",
@@ -126,7 +126,7 @@ const Recollab = () => {
           <p
             style={{
               fontFamily: HEADING_FONT,
-              fontSize: 24,
+              fontSize: 30,
               fontWeight: 500,
               color: CHARCOAL,
               lineHeight: 1.6,
@@ -164,7 +164,7 @@ const Recollab = () => {
                 <p
                   style={{
                     fontFamily: BODY_FONT,
-                    fontSize: 16,
+                    fontSize: 21,
                     fontWeight: 600,
                     color: CHARCOAL,
                     margin: "0 0 6px 0",
@@ -175,7 +175,7 @@ const Recollab = () => {
                 <p
                   style={{
                     fontFamily: BODY_FONT,
-                    fontSize: 15,
+                    fontSize: 20,
                     color: "#5A5A5A",
                     lineHeight: 1.7,
                     margin: 0,
@@ -256,7 +256,7 @@ const Recollab = () => {
           <p
             style={{
               fontFamily: BODY_FONT,
-              fontSize: 11,
+              fontSize: 16,
               fontWeight: 600,
               color: GOLD,
               textTransform: "uppercase" as const,
@@ -270,7 +270,7 @@ const Recollab = () => {
           <h2
             style={{
               fontFamily: HEADING_FONT,
-              fontSize: 28,
+              fontSize: 36,
               fontWeight: 600,
               color: CHARCOAL,
               margin: "0 0 20px 0",
@@ -300,12 +300,12 @@ const Recollab = () => {
             style={{
               display: "inline-block",
               fontFamily: BODY_FONT,
-              fontSize: 15,
+              fontSize: 20,
               fontWeight: 600,
               color: "#1A1A1A",
               background: GOLD,
               borderRadius: 8,
-              padding: "12px 28px",
+              padding: "16px 36px",
               textDecoration: "none",
               letterSpacing: "0.01em",
             }}

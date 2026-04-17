@@ -84,8 +84,8 @@ const Insurance = () => {
         visitedItems={["overview", "inventory", "financials", "projects", "marketplace", "funding"]}
       />
 
-      <main className="flex-1" style={{ marginLeft: 260 }}>
-        <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 44px 48px" }}>
+      <main className="flex-1" style={{ marginLeft: 320 }}>
+        <div style={{ maxWidth: 1560, margin: "0 auto", padding: "28px 36px 48px" }}>
 
           <TopBar
             onReplay={reset}
@@ -106,10 +106,10 @@ const Insurance = () => {
 
           {/* ── Page title + subtitle ── */}
           <div style={{ marginBottom: 20 }}>
-            <h1 style={{ fontSize: 20, fontWeight: 600, color: "#0A0A0A", margin: 0, marginBottom: 3 }}>
+            <h1 style={{ fontSize: 27, fontWeight: 600, color: "#2E1A47", margin: 0, marginBottom: 3 }}>
               Insurance
             </h1>
-            <p style={{ fontSize: 14, color: "#9CA3B8", margin: 0 }}>
+            <p style={{ fontSize: 19, color: "#64748B", margin: 0 }}>
               RECOstudy monitors your building's insurance exposure automatically.
             </p>
           </div>
@@ -139,10 +139,10 @@ const Insurance = () => {
                     <p style={{
                       margin: 0,
                       marginBottom: 8,
-                      fontSize: 10,
+                      fontSize: 20,
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
-                      color: "#9CA3B8",
+                      color: "#64748B",
                     }}>
                       Trigger
                     </p>
@@ -151,9 +151,9 @@ const Insurance = () => {
                     <p style={{
                       margin: 0,
                       marginBottom: 10,
-                      fontSize: 12,
+                      fontSize: 17,
                       fontStyle: "italic",
-                      color: "#9CA3B8",
+                      color: "#64748B",
                     }}>
                       Insurance Agent scanned 24 components, 3 flagged
                     </p>
@@ -165,18 +165,18 @@ const Insurance = () => {
                       <div style={{
                         background: "#FFFFFF",
                         border: "1px solid rgba(15,23,41,0.06)",
-                        borderLeft: "2px solid #0F1729",
+                        borderLeft: "2px solid #2E1A47",
                         borderRadius: 8,
                         padding: "10px 14px",
                         boxShadow: "0 2px 8px rgba(220,38,38,0.08)",
                       }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                           <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
-                          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
+                          <span style={{ fontSize: 19, fontWeight: 600, color: "#2E1A47" }}>
                             Elevator Cab - Townhouse
                           </span>
                         </div>
-                        <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
+                        <p style={{ margin: 0, fontSize: 17, color: "#64748B" }}>
                           End-of-life &middot; 0 years RUL &middot; $36,000
                         </p>
                       </div>
@@ -191,11 +191,11 @@ const Insurance = () => {
                       }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                           <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#DC2626", flexShrink: 0 }} />
-                          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
+                          <span style={{ fontSize: 19, fontWeight: 600, color: "#2E1A47" }}>
                             Site Utilities - Garbage Compactor
                           </span>
                         </div>
-                        <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
+                        <p style={{ margin: 0, fontSize: 17, color: "#64748B" }}>
                           End-of-life &middot; Immediate &middot; $42,000
                         </p>
                       </div>
@@ -209,11 +209,11 @@ const Insurance = () => {
                       }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                           <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#F59E0B", flexShrink: 0 }} />
-                          <span style={{ fontSize: 14, fontWeight: 600, color: "#0F1729" }}>
+                          <span style={{ fontSize: 19, fontWeight: 600, color: "#2E1A47" }}>
                             Boiler
                           </span>
                         </div>
-                        <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
+                        <p style={{ margin: 0, fontSize: 17, color: "#64748B" }}>
                           Critical &middot; 1 year RUL &middot; $100,000
                         </p>
                       </div>
@@ -227,10 +227,10 @@ const Insurance = () => {
                     <p style={{
                       margin: 0,
                       marginBottom: 10,
-                      fontSize: 10,
+                      fontSize: 20,
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
-                      color: "#9CA3B8",
+                      color: "#64748B",
                     }}>
                       Why This Matters
                     </p>
@@ -250,7 +250,7 @@ const Insurance = () => {
                             flexShrink: 0,
                             marginTop: 7,
                           }} />
-                          <span style={{ fontSize: 13, color: "#5A6178", lineHeight: 1.6 }}>
+                          <span style={{ fontSize: 18, color: "#334155", lineHeight: 1.6 }}>
                             {text}
                           </span>
                         </div>
@@ -264,21 +264,21 @@ const Insurance = () => {
                     <p style={{
                       margin: 0,
                       marginBottom: 6,
-                      fontSize: 10,
+                      fontSize: 20,
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
-                      color: "#9CA3B8",
+                      color: "#64748B",
                     }}>
                       Insurer on File
                     </p>
 
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
-                      <Building size={14} style={{ color: "#9CA3B8", flexShrink: 0 }} />
-                      <span style={{ fontSize: 13, fontWeight: 500, color: "#0F1729" }}>
+                      <Building size={19} style={{ color: "#64748B", flexShrink: 0 }} />
+                      <span style={{ fontSize: 18, fontWeight: 500, color: "#2E1A47" }}>
                         Apex Property Insurance
                       </span>
                     </div>
-                    <p style={{ margin: 0, fontSize: 12, color: "#9CA3B8" }}>
+                    <p style={{ margin: 0, fontSize: 17, color: "#64748B" }}>
                       insurer@example.com
                     </p>
                   </motion.div>
@@ -307,17 +307,17 @@ const Insurance = () => {
                     {/* ── Email header top row ── */}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                       {/* RECOstudy™ wordmark */}
-                      <span style={{ fontSize: 13 }}>
-                        <span style={{ fontWeight: 700, color: "#0F1729" }}>RECO</span>
-                        <span style={{ fontWeight: 700, color: "#4F6BFF" }}>study</span>
-                        <span style={{ fontSize: 9, color: "#9CA3B8", verticalAlign: "super", marginLeft: 1 }}>™</span>
+                      <span style={{ fontSize: 18 }}>
+                        <span style={{ fontWeight: 700, color: "#2E1A47" }}>RECO</span>
+                        <span style={{ fontWeight: 700, color: "#4D6BA9" }}>study</span>
+                        <span style={{ fontSize: 19, color: "#64748B", verticalAlign: "super", marginLeft: 1 }}>™</span>
                       </span>
                       {/* INSURANCE NOTIFICATION label */}
                       <span style={{
-                        fontSize: 11,
+                        fontSize: 16,
                         textTransform: "uppercase",
                         letterSpacing: "0.08em",
-                        color: "#9CA3B8",
+                        color: "#64748B",
                       }}>
                         Insurance Notification
                       </span>
@@ -349,22 +349,22 @@ const Insurance = () => {
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          height: 32,
+                          height: 48,
                           borderBottom: "1px solid #F8F9FC",
                         }}
                       >
                         <span style={{
                           width: 60,
                           flexShrink: 0,
-                          fontSize: 11,
-                          color: "#9CA3B8",
+                          fontSize: 16,
+                          color: "#64748B",
                         }}>
                           {label}
                         </span>
                         <span style={{
-                          fontSize: 13,
+                          fontSize: 18,
                           fontWeight: valueWeight,
-                          color: "#0F1729",
+                          color: "#2E1A47",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -378,7 +378,7 @@ const Insurance = () => {
                     <div style={{ height: 1, background: "#EEEFF2", margin: "12px 0" }} />
 
                     {/* ── Body lines (reveal at 4200ms, 300ms apart) ── */}
-                    <div style={{ fontSize: 13, color: "#5A6178", lineHeight: 1.75 }}>
+                    <div style={{ fontSize: 18, color: "#334155", lineHeight: 1.75 }}>
                       {BODY_LINES.map((line, i) => (
                         <AnimatePresence key={i}>
                           {bodyLineVisible(i) && (
@@ -411,10 +411,10 @@ const Insurance = () => {
                           <p style={{
                             margin: 0,
                             marginBottom: 8,
-                            fontSize: 10,
+                            fontSize: 20,
                             textTransform: "uppercase",
                             letterSpacing: "0.08em",
-                            color: "#9CA3B8",
+                            color: "#64748B",
                           }}>
                             Attachments
                           </p>
@@ -435,8 +435,8 @@ const Insurance = () => {
                                   padding: "5px 12px",
                                 }}
                               >
-                                <Paperclip size={12} style={{ color: "#9CA3B8", flexShrink: 0 }} />
-                                <span style={{ fontSize: 12, color: "#5A6178" }}>{label}</span>
+                                <Paperclip size={22} style={{ color: "#64748B", flexShrink: 0 }} />
+                                <span style={{ fontSize: 17, color: "#334155" }}>{label}</span>
                               </div>
                             ))}
                           </div>
@@ -461,13 +461,13 @@ const Insurance = () => {
                     <div
                       style={{
                         width: "100%",
-                        height: 44,
+                        height: 56,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         gap: 6,
                         borderRadius: 7,
-                        fontSize: 14,
+                        fontSize: 19,
                         fontWeight: 500,
                         cursor: "default",
                         transition: "background 200ms ease, border-color 200ms ease, color 200ms ease",
@@ -485,8 +485,8 @@ const Insurance = () => {
                             }
                           : {
                               background: "transparent",
-                              border: "1px solid #0F1729",
-                              color: "#0F1729",
+                              border: "1px solid #2E1A47",
+                              color: "#2E1A47",
                             }),
                       }}
                     >
@@ -520,7 +520,7 @@ const Insurance = () => {
                         <div style={{
                           height: "100%",
                           width: `${progressPct}%`,
-                          background: "#0F1729",
+                          background: "#2E1A47",
                           borderRadius: 2,
                           transition: "width 30ms linear",
                         }} />

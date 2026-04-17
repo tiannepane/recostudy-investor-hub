@@ -31,18 +31,18 @@ const AgentStatus = ({ messages, elapsed }: AgentStatusProps) => {
     setDisplayText(current.text.substring(0, charsToShow));
   }, [elapsed, messages]);
 
-  if (!activeMsg) return <div className="h-6" />;
+  if (!activeMsg) return <div className="h-8" />;
 
-  const dotColor = activeMsg.color === "green" ? "#10B981" : "#9CA3B8";
-  const textColor = activeMsg.color === "green" ? "#10B981" : "#9CA3B8";
+  const dotColor = activeMsg.color === "green" ? "#10B981" : "#64748B";
+  const textColor = activeMsg.color === "green" ? "#10B981" : "#64748B";
 
   return (
-    <div className="flex items-center gap-2 h-6">
+    <div className="flex items-center gap-2 h-8">
       <span
         className="inline-block rounded-full flex-shrink-0"
-        style={{ width: 6, height: 6, background: dotColor }}
+        style={{ width: 8, height: 8, background: dotColor }}
       />
-      <span className="font-mono text-[13px]" style={{ color: textColor }}>
+      <span className="font-mono text-[18px]" style={{ color: textColor }}>
         {displayText}
       </span>
     </div>

@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import Intro from "./pages/Intro.tsx";
 import Index from "./pages/Index.tsx";
 import Inventory from "./pages/Inventory.tsx";
 import Financials from "./pages/Financials.tsx";
@@ -25,7 +26,8 @@ const App = () => (
       <BrowserRouter>
         <FloatingChat />
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Intro />} />
+          <Route path="/onboarding" element={<Index />} />
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/financials" element={<Financials />} />
           <Route path="/projects" element={<Projects />} />

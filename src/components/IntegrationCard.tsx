@@ -13,13 +13,13 @@ const IntegrationCard = ({ name, logoSrc, buttonState }: IntegrationCardProps) =
   const buttonStyles: Record<ButtonState, React.CSSProperties> = {
     connect: {
       border: "1px solid hsl(var(--card-border))",
-      color: "#5A6178",
+      color: "#334155",
       background: "transparent",
     },
     connecting: {
-      border: "1px solid #4F6BFF",
+      border: "1px solid #4D6BA9",
       color: "white",
-      background: "#4F6BFF",
+      background: "#4D6BA9",
     },
     connected: {
       border: "1px solid #D1FAE5",
@@ -37,20 +37,20 @@ const IntegrationCard = ({ name, logoSrc, buttonState }: IntegrationCardProps) =
   return (
     <div
       className="rounded-xl border border-border bg-card/50 flex flex-col items-center justify-center"
-      style={{ height: 160, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+      style={{ height: 200, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
     >
       <img
         src={logoSrc}
         alt={name}
         className="rounded-lg mb-3 pointer-events-none select-none"
-        style={{ width: 40, height: 40 }}
+        style={{ width: 52, height: 52 }}
         draggable={false}
       />
-      <p className="text-[15px] font-medium text-heading mb-3">{name}</p>
+      <p className="text-[21px] font-medium text-heading mb-3">{name}</p>
       <button
-        className="text-[12px] rounded-md cursor-default"
+        className="text-[17px] rounded-md cursor-default"
         style={{
-          padding: "6px 16px",
+          padding: "8px 20px",
           transition: "background 300ms, color 300ms, border-color 300ms",
           ...buttonStyles[buttonState],
         }}

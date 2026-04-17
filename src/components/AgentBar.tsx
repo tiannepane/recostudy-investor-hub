@@ -26,15 +26,15 @@ const AgentBar = ({
   return (
     <div
       style={{
-        height: 40,
-        padding: "0 24px",
+        height: 52,
+        padding: "0 32px",
         display: "flex",
         alignItems: "center",
-        gap: 10,
+        gap: 14,
         background: isComplete_ ? "#F0FDF4" : "#F8F9FC",
         borderBottom: `1px solid ${isComplete_ ? "#BBF7D0" : "rgba(15,23,41,0.06)"}`,
         transition: "background 0.4s ease, border-color 0.4s ease",
-        marginBottom: 20,
+        marginBottom: 28,
       }}
     >
       {/* Accent dot — pulses while thinking, static when complete */}
@@ -43,8 +43,8 @@ const AgentBar = ({
           animate={{ opacity: [1, 0.25, 1] }}
           transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
           style={{
-            width: 6,
-            height: 6,
+            width: 8,
+            height: 8,
             borderRadius: "50%",
             background: accentColor,
             flexShrink: 0,
@@ -54,8 +54,8 @@ const AgentBar = ({
       ) : (
         <span
           style={{
-            width: 6,
-            height: 6,
+            width: 8,
+            height: 8,
             borderRadius: "50%",
             background: "#22C55E",
             flexShrink: 0,
@@ -72,21 +72,19 @@ const AgentBar = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: [1, 0.5, 1] }}
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
-            // The opacity keyframe loop for the shimmer effect
             transition={{
               opacity: {
                 duration: 1.2,
                 repeat: Infinity,
                 ease: "easeInOut",
-                // Override for the enter/exit transitions above
                 times: [0, 0.5, 1],
               },
             }}
             style={{
               flex: 1,
-              fontSize: 13,
+              fontSize: 18,
               fontFamily: "'JetBrains Mono', monospace",
-              color: "#5A6178",
+              color: "#334155",
             }}
           >
             {agentName}: {thinkingMessage}
@@ -100,7 +98,7 @@ const AgentBar = ({
             transition={{ duration: 0.3 }}
             style={{
               flex: 1,
-              fontSize: 13,
+              fontSize: 18,
               fontFamily: "'JetBrains Mono', monospace",
               color: "#15803D",
               fontWeight: 500,
@@ -119,7 +117,7 @@ const AgentBar = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
-            style={{ fontSize: 11, color: "#9CA3B8", flexShrink: 0 }}
+            style={{ fontSize: 16, color: "#64748B", flexShrink: 0 }}
           >
             just now
           </motion.span>

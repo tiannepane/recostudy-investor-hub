@@ -248,8 +248,8 @@ const Projects = () => {
         visitedItems={["overview", "inventory", "financials"]}
       />
 
-      <main className="flex-1" style={{ marginLeft: 260 }}>
-        <div className="mx-auto" style={{ maxWidth: 1100, padding: "44px 50px 48px" }}>
+      <main className="flex-1" style={{ marginLeft: 320 }}>
+        <div className="mx-auto" style={{ maxWidth: 1560, padding: "44px 36px 48px" }}>
           <TopBar
             onReplay={reset}
             breadcrumb="Buildings › Meridian Condominium Association, Inc. › Projects"
@@ -288,37 +288,37 @@ const Projects = () => {
                             style={{
                               borderRadius: 10,
                               border: "1px solid rgba(220, 38, 38, 0.12)",
-                              borderLeft: "3px solid #0F1729",
+                              borderLeft: "3px solid #2E1A47",
                               background: "rgba(255, 255, 255, 0.85)",
                               backdropFilter: "blur(8px)",
                               boxShadow: "0 0 0 1px rgba(220,38,38,0.05), 0 8px 32px rgba(220,38,38,0.09)",
                               padding: 24,
                             }}
                           >
-                            <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3B8", fontWeight: 500, marginBottom: 6 }}>
+                            <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.08em", color: "#64748B", fontWeight: 500, marginBottom: 6 }}>
                               Critical: Action Required
                             </p>
-                            <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", lineHeight: 1.2, marginBottom: 8 }}>
+                            <p style={{ fontSize: 27, fontWeight: 700, color: "#2E1A47", lineHeight: 1.2, marginBottom: 8 }}>
                               Elevator Cab - Townhouse
                             </p>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                              <span style={{ fontSize: 12, color: "#5A6178", background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "2px 8px" }}>
+                              <span style={{ fontSize: 17, color: "#334155", background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "2px 8px" }}>
                                 Services
                               </span>
                               <ConditionIndicator condition="Poor" />
                             </div>
                             <div style={{ height: 1, background: "#EEEFF2", marginBottom: 14 }} />
                             {/* Remaining Useful Life row — amber dot, no red */}
-                            <div style={{ display: "flex", alignItems: "center", height: 36, borderBottom: "1px solid #F8F9FC" }}>
+                            <div style={{ display: "flex", alignItems: "center", height: 52, borderBottom: "1px solid #F8F9FC" }}>
                               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F59E0B", flexShrink: 0, marginRight: 8, display: "inline-block" }} />
-                              <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>Remaining Useful Life</span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729" }}>End of life</span>
+                              <span style={{ fontSize: 18, color: "#334155", flex: 1 }}>Remaining Useful Life</span>
+                              <span style={{ fontSize: 18, fontWeight: 600, color: "#2E1A47" }}>End of life</span>
                             </div>
                             {/* Estimated Cost row */}
-                            <div style={{ display: "flex", alignItems: "center", height: 36 }}>
-                              <DollarSign size={14} style={{ color: "#9CA3B8", flexShrink: 0, marginRight: 8 }} />
-                              <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>Estimated Cost</span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$36,000</span>
+                            <div style={{ display: "flex", alignItems: "center", height: 52 }}>
+                              <DollarSign size={19} style={{ color: "#64748B", flexShrink: 0, marginRight: 8 }} />
+                              <span style={{ fontSize: 18, color: "#334155", flex: 1 }}>Estimated Cost</span>
+                              <span style={{ fontSize: 18, fontWeight: 600, color: "#2E1A47", fontFamily: "'JetBrains Mono', monospace" }}>$36,000</span>
                             </div>
                           </motion.div>
                         ) : (
@@ -331,7 +331,7 @@ const Projects = () => {
                             style={{
                               borderRadius: 10,
                               border: selectedComp.risk === "Critical" ? "1px solid rgba(220, 38, 38, 0.12)" : "1px solid rgba(249, 115, 22, 0.15)",
-                              borderLeft: "3px solid #0F1729",
+                              borderLeft: "3px solid #2E1A47",
                               background: "rgba(255, 255, 255, 0.85)",
                               backdropFilter: "blur(8px)",
                               boxShadow: selectedComp.risk === "Critical"
@@ -340,30 +340,30 @@ const Projects = () => {
                               padding: 24,
                             }}
                           >
-                            <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3B8", fontWeight: 500, marginBottom: 6 }}>
+                            <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.08em", color: "#64748B", fontWeight: 500, marginBottom: 6 }}>
                               {selectedComp.risk === "Critical" ? "Critical: Action Required" : "Flagged: Monitor Closely"}
                             </p>
-                            <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", marginBottom: 8, lineHeight: 1.2 }}>
+                            <p style={{ fontSize: 27, fontWeight: 700, color: "#2E1A47", marginBottom: 8, lineHeight: 1.2 }}>
                               {selectedComp.name}
                             </p>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                              <span style={{ fontSize: 12, background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "2px 8px", color: "#5A6178" }}>
+                              <span style={{ fontSize: 17, background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "2px 8px", color: "#334155" }}>
                                 {selectedComp.category}
                               </span>
                               <ConditionIndicator condition={selectedComp.condition} />
                             </div>
                             <div style={{ height: 1, background: "#EEEFF2", margin: "10px 0 8px" }} />
                             {/* Remaining Useful Life row — amber dot */}
-                            <div style={{ display: "flex", alignItems: "center", height: 36, borderBottom: "1px solid #F8F9FC" }}>
+                            <div style={{ display: "flex", alignItems: "center", height: 52, borderBottom: "1px solid #F8F9FC" }}>
                               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F59E0B", flexShrink: 0, marginRight: 8, display: "inline-block" }} />
-                              <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>Remaining Useful Life</span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729" }}>{selectedComp.rul}</span>
+                              <span style={{ fontSize: 18, color: "#334155", flex: 1 }}>Remaining Useful Life</span>
+                              <span style={{ fontSize: 18, fontWeight: 600, color: "#2E1A47" }}>{selectedComp.rul}</span>
                             </div>
                             {/* Estimated Cost row */}
-                            <div style={{ display: "flex", alignItems: "center", height: 36 }}>
-                              <DollarSign size={14} style={{ color: "#9CA3B8", flexShrink: 0, marginRight: 8 }} />
-                              <span style={{ fontSize: 13, color: "#5A6178", flex: 1 }}>Estimated Cost</span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>{selectedComp.cost}</span>
+                            <div style={{ display: "flex", alignItems: "center", height: 52 }}>
+                              <DollarSign size={19} style={{ color: "#64748B", flexShrink: 0, marginRight: 8 }} />
+                              <span style={{ fontSize: 18, color: "#334155", flex: 1 }}>Estimated Cost</span>
+                              <span style={{ fontSize: 18, fontWeight: 600, color: "#2E1A47", fontFamily: "'JetBrains Mono', monospace" }}>{selectedComp.cost}</span>
                             </div>
                           </motion.div>
                         )}
@@ -380,8 +380,8 @@ const Projects = () => {
                         transition={{ duration: 0.25 }}
                         style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 24, marginBottom: 8 }}
                       >
-                        <Sparkles size={11} style={{ color: "#9CA3B8" }} />
-                        <span style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8" }}>
+                        <Sparkles size={22} style={{ color: "#64748B" }} />
+                        <span style={{ fontSize: 16, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B" }}>
                           Also flagged by Compliance Agent
                         </span>
                       </motion.div>
@@ -405,20 +405,20 @@ const Projects = () => {
                               style={{
                                 background: "rgba(255, 255, 255, 0.85)",
                                 backdropFilter: "blur(8px)",
-                                border: isSelected || isHovered ? "1px solid #4F6BFF" : "1px solid rgba(249,115,22,0.09)",
+                                border: isSelected || isHovered ? "1px solid #4D6BA9" : "1px solid rgba(249,115,22,0.09)",
                                 borderRadius: 10,
                                 padding: "12px 14px",
                                 cursor: "pointer",
-                                boxShadow: isSelected || isHovered ? "0 0 0 3px rgba(79,107,255,0.08)" : "0 0 0 1px rgba(249,115,22,0.04), 0 8px 32px rgba(249,115,22,0.06)",
+                                boxShadow: isSelected || isHovered ? "0 0 0 3px rgba(77,107,169,0.08)" : "0 0 0 1px rgba(249,115,22,0.04), 0 8px 32px rgba(249,115,22,0.06)",
                                 transition: "border-color 200ms ease, box-shadow 200ms ease",
                               }}
                             >
-                              <p style={{ fontSize: 14, fontWeight: 600, color: "#0F1729", marginBottom: 6 }}>{comp.name}</p>
+                              <p style={{ fontSize: 19, fontWeight: 600, color: "#2E1A47", marginBottom: 6 }}>{comp.name}</p>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F59E0B", flexShrink: 0, display: "inline-block" }} />
                                 <ConditionIndicator condition={comp.condition} />
                               </div>
-                              <p style={{ fontSize: 12, color: "#9CA3B8" }}>
+                              <p style={{ fontSize: 17, color: "#64748B" }}>
                                 {comp.rul.replace("years", "yrs").replace("year", "yr")} · {comp.cost}
                               </p>
                             </motion.div>
@@ -462,12 +462,12 @@ const Projects = () => {
                                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
                                     style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}
                                   >
-                                    <p style={{ fontSize: 13, lineHeight: 1 }}>
-                                      <span style={{ fontWeight: 700, color: "#0F1729" }}>RECO</span>
-                                      <span style={{ fontWeight: 700, color: "#4F6BFF" }}>study</span>
-                                      <sup style={{ fontSize: 9, color: "#9CA3B8", fontWeight: 400 }}>™</sup>
+                                    <p style={{ fontSize: 18, lineHeight: 1 }}>
+                                      <span style={{ fontWeight: 700, color: "#2E1A47" }}>RECO</span>
+                                      <span style={{ fontWeight: 700, color: "#4D6BA9" }}>study</span>
+                                      <sup style={{ fontSize: 19, color: "#64748B", fontWeight: 400 }}>™</sup>
                                     </p>
-                                    <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#9CA3B8" }}>RFP-2026-001</p>
+                                    <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, color: "#64748B" }}>RFP-2026-001</p>
                                   </motion.div>
                                 )}
                               </AnimatePresence>
@@ -477,7 +477,7 @@ const Projects = () => {
                               <AnimatePresence>
                                 {rfpType && (
                                   <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
-                                    style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#9CA3B8", marginBottom: 8 }}
+                                    style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.1em", color: "#64748B", marginBottom: 8 }}
                                   >
                                     Request for Proposal
                                   </motion.p>
@@ -485,7 +485,7 @@ const Projects = () => {
                               </AnimatePresence>
 
                               {titleCharsCount > 0 && (
-                                <p style={{ fontSize: 18, fontWeight: 700, color: "#0F1729", marginBottom: 4, lineHeight: 1.3, minHeight: 22 }}>
+                                <p style={{ fontSize: 24, fontWeight: 700, color: "#2E1A47", marginBottom: 4, lineHeight: 1.3, minHeight: 22 }}>
                                   {titleText}
                                   {titleCharsCount < TITLE_TEXT.length && (
                                     <span style={{ opacity: 0.35, fontWeight: 300 }}>|</span>
@@ -496,7 +496,7 @@ const Projects = () => {
                               <AnimatePresence>
                                 {rfpOrg && (
                                   <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
-                                    style={{ fontSize: 13, color: "#5A6178", marginBottom: 12 }}
+                                    style={{ fontSize: 18, color: "#334155", marginBottom: 12 }}
                                   >
                                     Meridian Condominium Association, Inc.
                                   </motion.p>
@@ -508,7 +508,7 @@ const Projects = () => {
                               <AnimatePresence>
                                 {scopeHeader && (
                                   <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
-                                    style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#9CA3B8", marginBottom: 5 }}
+                                    style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#64748B", marginBottom: 5 }}
                                   >
                                     Scope of Work
                                   </motion.p>
@@ -518,7 +518,7 @@ const Projects = () => {
                               <div style={{ marginBottom: 10, minHeight: scopeLineCount > 0 ? scopeLineCount * 22 : 0 }}>
                                 {SCOPE_LINES.slice(0, scopeLineCount).map((line, i) => (
                                   <motion.p key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
-                                    style={{ fontSize: 12, color: "#5A6178", lineHeight: 1.55 }}
+                                    style={{ fontSize: 17, color: "#334155", lineHeight: 1.55 }}
                                   >
                                     {line}
                                   </motion.p>
@@ -528,7 +528,7 @@ const Projects = () => {
                               <AnimatePresence>
                                 {specsVisible && (
                                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                                    <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#9CA3B8", marginBottom: 7 }}>
+                                    <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, color: "#64748B", marginBottom: 7 }}>
                                       Specifications
                                     </p>
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 16px", marginBottom: 10 }}>
@@ -539,8 +539,8 @@ const Projects = () => {
                                         { label: "Priority",      value: "Critical"               },
                                       ].map((spec) => (
                                         <div key={spec.label}>
-                                          <p style={{ fontSize: 11, color: "#9CA3B8", marginBottom: 2 }}>{spec.label}</p>
-                                          <p style={{ fontSize: 13, fontWeight: 500, color: "#0F1729" }}>{spec.value}</p>
+                                          <p style={{ fontSize: 16, color: "#64748B", marginBottom: 2 }}>{spec.label}</p>
+                                          <p style={{ fontSize: 18, fontWeight: 500, color: "#2E1A47" }}>{spec.value}</p>
                                         </div>
                                       ))}
                                     </div>
@@ -551,19 +551,19 @@ const Projects = () => {
                               <AnimatePresence>
                                 {attachmentsVisible && (
                                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                                    <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 7 }}>
+                                    <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 7 }}>
                                       Attachments
                                     </p>
                                     <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 12 }}>
                                       {["Elevator Condition Report", "Cab Inspection Photos"].map((att) => (
                                         <div key={att} style={{ display: "flex", alignItems: "center", gap: 5, background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "4px 9px" }}>
-                                          <Paperclip size={11} style={{ color: "#9CA3B8" }} />
-                                          <span style={{ fontSize: 12, color: "#5A6178" }}>{att}</span>
+                                          <Paperclip size={22} style={{ color: "#64748B" }} />
+                                          <span style={{ fontSize: 17, color: "#334155" }}>{att}</span>
                                         </div>
                                       ))}
                                     </div>
                                     <div style={{ height: 1, background: "#E8EBF0", marginBottom: 8 }} />
-                                    <p style={{ fontSize: 10, color: "#9CA3B8", fontStyle: "italic" }}>
+                                    <p style={{ fontSize: 20, color: "#64748B", fontStyle: "italic" }}>
                                       Generated by RECOstudy Compliance Agent &nbsp;·&nbsp; March 20, 2026
                                     </p>
                                   </motion.div>
@@ -582,23 +582,23 @@ const Projects = () => {
                               transition={{ duration: 0.3 }}
                             >
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                                <p style={{ fontSize: 13, lineHeight: 1 }}>
-                                  <span style={{ fontWeight: 700, color: "#0F1729" }}>RECO</span>
-                                  <span style={{ fontWeight: 700, color: "#4F6BFF" }}>study</span>
-                                  <sup style={{ fontSize: 9, color: "#9CA3B8", fontWeight: 400 }}>™</sup>
+                                <p style={{ fontSize: 18, lineHeight: 1 }}>
+                                  <span style={{ fontWeight: 700, color: "#2E1A47" }}>RECO</span>
+                                  <span style={{ fontWeight: 700, color: "#4D6BA9" }}>study</span>
+                                  <sup style={{ fontSize: 19, color: "#64748B", fontWeight: 400 }}>™</sup>
                                 </p>
-                                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#9CA3B8" }}>{selectedComp.rfp.id}</p>
+                                <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, color: "#64748B" }}>{selectedComp.rfp.id}</p>
                               </div>
                               <div style={{ height: 1, background: "#E8EBF0", marginBottom: 12 }} />
-                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#9CA3B8", marginBottom: 8 }}>
+                              <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.1em", color: "#64748B", marginBottom: 8 }}>
                                 Request for Proposal
                               </p>
-                              <p style={{ fontSize: 18, fontWeight: 700, color: "#0F1729", marginBottom: 4, lineHeight: 1.3 }}>{selectedComp.rfp.title}</p>
-                              <p style={{ fontSize: 13, color: "#5A6178", marginBottom: 12 }}>Meridian Condominium Association, Inc.</p>
+                              <p style={{ fontSize: 24, fontWeight: 700, color: "#2E1A47", marginBottom: 4, lineHeight: 1.3 }}>{selectedComp.rfp.title}</p>
+                              <p style={{ fontSize: 18, color: "#334155", marginBottom: 12 }}>Meridian Condominium Association, Inc.</p>
                               <div style={{ height: 1, background: "#E8EBF0", marginBottom: 10 }} />
-                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 5 }}>Scope of Work</p>
-                              <p style={{ fontSize: 12, color: "#5A6178", lineHeight: 1.55, marginBottom: 10 }}>{selectedComp.rfp.scope}</p>
-                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 7 }}>Specifications</p>
+                              <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 5 }}>Scope of Work</p>
+                              <p style={{ fontSize: 17, color: "#334155", lineHeight: 1.55, marginBottom: 10 }}>{selectedComp.rfp.scope}</p>
+                              <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 7 }}>Specifications</p>
                               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 16px", marginBottom: 10 }}>
                                 {[
                                   { label: "Building Area", value: selectedComp.rfp.area     },
@@ -607,22 +607,22 @@ const Projects = () => {
                                   { label: "Priority",      value: selectedComp.rfp.priority },
                                 ].map((spec) => (
                                   <div key={spec.label}>
-                                    <p style={{ fontSize: 11, color: "#9CA3B8", marginBottom: 2 }}>{spec.label}</p>
-                                    <p style={{ fontSize: 13, fontWeight: 500, color: "#0F1729" }}>{spec.value}</p>
+                                    <p style={{ fontSize: 16, color: "#64748B", marginBottom: 2 }}>{spec.label}</p>
+                                    <p style={{ fontSize: 18, fontWeight: 500, color: "#2E1A47" }}>{spec.value}</p>
                                   </div>
                                 ))}
                               </div>
-                              <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 7 }}>Attachments</p>
+                              <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 7 }}>Attachments</p>
                               <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 12 }}>
                                 {selectedComp.rfp.attachments.map((att) => (
                                   <div key={att} style={{ display: "flex", alignItems: "center", gap: 5, background: "#F8F9FC", border: "1px solid rgba(15,23,41,0.06)", borderRadius: 4, padding: "4px 9px" }}>
-                                    <Paperclip size={11} style={{ color: "#9CA3B8" }} />
-                                    <span style={{ fontSize: 12, color: "#5A6178" }}>{att}</span>
+                                    <Paperclip size={22} style={{ color: "#64748B" }} />
+                                    <span style={{ fontSize: 17, color: "#334155" }}>{att}</span>
                                   </div>
                                 ))}
                               </div>
                               <div style={{ height: 1, background: "#E8EBF0", marginBottom: 8 }} />
-                              <p style={{ fontSize: 10, color: "#9CA3B8", fontStyle: "italic" }}>
+                              <p style={{ fontSize: 20, color: "#64748B", fontStyle: "italic" }}>
                                 Generated by RECOstudy Compliance Agent &nbsp;·&nbsp; March 20, 2026
                               </p>
                             </motion.div>
@@ -641,21 +641,21 @@ const Projects = () => {
                         transition={{ duration: 0.35, ease: "easeOut" }}
                         onClick={() => navigate("/marketplace")}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "#0F1729";
+                          e.currentTarget.style.background = "#2E1A47";
                           e.currentTarget.style.color = "#FFFFFF";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = "transparent";
-                          e.currentTarget.style.color = "#0F1729";
+                          e.currentTarget.style.color = "#2E1A47";
                         }}
                         style={{
                           width: "100%",
                           height: 48,
                           background: "transparent",
-                          color: "#0F1729",
-                          border: "1px solid #0F1729",
+                          color: "#2E1A47",
+                          border: "1px solid #2E1A47",
                           borderRadius: 7,
-                          fontSize: 14,
+                          fontSize: 19,
                           fontWeight: 500,
                           cursor: "pointer",
                           flexShrink: 0,

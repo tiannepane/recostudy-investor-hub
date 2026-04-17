@@ -123,10 +123,10 @@ const FloatingChat = () => {
               bottom: 24,
               right: 24,
               zIndex: 50,
-              width: 52,
-              height: 52,
+              width: 64,
+              height: 64,
               borderRadius: "50%",
-              background: "#0A0A0A",
+              background: "#2E1A47",
               border: "none",
               cursor: "pointer",
               display: "flex",
@@ -137,7 +137,7 @@ const FloatingChat = () => {
             }}
             whileHover={{ scale: 1.05 }}
           >
-            <MessageCircle size={22} style={{ color: "#FFFFFF" }} />
+            <MessageCircle size={28} style={{ color: "#FFFFFF" }} />
           </motion.button>
         )}
       </AnimatePresence>
@@ -155,8 +155,8 @@ const FloatingChat = () => {
               bottom: 24,
               right: 24,
               zIndex: 50,
-              width: 360,
-              height: 480,
+              width: 460,
+              height: 620,
               background: "#FFFFFF",
               borderRadius: 20,
               border: "1px solid #E0E0E0",
@@ -172,12 +172,12 @@ const FloatingChat = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "16px 20px",
+                padding: "20px 24px",
                 borderBottom: "1px solid #F0F0F0",
                 flexShrink: 0,
               }}
             >
-              <p style={{ fontSize: 14, fontWeight: 600, color: "#0A0A0A", margin: 0 }}>
+              <p style={{ fontSize: 19, fontWeight: 600, color: "#2E1A47", margin: 0 }}>
                 Ask Reco!
               </p>
               <button
@@ -187,13 +187,13 @@ const FloatingChat = () => {
                   border: "none",
                   cursor: "pointer",
                   padding: 4,
-                  color: "#999",
+                  color: "#4B5563",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <X size={16} />
+                <X size={20} />
               </button>
             </div>
 
@@ -203,14 +203,14 @@ const FloatingChat = () => {
               style={{
                 flex: 1,
                 overflowY: "auto",
-                padding: "16px 20px",
+                padding: "20px 24px",
                 display: "flex",
                 flexDirection: "column",
-                gap: 12,
+                gap: 16,
               }}
             >
               {messages.length === 0 && !loading && (
-                <p style={{ fontSize: 13, color: "#999", textAlign: "center", marginTop: 32 }}>
+                <p style={{ fontSize: 18, color: "#4B5563", textAlign: "center", marginTop: 32 }}>
                   Ask anything about Meridian's finances.
                 </p>
               )}
@@ -225,11 +225,11 @@ const FloatingChat = () => {
                 >
                   <div
                     style={{
-                      padding: "10px 14px",
+                      padding: "12px 18px",
                       borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                      background: m.role === "user" ? "#0A0A0A" : "#F5F5F5",
-                      color: m.role === "user" ? "#FFFFFF" : "#0A0A0A",
-                      fontSize: 13,
+                      background: m.role === "user" ? "#2E1A47" : "#F5F5F5",
+                      color: m.role === "user" ? "#FFFFFF" : "#2E1A47",
+                      fontSize: 18,
                       lineHeight: 1.55,
                       whiteSpace: "pre-wrap",
                     }}
@@ -243,7 +243,7 @@ const FloatingChat = () => {
                 <div style={{ alignSelf: "flex-start" }}>
                   <div
                     style={{
-                      padding: "12px 16px",
+                      padding: "14px 18px",
                       borderRadius: "16px 16px 16px 4px",
                       background: "#F5F5F5",
                       display: "flex",
@@ -255,8 +255,8 @@ const FloatingChat = () => {
                       <span
                         key={i}
                         style={{
-                          width: 6,
-                          height: 6,
+                          width: 8,
+                          height: 8,
                           borderRadius: "50%",
                           background: "#BBBDC4",
                           display: "inline-block",
@@ -270,7 +270,7 @@ const FloatingChat = () => {
 
               {/* Prompt chips — always visible when not loading */}
               {!loading && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: messages.length === 0 ? 4 : 8 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: messages.length === 0 ? 4 : 8 }}>
                   {PRESET_PROMPTS.map((p) => (
                     <button
                       key={p.label}
@@ -279,8 +279,8 @@ const FloatingChat = () => {
                         background: "#F7F8FA",
                         border: "1px solid #E5E7EB",
                         borderRadius: 999,
-                        padding: "7px 14px",
-                        fontSize: 12,
+                        padding: "9px 18px",
+                        fontSize: 17,
                         color: "#374151",
                         cursor: "pointer",
                         textAlign: "left",
@@ -304,14 +304,14 @@ const FloatingChat = () => {
             </div>
 
             {/* Input */}
-            <div style={{ padding: "12px 16px", borderTop: "1px solid #F0F0F0", flexShrink: 0 }}>
+            <div style={{ padding: "14px 18px", borderTop: "1px solid #F0F0F0", flexShrink: 0 }}>
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   border: "1px solid #E5E7EB",
                   borderRadius: 999,
-                  padding: "4px 4px 4px 14px",
+                  padding: "4px 4px 4px 16px",
                   background: "#FAFAFA",
                 }}
               >
@@ -327,8 +327,8 @@ const FloatingChat = () => {
                     border: "none",
                     background: "transparent",
                     outline: "none",
-                    fontSize: 13,
-                    color: "#0A0A0A",
+                    fontSize: 18,
+                    color: "#2E1A47",
                   }}
                   disabled={loading}
                 />
@@ -336,10 +336,10 @@ const FloatingChat = () => {
                   onClick={handleSend}
                   disabled={loading || !query.trim()}
                   style={{
-                    width: 30,
-                    height: 30,
+                    width: 38,
+                    height: 38,
                     borderRadius: "50%",
-                    background: loading || !query.trim() ? "#D1D5DB" : "#0A0A0A",
+                    background: loading || !query.trim() ? "#D1D5DB" : "#2E1A47",
                     border: "none",
                     cursor: loading || !query.trim() ? "default" : "pointer",
                     display: "flex",
@@ -349,7 +349,7 @@ const FloatingChat = () => {
                     transition: "background 0.15s",
                   }}
                 >
-                  <ArrowUp size={14} style={{ color: "#FFFFFF" }} />
+                  <ArrowUp size={18} style={{ color: "#FFFFFF" }} />
                 </button>
               </div>
             </div>

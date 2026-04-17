@@ -64,6 +64,15 @@ export default {
         "body-text": "hsl(var(--body-text))",
         heading: "hsl(var(--heading))",
       },
+      fontSize: {
+        xs:   ["1.125rem",  { lineHeight: "1.375rem" }],
+        sm:   ["1.25rem",   { lineHeight: "1.625rem" }],
+        base: ["1.375rem",  { lineHeight: "1.875rem" }],
+        lg:   ["1.5625rem", { lineHeight: "2.125rem" }],
+        xl:   ["1.6875rem", { lineHeight: "2.125rem" }],
+        "2xl":["2rem",      { lineHeight: "2.625rem" }],
+        "4xl":["2.875rem",  { lineHeight: "3.25rem" }],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

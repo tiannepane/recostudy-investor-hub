@@ -23,7 +23,7 @@ const springTransition = {
 
 const FileList = ({ files }: { files: FileItem[] }) => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <AnimatePresence>
         {files.map(
           (file) =>
@@ -33,32 +33,32 @@ const FileList = ({ files }: { files: FileItem[] }) => {
                 initial={{ opacity: 0, y: 16, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={springTransition}
-                className="flex items-center gap-3"
-                style={{ height: 56 }}
+                className="flex items-center gap-4"
+                style={{ height: 70 }}
               >
                 <div
                   className="flex items-center justify-center rounded-lg flex-shrink-0"
-                  style={{ width: 40, height: 40, background: fileTypeStyles[file.type].bg }}
+                  style={{ width: 50, height: 50, background: fileTypeStyles[file.type].bg }}
                 >
                   {(() => {
                     const FIcon = fileTypeStyles[file.type].icon;
-                    return <FIcon size={20} style={{ color: fileTypeStyles[file.type].iconColor }} />;
+                    return <FIcon size={24} style={{ color: fileTypeStyles[file.type].iconColor }} />;
                   })()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-medium text-heading truncate">{file.name}</p>
-                  <p className="text-[12px] font-mono text-breadcrumb">{file.detail}</p>
+                  <p className="text-[19px] font-medium text-heading truncate">{file.name}</p>
+                  <p className="text-[17px] font-mono text-breadcrumb">{file.detail}</p>
                 </div>
                 <div className="flex-shrink-0">
                   {file.done ? (
                     <div
                       className="flex items-center justify-center rounded-full"
-                      style={{ width: 20, height: 20, background: "#10B981" }}
+                      style={{ width: 24, height: 24, background: "#10B981" }}
                     >
-                      <Check size={12} className="text-primary-foreground" />
+                      <Check size={15} className="text-primary-foreground" />
                     </div>
                   ) : (
-                    <Loader2 size={20} className="animate-spin-slow" style={{ color: "#4F6BFF" }} />
+                    <Loader2 size={24} className="animate-spin-slow" style={{ color: "#4D6BA9" }} />
                   )}
                 </div>
               </motion.div>

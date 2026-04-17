@@ -53,8 +53,8 @@ const Funding = () => {
         visitedItems={["overview", "inventory", "financials", "projects", "marketplace"]}
       />
 
-      <main className="flex-1" style={{ marginLeft: 260 }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 44px 48px" }}>
+      <main className="flex-1" style={{ marginLeft: 320 }}>
+        <div style={{ maxWidth: 1560, margin: "0 auto", padding: "32px 36px 48px" }}>
           <TopBar
             onReplay={reset}
             breadcrumb="Buildings › Meridian Condominium Association, Inc. › Funding"
@@ -83,7 +83,7 @@ const Funding = () => {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 20 }}>
                   <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#F59E0B", flexShrink: 0 }} />
-                  <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: "#5A6178" }}>
+                  <span style={{ fontSize: 17, fontFamily: "'JetBrains Mono', monospace", color: "#334155" }}>
                     Funding gap: $10,000 identified
                   </span>
                 </div>
@@ -92,21 +92,21 @@ const Funding = () => {
           </AnimatePresence>
 
           {/* ── Page heading (always visible) ── */}
-          <div style={{ maxWidth: 900, marginBottom: 4 }}>
-            <h1 style={{ fontSize: 20, fontWeight: 600, color: "#0A0A0A" }}>
+          <div style={{ marginBottom: 4 }}>
+            <h1 style={{ fontSize: 27, fontWeight: 600, color: "#2E1A47" }}>
               Funding
             </h1>
           </div>
 
           {/* ── Subtitle (fades in at 5s) ── */}
-          <div style={{ maxWidth: 900, marginBottom: 20, minHeight: 20 }}>
+          <div style={{ marginBottom: 20, minHeight: 20 }}>
             <AnimatePresence>
               {showSubtitle && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.35, ease: "easeOut" }}
-                  style={{ fontSize: 14, color: "#9CA3B8" }}
+                  style={{ fontSize: 19, color: "#64748B" }}
                 >
                   RECOstudy matched your building to pre-approved lending partners.
                 </motion.p>
@@ -119,7 +119,6 @@ const Funding = () => {
             style={{
               display: "flex",
               gap: 20,
-              maxWidth: 900,
             }}
           >
             {/* ─── LEFT COLUMN — 35% Gap Summary ─── */}
@@ -140,46 +139,46 @@ const Funding = () => {
                     }}
                   >
                     {/* Section label */}
-                    <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9CA3B8", fontWeight: 500, marginBottom: 14 }}>
+                    <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.08em", color: "#64748B", fontWeight: 500, marginBottom: 14 }}>
                       Gap Summary
                     </p>
 
                     {/* Reserve Balance */}
                     <div style={{ marginBottom: 12 }}>
-                      <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 2 }}>Reserve Balance</p>
-                      <p style={{ fontSize: 20, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$28,000</p>
+                      <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 2 }}>Reserve Balance</p>
+                      <p style={{ fontSize: 27, fontWeight: 600, color: "#2E1A47", fontFamily: "'JetBrains Mono', monospace" }}>$28,000</p>
                     </div>
                     <div style={{ height: 1, background: "#EEEFF2", marginBottom: 12 }} />
 
                     {/* Best Bid */}
                     <div style={{ marginBottom: 12 }}>
-                      <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 2 }}>Best Bid</p>
-                      <p style={{ fontSize: 20, fontWeight: 600, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$38,000</p>
+                      <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 2 }}>Best Bid</p>
+                      <p style={{ fontSize: 27, fontWeight: 600, color: "#2E1A47", fontFamily: "'JetBrains Mono', monospace" }}>$38,000</p>
                     </div>
                     <div style={{ height: 1, background: "#EEEFF2", marginBottom: 12 }} />
 
                     {/* Shortfall */}
                     <div style={{ marginBottom: 16 }}>
-                      <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9CA3B8", marginBottom: 2 }}>Shortfall</p>
-                      <p style={{ fontSize: 20, fontWeight: 700, color: "#0F1729", fontFamily: "'JetBrains Mono', monospace" }}>$10,000</p>
+                      <p style={{ fontSize: 20, textTransform: "uppercase", letterSpacing: "0.06em", color: "#64748B", marginBottom: 2 }}>Shortfall</p>
+                      <p style={{ fontSize: 27, fontWeight: 700, color: "#2E1A47", fontFamily: "'JetBrains Mono', monospace" }}>$10,000</p>
                     </div>
 
                     {/* Coverage bar */}
                     <div style={{ width: "100%", height: 6, borderRadius: 3, background: "#EEEFF2", overflow: "hidden", marginBottom: 6 }}>
-                      <div style={{ width: `${reservePct}%`, height: "100%", background: "#0F1729", borderRadius: 3 }} />
+                      <div style={{ width: `${reservePct}%`, height: "100%", background: "#2E1A47", borderRadius: 3 }} />
                     </div>
-                    <p style={{ fontSize: 11, color: "#9CA3B8", marginBottom: 16 }}>
+                    <p style={{ fontSize: 16, color: "#64748B", marginBottom: 16 }}>
                       74% covered by reserves
                     </p>
 
                     {/* Context note */}
                     <div style={{ height: 1, background: "#EEEFF2", marginBottom: 12 }} />
-                    <p style={{ fontSize: 12, color: "#9CA3B8", lineHeight: 1.6, marginBottom: 12 }}>
+                    <p style={{ fontSize: 17, color: "#64748B", lineHeight: 1.6, marginBottom: 12 }}>
                       Your building qualifies based on a current reserve study on file. No personal guarantees required.
                     </p>
 
                     {/* Agent status */}
-                    <p style={{ fontSize: 11, fontStyle: "italic", color: "#9CA3B8" }}>
+                    <p style={{ fontSize: 16, fontStyle: "italic", color: "#64748B" }}>
                       Funding Agent: 2 solutions matched &#10003;
                     </p>
                   </motion.div>
@@ -211,19 +210,19 @@ const Funding = () => {
                   >
                     {/* Icon row + badge */}
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                      <DollarSign size={18} style={{ color: "#9CA3B8" }} />
-                      <span style={{ fontSize: 11, fontStyle: "italic", color: "#9CA3B8" }}>
+                      <DollarSign size={18} style={{ color: "#64748B" }} />
+                      <span style={{ fontSize: 16, fontStyle: "italic", color: "#64748B" }}>
                         Pre-Approved
                       </span>
                     </div>
-                    <p style={{ fontSize: 10, color: "#9CA3B8", marginBottom: 3 }}>Recommended</p>
-                    <p style={{ fontSize: 18, fontWeight: 600, color: "#0F1729", marginBottom: 4 }}>
+                    <p style={{ fontSize: 20, color: "#64748B", marginBottom: 3 }}>Recommended</p>
+                    <p style={{ fontSize: 24, fontWeight: 600, color: "#2E1A47", marginBottom: 4 }}>
                       Reserve Loan
                     </p>
-                    <p style={{ fontSize: 13, color: "#9CA3B8", marginBottom: 10 }}>
+                    <p style={{ fontSize: 18, color: "#64748B", marginBottom: 10 }}>
                       5.2% APR &middot; Up to $300,000
                     </p>
-                    <p style={{ fontSize: 13, color: "#5A6178", lineHeight: 1.5, marginBottom: 14, flex: 1 }}>
+                    <p style={{ fontSize: 18, color: "#334155", lineHeight: 1.5, marginBottom: 14, flex: 1 }}>
                       Competitive rate for associations with a current reserve study on file.
                     </p>
                     <div style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -231,7 +230,7 @@ const Funding = () => {
                         style={{
                           background: "transparent",
                           color: "#0F1729",
-                          fontSize: 13,
+                          fontSize: 18,
                           fontWeight: 500,
                           borderRadius: 7,
                           height: 40,
@@ -276,18 +275,18 @@ const Funding = () => {
                   >
                     {/* Icon row + badge */}
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                      <Landmark size={18} style={{ color: "#9CA3B8" }} />
-                      <span style={{ fontSize: 11, fontStyle: "italic", color: "#9CA3B8" }}>
+                      <Landmark size={18} style={{ color: "#64748B" }} />
+                      <span style={{ fontSize: 16, fontStyle: "italic", color: "#64748B" }}>
                         Eligible
                       </span>
                     </div>
-                    <p style={{ fontSize: 18, fontWeight: 600, color: "#0F1729", marginBottom: 4 }}>
+                    <p style={{ fontSize: 24, fontWeight: 600, color: "#2E1A47", marginBottom: 4 }}>
                       NYC LL97 Incentive
                     </p>
-                    <p style={{ fontSize: 13, color: "#9CA3B8", marginBottom: 10 }}>
+                    <p style={{ fontSize: 18, color: "#64748B", marginBottom: 10 }}>
                       Up to $25,000 offset &middot; NY Green Bank eligible
                     </p>
-                    <p style={{ fontSize: 13, color: "#5A6178", lineHeight: 1.5, marginBottom: 14, flex: 1 }}>
+                    <p style={{ fontSize: 18, color: "#334155", lineHeight: 1.5, marginBottom: 14, flex: 1 }}>
                       Available for energy-efficient boiler and mechanical replacement projects.
                     </p>
                     <div style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -295,7 +294,7 @@ const Funding = () => {
                         style={{
                           background: "transparent",
                           color: "#0F1729",
-                          fontSize: 13,
+                          fontSize: 18,
                           fontWeight: 500,
                           borderRadius: 7,
                           height: 40,

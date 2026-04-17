@@ -2,7 +2,7 @@ import { RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const NAV_ORDER = [
-  { id: "overview",    path: "/" },
+  { id: "overview",    path: "/onboarding" },
   { id: "inventory",   path: "/inventory" },
   { id: "financials",  path: "/financials" },
   { id: "projects",    path: "/projects" },
@@ -27,7 +27,7 @@ const TopBar = ({ onReplay, breadcrumb = "Buildings › Meridian Condominium Ass
 
   return (
     <div className="flex items-center justify-between mb-8">
-      <p className="text-[13px] text-breadcrumb">
+      <p className="text-[18px] text-breadcrumb">
         {breadcrumb}
       </p>
       <div className="flex items-center gap-4">
@@ -37,38 +37,38 @@ const TopBar = ({ onReplay, breadcrumb = "Buildings › Meridian Condominium Ass
             onClick={() => prevPath && navigate(prevPath)}
             disabled={!prevPath}
             className="flex items-center justify-center rounded-full border border-border bg-card transition-colors hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{ width: 32, height: 32 }}
+            style={{ width: 40, height: 40 }}
             title="Previous"
           >
-            <ChevronLeft size={16} className="text-breadcrumb" />
+            <ChevronLeft size={20} className="text-breadcrumb" />
           </button>
           <button
             onClick={() => nextPath && navigate(nextPath)}
             disabled={!nextPath}
             className="flex items-center justify-center rounded-full border border-border bg-card transition-colors hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{ width: 32, height: 32 }}
+            style={{ width: 40, height: 40 }}
             title="Next"
           >
-            <ChevronRight size={16} className="text-breadcrumb" />
+            <ChevronRight size={20} className="text-breadcrumb" />
           </button>
         </div>
 
         <button
           onClick={onReplay}
           className="flex items-center justify-center rounded-full border border-border bg-card transition-colors hover:bg-secondary"
-          style={{ width: 32, height: 32 }}
+          style={{ width: 40, height: 40 }}
         >
-          <RotateCcw size={14} className="text-breadcrumb" />
+          <RotateCcw size={18} className="text-breadcrumb" />
         </button>
 
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-[14px] font-medium text-heading">RECollab Admin</p>
-            <p className="text-[12px] text-breadcrumb">Platform Administrator</p>
+            <p className="text-[19px] font-medium text-heading">RECollab Admin</p>
+            <p className="text-[17px] text-breadcrumb">Platform Administrator</p>
           </div>
           <div
-            className="flex items-center justify-center rounded-full text-primary-foreground text-[13px] font-semibold"
-            style={{ width: 36, height: 36, background: "#4F6BFF" }}
+            className="flex items-center justify-center rounded-full text-primary-foreground text-[18px] font-semibold"
+            style={{ width: 44, height: 44, background: "#4D6BA9" }}
           >
             RA
           </div>

@@ -39,17 +39,17 @@ const UploadCard = ({ zones, files }: UploadCardProps) => {
               key={zone.label}
               className="flex-1 flex flex-col items-center justify-center rounded-lg transition-all duration-300"
               style={{
-                height: 160,
+                height: 200,
                 border: zone.highlighted
-                  ? "1.5px dashed #4F6BFF"
+                  ? "1.5px dashed #4D6BA9"
                   : "1.5px dashed hsl(var(--card-border))",
                 boxShadow: zone.highlighted
-                  ? "0 0 0 3px rgba(79,107,255,0.1)"
+                  ? "0 0 0 3px rgba(77,107,169,0.1)"
                   : "none",
               }}
             >
-              <Icon size={28} className="text-breadcrumb mb-2" />
-              <span className="text-[13px] text-body-text">{zone.label}</span>
+              <Icon size={35} className="text-breadcrumb mb-2" />
+              <span className="text-[18px] text-body-text">{zone.label}</span>
             </div>
           );
         })}
@@ -59,7 +59,7 @@ const UploadCard = ({ zones, files }: UploadCardProps) => {
       <div className="my-5 border-t border-border" />
 
       {/* File List */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <AnimatePresence>
           {files.map(
             (file) =>
@@ -69,28 +69,28 @@ const UploadCard = ({ zones, files }: UploadCardProps) => {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="flex items-center gap-3"
-                  style={{ height: 56 }}
+                  className="flex items-center gap-4"
+                  style={{ height: 70 }}
                 >
                   {/* Icon container */}
                   <div
                     className="flex items-center justify-center rounded-lg flex-shrink-0"
                     style={{
-                      width: 40,
-                      height: 40,
+                      width: 50,
+                      height: 50,
                       background: fileTypeStyles[file.type].bg,
                     }}
                   >
                     {(() => {
                       const FIcon = fileTypeStyles[file.type].icon;
-                      return <FIcon size={20} style={{ color: fileTypeStyles[file.type].iconColor }} />;
+                      return <FIcon size={24} style={{ color: fileTypeStyles[file.type].iconColor }} />;
                     })()}
                   </div>
 
                   {/* Text */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-medium text-heading truncate">{file.name}</p>
-                    <p className="text-[12px] text-breadcrumb">{file.detail}</p>
+                    <p className="text-[19px] font-medium text-heading truncate">{file.name}</p>
+                    <p className="text-[17px] text-breadcrumb">{file.detail}</p>
                   </div>
 
                   {/* Status */}
@@ -98,15 +98,15 @@ const UploadCard = ({ zones, files }: UploadCardProps) => {
                     {file.done ? (
                       <div
                         className="flex items-center justify-center rounded-full"
-                        style={{ width: 20, height: 20, background: "#10B981" }}
+                        style={{ width: 24, height: 24, background: "#10B981" }}
                       >
-                        <Check size={12} className="text-primary-foreground" />
+                        <Check size={15} className="text-primary-foreground" />
                       </div>
                     ) : (
                       <Loader2
-                        size={20}
+                        size={24}
                         className="animate-spin-slow"
-                        style={{ color: "#4F6BFF" }}
+                        style={{ color: "#4D6BA9" }}
                       />
                     )}
                   </div>

@@ -12,17 +12,17 @@ interface Props {
 }
 
 const ConditionIndicator = ({ condition }: Props) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
     <div
       style={{
-        width: 6,
-        height: 6,
+        width: 8,
+        height: 8,
         borderRadius: "50%",
         background: dotColor[condition],
         flexShrink: 0,
       }}
     />
-    <span style={{ fontSize: 13, color: "#5A6178", whiteSpace: "nowrap" }}>
+    <span style={{ fontSize: 18, color: "#334155", whiteSpace: "nowrap" }}>
       {condition}
     </span>
   </div>
