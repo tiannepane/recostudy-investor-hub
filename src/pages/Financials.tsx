@@ -608,7 +608,8 @@ const Financials = () => {
                       fontWeight: 500,
                     }}
                   >
-                    Reserve Fund Trajectory: Action Required
+                    Reserve Fund Trajectory:{" "}
+                    <span style={{ color: "#F97316" }}>Action Required</span>
                   </p>
                   <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                     {/* Dashed gray swatch */}
