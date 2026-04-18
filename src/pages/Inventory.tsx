@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
@@ -183,6 +183,7 @@ const SkeletonRow = ({ delay }: { delay: number }) => (
     <td style={{ padding: "8px 16px" }}><SkeletonCell w={80} /></td>
     <td style={{ padding: "8px 16px" }}><SkeletonCell w={36} /></td>
     <td style={{ padding: "8px 16px" }}><SkeletonCell w={52} /></td>
+    <td style={{ padding: "8px 16px" }}><SkeletonCell w={44} /></td>
   </tr>
 );
 
@@ -432,17 +433,18 @@ const Inventory = () => {
             >
               <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse" }}>
                 <colgroup>
-                  <col style={{ width: "28%" }} />
-                  <col style={{ width: "13%" }} />
-                  <col style={{ width: "11%" }} />
-                  <col style={{ width: "19%" }} />
-                  <col style={{ width: "13%" }} />
-                  <col style={{ width: "16%" }} />
+                  <col style={{ width: "25%" }} />
+                  <col style={{ width: "12%" }} />
+                  <col style={{ width: "10%" }} />
+                  <col style={{ width: "17%" }} />
+                  <col style={{ width: "12%" }} />
+                  <col style={{ width: "14%" }} />
+                  <col style={{ width: "10%" }} />
                 </colgroup>
 
                 <thead>
                   <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
-                    {["COMPONENT", "CATEGORY", "CONDITION", "LOCATION", "REMAINING LIFE", "EST. COST"].map(
+                    {["COMPONENT", "CATEGORY", "CONDITION", "LOCATION", "REMAINING LIFE", "EST. COST", ""].map(
                       (label) => (
                         <th
                           key={label}
@@ -541,6 +543,38 @@ const Inventory = () => {
 
                           <td style={{ padding: "10px 16px", fontSize: 18, fontFamily: "monospace", fontWeight: 500, color: "#2E1A47", whiteSpace: "nowrap" }}>
                             {row.cost}
+                          </td>
+
+                          <td style={{ padding: "10px 16px" }} onClick={(e) => e.stopPropagation()}>
+                            <button
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 5,
+                                padding: "5px 12px",
+                                background: "transparent",
+                                border: "1px solid #E5E7EB",
+                                borderRadius: 6,
+                                fontSize: 15,
+                                fontWeight: 500,
+                                color: "#64748B",
+                                cursor: "pointer",
+                                transition: "border-color 0.15s, color 0.15s, background 0.15s",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = "#2E1A47";
+                                e.currentTarget.style.color = "#2E1A47";
+                                e.currentTarget.style.background = "#F8F8FC";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = "#E5E7EB";
+                                e.currentTarget.style.color = "#64748B";
+                                e.currentTarget.style.background = "transparent";
+                              }}
+                            >
+                              <Pencil size={13} />
+                              Edit
+                            </button>
                           </td>
                         </motion.tr>
                       ))}
