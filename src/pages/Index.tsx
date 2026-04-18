@@ -96,6 +96,30 @@ const FileRow = ({
   </AnimatePresence>
 );
 
+/* ─── QA Scan Wrapper ──────────────────────────────────────── */
+
+const ScanWrapper = ({ scanning, scanned, children }: { scanning: boolean; scanned: boolean; children: React.ReactNode }) => (
+  <div style={{ position: "relative", borderRadius: 10, overflow: "hidden" }}>
+    {children}
+    {scanning && (
+      <>
+        <motion.div
+          animate={{ x: ["-120%", "120%"] }}
+          transition={{ duration: 0.75, repeat: Infinity, ease: "easeInOut" }}
+          style={{
+            position: "absolute", inset: 0, pointerEvents: "none",
+            background: "linear-gradient(90deg, transparent, rgba(16,185,129,0.12), rgba(16,185,129,0.22), rgba(16,185,129,0.12), transparent)",
+          }}
+        />
+        <div style={{ position: "absolute", inset: 0, borderRadius: 10, border: "1.5px solid rgba(16,185,129,0.55)", pointerEvents: "none" }} />
+      </>
+    )}
+    {scanned && !scanning && (
+      <div style={{ position: "absolute", inset: 0, borderRadius: 10, border: "1.5px solid rgba(16,185,129,0.25)", pointerEvents: "none" }} />
+    )}
+  </div>
+);
+
 /* ─── PDF Group Row — icon stack only ─────────────────────── */
 
 const PdfGroupRow = ({ visible, done, docAppears }: { visible: boolean; done: boolean; docAppears: boolean[] }) => (
@@ -392,6 +416,14 @@ const Index = () => {
   const showCompletion = t >= COMPLETION_AT;
   const showButton     = t >= BUTTON_APPEAR_AT;
 
+  // QA scan phases — each row scanned sequentially
+  const photosScan   = qaProgress >= 0.05 && qaProgress < 0.40;
+  const photosScanned = qaProgress >= 0.40;
+  const pdfsScan     = qaProgress >= 0.36 && qaProgress < 0.70;
+  const pdfsScanned  = qaProgress >= 0.70;
+  const videoScan    = qaProgress >= 0.66 && qaProgress < 0.98;
+  const videoScanned = qaProgress >= 0.98;
+
   const startConnect = useCallback(() => {
     if (connectStarted.current) return;
     connectStarted.current = true;
@@ -545,7 +577,9 @@ const Index = () => {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
 
                   {/* Photos row */}
-                  <FileRow visible={photosFileVisible} done={photosFileDone} name="6 building inspection photos" detail="Images · 24.5 MB" IconComp={ImageIcon} />
+                  <ScanWrapper scanning={photosScan} scanned={photosScanned}>
+                    <FileRow visible={photosFileVisible} done={photosFileDone} name="6 building inspection photos" detail="Images · 24.5 MB" IconComp={ImageIcon} />
+                  </ScanWrapper>
                   <SideAgentPanel
                     name="Vision Agent" Icon={Eye} color="#6366F1"
                     progress={visionProgress} visible={t >= VISION_START}
@@ -557,7 +591,9 @@ const Index = () => {
                   />
 
                   {/* PDFs row */}
-                  <PdfGroupRow visible={pdfsVisible} done={pdfsDone} docAppears={pdfDocAppears} />
+                  <ScanWrapper scanning={pdfsScan} scanned={pdfsScanned}>
+                    <PdfGroupRow visible={pdfsVisible} done={pdfsDone} docAppears={pdfDocAppears} />
+                  </ScanWrapper>
                   <SideAgentPanel
                     name="Document Agent" Icon={FileText} color="#0EA5E9"
                     progress={docProgress} visible={t >= DOC_START}
@@ -569,34 +605,36 @@ const Index = () => {
                   />
 
                   {/* Video row — icon only */}
-                  <AnimatePresence>
-                    {voiceFileVisible && (
-                      <motion.div initial={{ x: -16, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }}
-                        style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 14px", background: "white", borderRadius: 10, border: "1px solid #E5E7EB" }}>
-                        {/* MP4 file icon */}
-                        <div style={{ width: 36, height: 46, borderRadius: 5, background: "white", border: "1px solid #E5E7EB", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", overflow: "hidden", position: "relative", flexShrink: 0 }}>
-                          <div style={{ position: "absolute", top: 0, right: 0, width: 9, height: 9, background: "#F1F5F9", borderLeft: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", borderBottomLeftRadius: 3 }} />
-                          <div style={{ position: "absolute", top: 8, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
-                            <Video size={14} style={{ color: "#94A3B8" }} />
+                  <ScanWrapper scanning={videoScan} scanned={videoScanned}>
+                    <AnimatePresence>
+                      {voiceFileVisible && (
+                        <motion.div initial={{ x: -16, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }}
+                          style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 14px", background: "white", borderRadius: 10, border: "1px solid #E5E7EB" }}>
+                          {/* MP4 file icon */}
+                          <div style={{ width: 36, height: 46, borderRadius: 5, background: "white", border: "1px solid #E5E7EB", boxShadow: "0 1px 4px rgba(0,0,0,0.08)", overflow: "hidden", position: "relative", flexShrink: 0 }}>
+                            <div style={{ position: "absolute", top: 0, right: 0, width: 9, height: 9, background: "#F1F5F9", borderLeft: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", borderBottomLeftRadius: 3 }} />
+                            <div style={{ position: "absolute", top: 8, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+                              <Video size={14} style={{ color: "#94A3B8" }} />
+                            </div>
+                            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 13, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <span style={{ fontSize: 7, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>MP4</span>
+                            </div>
                           </div>
-                          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 13, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <span style={{ fontSize: 7, fontWeight: 800, color: "white", letterSpacing: "0.06em" }}>MP4</span>
+                          <p style={{ fontSize: 15, color: "#64748B", margin: 0, flex: 1 }}>site-walkthrough.mp4</p>
+                          <div style={{ flexShrink: 0 }}>
+                            {!voiceFileDone ? (
+                              <div style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #E5E7EB", borderTopColor: "#2E1A47", animation: "spin 0.8s linear infinite" }} />
+                            ) : (
+                              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3 }}
+                                style={{ width: 22, height: 22, borderRadius: "50%", background: "#2E1A47", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <Check size={13} color="white" />
+                              </motion.div>
+                            )}
                           </div>
-                        </div>
-                        <p style={{ fontSize: 15, color: "#64748B", margin: 0, flex: 1 }}>site-walkthrough.mp4</p>
-                        <div style={{ flexShrink: 0 }}>
-                          {!voiceFileDone ? (
-                            <div style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #E5E7EB", borderTopColor: "#2E1A47", animation: "spin 0.8s linear infinite" }} />
-                          ) : (
-                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.3 }}
-                              style={{ width: 22, height: 22, borderRadius: "50%", background: "#2E1A47", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <Check size={13} color="white" />
-                            </motion.div>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </ScanWrapper>
                   <SideAgentPanel
                     name="Video Agent" Icon={Video} color="#8B5CF6"
                     progress={audioProgress} visible={t >= AUDIO_START}
