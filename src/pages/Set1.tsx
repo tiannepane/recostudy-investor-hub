@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Star, Mail, FileText } from "lucide-react";
+import { Check, Star, Mail, FileText, Image as ImageIcon, Eye, Video, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 /* ─── Shared story viewer ───────────────────────────────────── */
@@ -186,7 +186,152 @@ const StoryViewer = ({
 
 /* ─── Step visuals ──────────────────────────────────────────── */
 
-// Step 1 — Inventory: single component row highlighted
+// Step 1 — Upload: 3 file rows appear with check marks
+const UploadStep = () => {
+  const [visible, setVisible] = useState(0);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setVisible(1), 300);
+    const t2 = setTimeout(() => setVisible(2), 900);
+    const t3 = setTimeout(() => setVisible(3), 1500);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
+
+  const FILES = [
+    { Icon: ImageIcon, name: "6 building inspection photos", detail: "Images · 24.5 MB" },
+    { Icon: FileText,  name: "4 documents",                  detail: "Financial Statement, Reserve Study, Meeting Minutes, Audit Report" },
+    { Icon: Video,     name: "site-walkthrough.mp4",         detail: "Video · 4m 32s" },
+  ];
+
+  return (
+    <div style={{ width: "100%" }}>
+      <p style={{ fontSize: 13, color: "#94A3B8", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>
+        Data Ingestion
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {FILES.map((f, i) => (
+          <AnimatePresence key={f.name}>
+            {visible > i && (
+              <motion.div
+                initial={{ x: -16, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  padding: "14px 18px",
+                  background: "white",
+                  borderRadius: 10,
+                  border: "1px solid #E5E7EB",
+                }}
+              >
+                <div style={{ width: 40, height: 40, borderRadius: 8, background: "#F5F5F5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <f.Icon size={20} style={{ color: "#2E1A47" }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 18, fontWeight: 500, color: "#2E1A47", marginBottom: 2 }}>{f.name}</p>
+                  <p style={{ fontSize: 14, color: "#94A3B8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.detail}</p>
+                </div>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                  style={{ width: 24, height: 24, borderRadius: "50%", background: "#2E1A47", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+                >
+                  <Check size={13} color="white" />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Step 2 — Agents complete + QA validated
+const AgentsStep = () => {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 200);
+    const t2 = setTimeout(() => setPhase(2), 700);
+    const t3 = setTimeout(() => setPhase(3), 1200);
+    const t4 = setTimeout(() => setPhase(4), 1900);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+  }, []);
+
+  const AGENTS = [
+    { name: "Vision Agent",   Icon: Eye,      color: "#6366F1", note: "6 photos analyzed · Spalling flagged on east elevation" },
+    { name: "Document Agent", Icon: FileText, color: "#0EA5E9", note: "4 docs parsed · Reserve balance: $2,064,255" },
+    { name: "Video Agent",    Icon: Video,    color: "#8B5CF6", note: "4m 32s transcribed · Rooftop membrane last serviced 2019" },
+  ];
+
+  return (
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
+      <p style={{ fontSize: 13, color: "#94A3B8", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
+        AI Agents
+      </p>
+
+      {AGENTS.map((a, i) => (
+        <AnimatePresence key={a.name}>
+          {phase > i && (
+            <motion.div
+              initial={{ opacity: 0, x: 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.35 }}
+              style={{
+                borderRadius: 10,
+                border: `1px solid ${a.color}22`,
+                borderLeft: `3px solid ${a.color}`,
+                background: "#FAFAFA",
+                padding: "12px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <a.Icon size={16} style={{ color: a.color, flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 16, fontWeight: 600, color: "#1E293B", marginBottom: 2 }}>{a.name}</p>
+                <p style={{ fontSize: 13, color: "#64748B", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.note}</p>
+              </div>
+              <span style={{ fontSize: 13, color: "#22C55E", fontWeight: 600, flexShrink: 0 }}>✓ Done</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ))}
+
+      {/* QA complete */}
+      <AnimatePresence>
+        {phase >= 4 && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              background: "#F0FDF4",
+              border: "1px solid #BBF7D0",
+              borderRadius: 10,
+              padding: "12px 16px",
+            }}
+          >
+            <ShieldCheck size={18} style={{ color: "#16A34A", flexShrink: 0 }} />
+            <span style={{ fontSize: 17, fontWeight: 600, color: "#15803D" }}>
+              QA Agent: all data validated — 24 components catalogued
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// Step 3 — Inventory: single component row highlighted
 const InventoryStep = () => (
   <div style={{ width: "100%" }}>
     <p style={{ fontSize: 13, color: "#94A3B8", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>
@@ -719,6 +864,18 @@ const InsuranceStep = () => {
 /* ─── Steps definition ──────────────────────────────────────── */
 
 const STEPS: StepDef[] = [
+  {
+    label: "Upload",
+    visual: <UploadStep />,
+    caption: "Photos, documents, and site video uploaded",
+    duration: 4000,
+  },
+  {
+    label: "Agents",
+    visual: <AgentsStep />,
+    caption: "24 components catalogued — 3 flagged for immediate attention",
+    duration: 4500,
+  },
   {
     label: "Inventory",
     visual: <InventoryStep />,
