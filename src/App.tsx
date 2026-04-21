@@ -15,6 +15,7 @@ import Reports from "./pages/Reports.tsx";
 import Recollab from "./pages/Recollab.tsx";
 import Set1 from "./pages/Set1.tsx";
 import Set2 from "./pages/Set2.tsx";
+import Problem from "./pages/Problem.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import FloatingChat from "./components/FloatingChat.tsx";
 
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/insurance" element={<Insurance />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/recollab" element={<Recollab />} />
+          <Route path="/problem" element={<Problem />} />
           <Route path="/set1" element={<Set1 />} />
           <Route path="/set2" element={<Set2 />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
