@@ -20,9 +20,9 @@ const PARTIES = [
 ];
 
 /* ── Timing (ms) ─────────────────────────────── */
-const CYCLE      = 10800;
+const CYCLE      = 11800;
 const PDF_IN_END = 1800;   // colored PDF arrives at PM
-const DIST_START = 2500;   // PM starts sending
+const DIST_START = 4200;   // PM starts sending (2.4 s of aging before distribution)
 const DIST_LAG   = 800;    // stagger between parties
 const DIST_DUR   = 2600;   // travel time per PDF along full path
 const GRAY_END   = 6500;   // building fully aged at 6.5 s
@@ -93,8 +93,6 @@ const Problem = () => {
   /* ── Loop state ── */
   const ct = elapsed % CYCLE;
 
-  const ALL_DELIVERED = DIST_START + (PARTIES.length - 1) * DIST_LAG + DIST_DUR;
-
   const ageNorm   = phase >= 5 ? clamp(ct / GRAY_END) : 0;
   const ageStage  = ageNorm < 0.28 ? 0 : ageNorm < 0.54 ? 1 : ageNorm < 0.78 ? 2 : 3;
   const pdfInProg  = clamp(ct / PDF_IN_END);
@@ -103,7 +101,7 @@ const Problem = () => {
   const showPdfFly  = phase >= 5 && ct < PDF_IN_END;
   const showPdfPM   = phase >= 5 && ct >= PDF_IN_END;
   const arrowDotX   = lerp(E.cx + 42, PM.cx - PM.hw, eio(pdfInProg));
-  const pmGrayProg = phase >= 5 ? eio(clamp((ct - DIST_START) / (ALL_DELIVERED - DIST_START))) : 0;
+  const pmAgeNorm  = phase >= 5 ? eio(clamp((ct - PDF_IN_END) / (DIST_START - PDF_IN_END))) : 0;
 
   const CLOCK_FACES = ["🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚","🕛"];
   const clockEmoji  = phase >= 5 ? CLOCK_FACES[Math.floor(elapsed / 400) % 12] : "🕐";
@@ -261,12 +259,12 @@ const Problem = () => {
           </div>
         )}
 
-        {/* ── RED PDF settled on PM ── */}
+        {/* ── PDF settled on PM — ages red → gray before distribution ── */}
         {showPdfPM && (
           <div style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1,
-            filter: pmGrayProg < 0.01
+            filter: pmAgeNorm < 0.02
               ? `sepia(1) saturate(8) hue-rotate(-20deg)`
-              : `grayscale(${pmGrayProg * 0.82}) saturate(${Math.max(0, 1 - pmGrayProg * 1.2)}) brightness(${1 - pmGrayProg * 0.14})` }}>
+              : `grayscale(${pmAgeNorm * 0.82}) saturate(${Math.max(0, 1 - pmAgeNorm * 1.2)}) brightness(${1 - pmAgeNorm * 0.14})` }}>
             📄
           </div>
         )}
@@ -276,11 +274,8 @@ const Problem = () => {
           const startAt  = DIST_START + i * DIST_LAG;
           const progress = clamp((ct - startAt) / DIST_DUR);
           if (progress <= 0) return null;
-          const pos  = pdfPos(progress, p);
-          const gray = eio(progress);
-          const filter = gray < 0.01
-            ? `sepia(1) saturate(8) hue-rotate(-20deg)`
-            : `grayscale(${gray * 0.82}) saturate(${Math.max(0, 1 - gray * 1.2)}) brightness(${1 - gray * 0.14})`;
+          const pos    = pdfPos(progress, p);
+          const filter = `grayscale(0.82) brightness(0.86)`;
           return (
             <div key={`pdf-${i}`}
               style={{ position:"absolute", left:pos.x, top:pos.y, fontSize:36, zIndex:10, pointerEvents:"none", lineHeight:1, filter }}>
