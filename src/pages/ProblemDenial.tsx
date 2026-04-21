@@ -20,9 +20,9 @@ const PARTIES = [
 ];
 
 /* ── Timing (ms) ─────────────────────────────── */
-const CYCLE      = 11800;
+const CYCLE      = 13500;
 const PDF_IN_END = 1800;
-const DIST_START = 4200;   // 2.4 s of aging before distribution
+const DIST_START = 5800;   // 4 s of aging before distribution
 const DIST_LAG   = 800;
 const DIST_DUR   = 2600;
 const GRAY_END   = 6500;   // building fully aged at 6.5 s
@@ -99,7 +99,7 @@ const ProblemDenial = () => {
   const showPdfFly  = phase >= 5 && ct < PDF_IN_END;
   const showPdfPM   = phase >= 5 && ct >= PDF_IN_END;
   const arrowDotX   = lerp(E.cx + 42, PM.cx - PM.hw, eio(pdfInProg));
-  const pmAgeNorm  = phase >= 5 ? eio(clamp((ct - PDF_IN_END) / (DIST_START - PDF_IN_END))) : 0;
+  const pmAgeNorm  = phase >= 5 ? clamp((ct - PDF_IN_END) / (DIST_START - PDF_IN_END)) : 0;
 
   const CLOCK_FACES = ["🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚","🕛"];
   const clockEmoji  = phase >= 5 ? CLOCK_FACES[Math.floor(elapsed / 400) % 12] : "🕐";
