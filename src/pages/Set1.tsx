@@ -56,7 +56,7 @@ const StoryViewer = ({
   const goPrev = () => { if (current > 0) setCurrent((c) => c - 1); };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#FAFAFA", display: "flex", flexDirection: "column", userSelect: "none" }}>
+    <div style={{ minHeight: "100vh", background: "#FAFAFA", display: "flex", flexDirection: "column", userSelect: "none", fontFamily: "'Inter', sans-serif" }}>
       {/* Progress bar */}
       <div style={{ height: 3, background: "#F1F3F7", position: "relative" }}>
         <motion.div
@@ -76,7 +76,7 @@ const StoryViewer = ({
           transition={{ duration: 0.3 }}
           style={{ padding: "32px 48px 0", maxWidth: 768, margin: "0 auto", width: "100%", boxSizing: "border-box" }}
         >
-          <h2 style={{ fontSize: 42, fontWeight: 800, color: "#1E293B", lineHeight: 1.15, letterSpacing: "-0.02em", margin: 0 }}>
+          <h2 style={{ fontSize: 42, fontWeight: 800, color: "#0F172A", lineHeight: 1.15, letterSpacing: "-0.02em", margin: 0, fontFamily: "'Inter', sans-serif" }}>
             {steps[current].title}
           </h2>
         </motion.div>
@@ -103,13 +103,13 @@ const StoryViewer = ({
         <button
           onClick={goPrev}
           disabled={current === 0}
-          style={{ padding: "11px 28px", borderRadius: 8, border: "1px solid #E2E8F0", background: "white", fontSize: 16, fontWeight: 500, color: current === 0 ? "#CBD5E1" : "#475569", cursor: current === 0 ? "default" : "pointer" }}
+          style={{ padding: "11px 28px", borderRadius: 8, border: "1px solid #E2E8F0", background: "white", fontSize: 16, fontWeight: 600, color: current === 0 ? "#CBD5E1" : "#334155", cursor: current === 0 ? "default" : "pointer", fontFamily: "'Inter', sans-serif" }}
         >
           ← Back
         </button>
         <button
           onClick={goNext}
-          style={{ padding: "11px 28px", borderRadius: 8, border: "none", background: "#2E1A47", fontSize: 16, fontWeight: 600, color: "white", cursor: "pointer" }}
+          style={{ padding: "11px 28px", borderRadius: 8, border: "none", background: "#2E1A47", fontSize: 16, fontWeight: 700, color: "white", cursor: "pointer", fontFamily: "'Inter', sans-serif" }}
         >
           {current === steps.length - 1 ? "Finish" : "Next →"}
         </button>
