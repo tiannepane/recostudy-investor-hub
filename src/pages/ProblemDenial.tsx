@@ -7,7 +7,7 @@ const DW = 860, DH = 460;
 const B  = { cx: 68,  cy: 210 };
 const E  = { cx: 224, cy: 210 };
 const PM = { cx: 416, cy: 210, hw: 65, hh: 48 };
-const PM_R     = PM.cx + PM.hw;   // 481
+const PM_R     = PM.cx + PM.hw;
 const BRANCH_X = 510;
 const L_CX = 638, R_CX = 772, P_HW = 42;
 
@@ -21,10 +21,10 @@ const PARTIES = [
 
 /* ── Timing (ms) ─────────────────────────────── */
 const CYCLE      = 14000;
-const PDF_IN_END = 1800;   // colored PDF arrives at PM
-const DIST_START = 2500;   // PM starts sending
-const DIST_LAG   = 800;    // stagger between parties
-const DIST_DUR   = 2600;   // travel time per PDF along full path
+const PDF_IN_END = 1800;
+const DIST_START = 2500;
+const DIST_LAG   = 800;
+const DIST_DUR   = 2600;
 const GRAY_END   = 5000;
 
 /* ── Helpers ─────────────────────────────────── */
@@ -32,10 +32,9 @@ const lerp  = (a: number, b: number, t: number) => a + (b - a) * t;
 const eio   = (t: number) => t < 0.5 ? 2*t*t : -1 + (4 - 2*t)*t;
 const clamp = (v: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, v));
 
-// PDF travels 3-segment path: PM_R → BRANCH_X (horiz) → party.cy (vert) → party left (horiz)
 function pdfPos(progress: number, party: typeof PARTIES[0]) {
-  const s1 = 0.18;  // end of horizontal stub PM → branch
-  const s2 = 0.50;  // end of vertical segment on branch bar
+  const s1 = 0.18;
+  const s2 = 0.50;
   if (progress < s1) {
     const t = progress / s1;
     return { x: lerp(PM_R + 2, BRANCH_X - 10, eio(t)), y: PM.cy - 11 };
@@ -49,7 +48,7 @@ function pdfPos(progress: number, party: typeof PARTIES[0]) {
 }
 
 /* ── Page ────────────────────────────────────── */
-const Problem = () => {
+const ProblemDenial = () => {
   const [phase,   setPhase]   = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const navigate = useNavigate();
@@ -81,7 +80,6 @@ const Problem = () => {
 
   const restart = () => setElapsed(0);
 
-  /* ── Loop state ── */
   const ct = elapsed % CYCLE;
 
   const ALL_DELIVERED = DIST_START + (PARTIES.length - 1) * DIST_LAG + DIST_DUR;
@@ -102,33 +100,26 @@ const Problem = () => {
     <div style={{ position: "fixed", inset: 0, background: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ position: "relative", width: DW, height: DH }}>
 
-        {/* ── SVG LINES ── */}
         <svg width={DW} height={DH} style={{ position: "absolute", inset: 0, overflow: "visible", pointerEvents: "none" }}>
           <defs>
-            <marker id="p-ag" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+            <marker id="pd-ag" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
               <polygon points="0 0, 7 2.5, 0 5" fill="#CBD5E1" />
             </marker>
-            <marker id="p-ai" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-              <polygon points="0 0, 7 2.5, 0 5" fill="#818CF8" />
-            </marker>
-            <marker id="p-dg" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+            <marker id="pd-dg" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
               <polygon points="0 0, 7 2.5, 0 5" fill="#374151" />
             </marker>
           </defs>
 
-
           {phase >= 3 && (
             <>
-              {/* glow layer — pulses when PDF is in flight */}
               {showPdfFly && (
                 <motion.path d={`M ${E.cx+42},${E.cy} L ${PM.cx-PM.hw},${PM.cy}`}
                   stroke="#374151" fill="none" strokeLinecap="round"
                   animate={{ strokeWidth: [4, 9, 4], opacity: [0.18, 0.06, 0.18] }}
                   transition={{ repeat: Infinity, duration: 0.9, ease: "easeInOut" }} />
               )}
-              {/* base line — dashes always flow */}
               <motion.path d={`M ${E.cx+42},${E.cy} L ${PM.cx-PM.hw},${PM.cy}`}
-                stroke="#374151" strokeDasharray="6 4" fill="none" markerEnd="url(#p-dg)"
+                stroke="#374151" strokeDasharray="6 4" fill="none" markerEnd="url(#pd-dg)"
                 initial={{ pathLength:0, opacity:0 }}
                 animate={{ pathLength:1, opacity:1, strokeWidth: showPdfFly ? 2.5 : 1.8, strokeDashoffset: [0, -10] }}
                 transition={{
@@ -137,7 +128,6 @@ const Problem = () => {
                   strokeWidth: { duration:0.2 },
                   strokeDashoffset: { repeat: Infinity, duration: 0.5, ease: "linear" },
                 }} />
-              {/* traveling dot + halo */}
               {showPdfFly && (
                 <>
                   <motion.circle cx={arrowDotX} cy={E.cy} r={7}
@@ -168,7 +158,7 @@ const Problem = () => {
           {phase >= 5 && PARTIES.map((p, i) => (
             <motion.path key={p.label}
               d={`M ${BRANCH_X},${p.cy} L ${p.cx-P_HW},${p.cy}`}
-              stroke="#E2E8F0" strokeWidth={1.5} fill="none" markerEnd="url(#p-ag)"
+              stroke="#E2E8F0" strokeWidth={1.5} fill="none" markerEnd="url(#pd-ag)"
               initial={{ pathLength:0, opacity:0 }} animate={{ pathLength:1, opacity:1 }}
               transition={{ duration:0.25, delay:i*0.09 }} />
           ))}
@@ -206,21 +196,39 @@ const Problem = () => {
         )}
 
         {/* ── PARTY CARDS ── */}
-        {phase >= 5 && PARTIES.map((p, i) => (
-          <motion.div key={p.label}
-            initial={{ opacity:0, x:8 }} animate={{ opacity:1, x:0 }}
-            transition={{ duration:0.35, delay:i*0.09 }}
-            style={{ position:"absolute", left:p.cx-P_HW, top:p.cy-34, width:P_HW*2, textAlign:"center", zIndex:2 }}>
-            <div style={{ background:"white", border:"1px solid #E5E7EB", borderRadius:10, padding:"7px 0 6px", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
-              <div style={{ fontSize:32, filter:
-                p.label === "Board"    ? "sepia(1) hue-rotate(145deg) saturate(6) brightness(0.52)" :
-                p.label === "Insurer"  ? "sepia(1) hue-rotate(185deg) saturate(4) brightness(0.65)" :
-                p.label === "Lender"   ? "sepia(1) hue-rotate(270deg) saturate(2) brightness(0.42)" :
-                "none" }}>{p.emoji}</div>
-              <p style={{ fontSize:12, color:"#475569", fontWeight:600, margin:"3px 0 0" }}>{p.label}</p>
-            </div>
-          </motion.div>
-        ))}
+        {phase >= 5 && PARTIES.map((p, i) => {
+          const isHardReject = p.label === "Lender" || p.label === "Insurer";
+          const arriveAt     = DIST_START + i * DIST_LAG + DIST_DUR;
+          const rejected     = ct >= arriveAt;
+          const showBadge    = rejected && ct < DIST_START + (i + 1) * DIST_LAG + DIST_DUR;
+          return (
+            <motion.div key={p.label}
+              initial={{ opacity:0, x:8 }} animate={{ opacity:1, x:0 }}
+              transition={{ duration:0.35, delay:i*0.09 }}
+              style={{ position:"absolute", left:p.cx-P_HW, top:p.cy-34, width:P_HW*2, textAlign:"center", zIndex:2 }}>
+              <div style={{ position:"relative" }}>
+                <div style={{ background:"white", border:"1px solid #E5E7EB", borderRadius:10, padding:"7px 0 6px", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
+                  <div style={{ fontSize:32, filter:
+                    p.label === "Board"    ? "sepia(1) hue-rotate(145deg) saturate(6) brightness(0.52)" :
+                    p.label === "Insurer"  ? "sepia(1) hue-rotate(185deg) saturate(4) brightness(0.65)" :
+                    p.label === "Lender"   ? "sepia(1) hue-rotate(270deg) saturate(2) brightness(0.42)" :
+                    "none" }}>{p.emoji}</div>
+                  <p style={{ fontSize:12, color:"#475569", fontWeight:600, margin:"3px 0 0" }}>{p.label}</p>
+                </div>
+                <AnimatePresence>
+                  {showBadge && (
+                    <motion.div key={`badge-${p.label}`}
+                      initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                      transition={{ duration:0.4 }}
+                      style={{ position:"absolute", top:-10, right:-8, fontSize:12, zIndex:20, lineHeight:1 }}>
+                      {isHardReject ? "❌" : "⚠️"}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          );
+        })}
 
         {/* ── METHOD EMOJIS ── */}
         {phase >= 5 && PARTIES.map((p, i) => {
@@ -250,7 +258,7 @@ const Problem = () => {
           </div>
         )}
 
-        {/* ── GRAY PDFs following the 3-segment path per party ── */}
+        {/* ── PDFs traveling to parties ── */}
         {phase >= 5 && PARTIES.map((p, i) => {
           const startAt  = DIST_START + i * DIST_LAG;
           const progress = clamp((ct - startAt) / DIST_DUR);
@@ -269,7 +277,6 @@ const Problem = () => {
             </div>
           );
         })}
-
 
       </div>
 
@@ -293,4 +300,4 @@ const Problem = () => {
   );
 };
 
-export default Problem;
+export default ProblemDenial;

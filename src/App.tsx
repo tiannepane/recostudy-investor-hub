@@ -16,8 +16,8 @@ import Recollab from "./pages/Recollab.tsx";
 import Set1 from "./pages/Set1.tsx";
 import Set2 from "./pages/Set2.tsx";
 import Problem from "./pages/Problem.tsx";
+import ProblemDenial from "./pages/ProblemDenial.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import FloatingChat from "./components/FloatingChat.tsx";
 
 const queryClient = new QueryClient();
 
@@ -27,7 +27,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <FloatingChat />
         <Routes>
           <Route path="/" element={<Intro />} />
           <Route path="/onboarding" element={<Index />} />
@@ -40,6 +39,7 @@ const App = () => (
           <Route path="/reports" element={<Reports />} />
           <Route path="/recollab" element={<Recollab />} />
           <Route path="/problem" element={<Problem />} />
+          <Route path="/problem-denial" element={<ProblemDenial />} />
           <Route path="/set1" element={<Set1 />} />
           <Route path="/set2" element={<Set2 />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
