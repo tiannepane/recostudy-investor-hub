@@ -29,10 +29,10 @@ const GRAY_END   = 6500;   // building fully aged at 6.5 s
 
 /* ── Building age stages ─────────────────────── */
 const AGE_FILTERS = [
-  "brightness(1) sepia(0) saturate(1)",
-  "brightness(0.97) sepia(0.38) saturate(0.8)",
-  "brightness(0.90) sepia(0.68) saturate(0.55) hue-rotate(5deg)",
-  "brightness(0.80) sepia(0.88) saturate(0.38) hue-rotate(8deg)",
+  "grayscale(0) brightness(1)",
+  "grayscale(0.3) brightness(0.97)",
+  "grayscale(0.6) brightness(0.92)",
+  "grayscale(0.85) brightness(0.86)",
 ];
 
 /* ── Helpers ─────────────────────────────────── */
