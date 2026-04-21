@@ -262,18 +262,14 @@ const Problem = () => {
         )}
 
         {/* ── RED PDF settled on PM ── */}
-        {showPdfPM && (() => {
-          const p1 = Math.min(pmGrayProg / 0.4, 1);
-          const p2 = Math.max(0, (pmGrayProg - 0.4) / 0.6);
-          const pmFilter = pmGrayProg < 0.01
-            ? `sepia(1) saturate(8) hue-rotate(-20deg)`
-            : `sepia(${p1 * (1 - p2)}) saturate(${1 + (1-p1)*7}) grayscale(${p2*0.78}) brightness(${1 - p2*0.14})`;
-          return (
-            <div style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1, filter: pmFilter }}>
-              📄
-            </div>
-          );
-        })()}
+        {showPdfPM && (
+          <div style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1,
+            filter: pmGrayProg < 0.01
+              ? `sepia(1) saturate(8) hue-rotate(-20deg)`
+              : `grayscale(${pmGrayProg * 0.82}) saturate(${Math.max(0, 1 - pmGrayProg * 1.2)}) brightness(${1 - pmGrayProg * 0.14})` }}>
+            📄
+          </div>
+        )}
 
         {/* ── GRAY PDFs following the 3-segment path per party ── */}
         {phase >= 5 && PARTIES.map((p, i) => {
@@ -282,13 +278,9 @@ const Problem = () => {
           if (progress <= 0) return null;
           const pos  = pdfPos(progress, p);
           const gray = eio(progress);
-          const g1 = Math.min(gray / 0.4, 1);
-          const g2 = Math.max(0, (gray - 0.4) / 0.6);
           const filter = gray < 0.01
             ? `sepia(1) saturate(8) hue-rotate(-20deg)`
-            : gray > 0.99
-            ? `grayscale(0.78) brightness(0.86)`
-            : `sepia(${g1 * (1 - g2)}) saturate(${1 + (1-g1)*7}) grayscale(${g2*0.78}) brightness(${1 - g2*0.14})`;
+            : `grayscale(${gray * 0.82}) saturate(${Math.max(0, 1 - gray * 1.2)}) brightness(${1 - gray * 0.14})`;
           return (
             <div key={`pdf-${i}`}
               style={{ position:"absolute", left:pos.x, top:pos.y, fontSize:36, zIndex:10, pointerEvents:"none", lineHeight:1, filter }}>
