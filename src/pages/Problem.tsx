@@ -22,9 +22,9 @@ const PARTIES = [
 /* ── Timing (ms) ─────────────────────────────── */
 const CYCLE      = 13500;
 const PDF_IN_END = 1800;   // colored PDF arrives at PM
-const DIST_START = 5800;   // PM starts sending (4 s of aging before distribution)
-const DIST_LAG   = 800;    // stagger between parties
-const DIST_DUR   = 2600;   // travel time per PDF along full path
+const DIST_START = 4000;   // ~2 s of aging then distribute
+const DIST_LAG   = 1100;   // stagger between parties
+const DIST_DUR   = 3000;   // travel time per PDF
 const GRAY_END   = 6500;   // building fully aged at 6.5 s
 
 /* ── Building age stages ─────────────────────── */
@@ -101,12 +101,11 @@ const Problem = () => {
   const showPdfFly  = phase >= 5 && ct < PDF_IN_END;
   const arrowDotX   = lerp(E.cx + 42, PM.cx - PM.hw, eio(pdfInProg));
 
-  const STAGE_INTERVAL = (DIST_START - PDF_IN_END) / 4;
   const PDF_STAGES = [
-    { filter: "sepia(1) saturate(8) hue-rotate(-20deg)" },
-    { filter: "grayscale(0.28) brightness(0.97)" },
-    { filter: "grayscale(0.55) brightness(0.92)" },
-    { filter: "grayscale(0.82) brightness(0.86)" },
+    "sepia(1) saturate(8) hue-rotate(-20deg)",
+    "grayscale(0.28) brightness(0.97)",
+    "grayscale(0.55) brightness(0.92)",
+    "grayscale(0.82) brightness(0.86)",
   ];
 
   const CLOCK_FACES = ["🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚","🕛"];
@@ -265,19 +264,14 @@ const Problem = () => {
           </div>
         )}
 
-        {/* ── PDF settled on PM: steps through color stages, then stays gray ── */}
-        {phase >= 5 && ct >= PDF_IN_END && (() => {
-          const si = ct < DIST_START
-            ? Math.min(Math.floor((ct - PDF_IN_END) / STAGE_INTERVAL), PDF_STAGES.length - 1)
-            : PDF_STAGES.length - 1;
-          return (
-            <motion.div key={`pm-pdf-${si}`}
-              initial={{ opacity: 0.4 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}
-              style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1, filter: PDF_STAGES[si].filter }}>
-              📄
-            </motion.div>
-          );
-        })()}
+        {/* ── PDF settled on PM: synced with building age stages ── */}
+        {phase >= 5 && ct >= PDF_IN_END && (
+          <motion.div key={`pm-pdf-${ageStage}`}
+            initial={{ opacity: 0.4 }} animate={{ opacity: 1 }} transition={{ duration: 0.7 }}
+            style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1, filter: PDF_STAGES[ageStage] }}>
+            📄
+          </motion.div>
+        )}
 
         {/* ── GRAY PDFs following the 3-segment path per party ── */}
         {phase >= 5 && PARTIES.map((p, i) => {
