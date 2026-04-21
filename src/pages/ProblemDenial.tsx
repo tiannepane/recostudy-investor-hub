@@ -97,9 +97,15 @@ const ProblemDenial = () => {
   const pdfInX     = lerp(E.cx + 44, PM.cx + 22, eio(pdfInProg));
   const pdfInY     = lerp(E.cy - 14, PM.cy - 70, eio(pdfInProg));
   const showPdfFly  = phase >= 5 && ct < PDF_IN_END;
-  const showPdfPM   = phase >= 5 && ct >= PDF_IN_END;
   const arrowDotX   = lerp(E.cx + 42, PM.cx - PM.hw, eio(pdfInProg));
-  const pmAgeNorm  = phase >= 5 ? clamp((ct - PDF_IN_END) / (DIST_START - PDF_IN_END)) : 0;
+
+  const STAGE_INTERVAL = (DIST_START - PDF_IN_END) / 4;
+  const PDF_STAGES = [
+    { filter: "sepia(1) saturate(8) hue-rotate(-20deg)" },
+    { filter: "grayscale(0.28) brightness(0.97)" },
+    { filter: "grayscale(0.55) brightness(0.92)" },
+    { filter: "grayscale(0.82) brightness(0.86)" },
+  ];
 
   const CLOCK_FACES = ["🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚","🕛"];
   const clockEmoji  = phase >= 5 ? CLOCK_FACES[Math.floor(elapsed / 400) % 12] : "🕐";
@@ -267,15 +273,19 @@ const ProblemDenial = () => {
           </div>
         )}
 
-        {/* ── PDF settled on PM — ages red → gray before distribution ── */}
-        {showPdfPM && (
-          <div style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1,
-            filter: pmAgeNorm < 0.02
-              ? `sepia(1) saturate(8) hue-rotate(-20deg)`
-              : `grayscale(${pmAgeNorm * 0.82}) saturate(${Math.max(0, 1 - pmAgeNorm * 1.2)}) brightness(${1 - pmAgeNorm * 0.14})` }}>
-            📄
-          </div>
-        )}
+        {/* ── PDF settled on PM: steps through color stages, then stays gray ── */}
+        {phase >= 5 && ct >= PDF_IN_END && (() => {
+          const si = ct < DIST_START
+            ? Math.min(Math.floor((ct - PDF_IN_END) / STAGE_INTERVAL), PDF_STAGES.length - 1)
+            : PDF_STAGES.length - 1;
+          return (
+            <motion.div key={`pm-pdf-${si}`}
+              initial={{ opacity: 0.4 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}
+              style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1, filter: PDF_STAGES[si].filter }}>
+              📄
+            </motion.div>
+          );
+        })()}
 
         {/* ── PDFs traveling to parties ── */}
         {phase >= 5 && PARTIES.map((p, i) => {
