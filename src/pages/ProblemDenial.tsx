@@ -20,12 +20,20 @@ const PARTIES = [
 ];
 
 /* ── Timing (ms) ─────────────────────────────── */
-const CYCLE      = 9800;
+const CYCLE      = 10800;
 const PDF_IN_END = 1800;
 const DIST_START = 2500;
 const DIST_LAG   = 800;
 const DIST_DUR   = 2600;
-const GRAY_END   = 5000;
+const GRAY_END   = 6500;   // building fully aged at 6.5 s
+
+/* ── Building age stages ─────────────────────── */
+const AGE_FILTERS = [
+  "brightness(1) sepia(0) saturate(1)",
+  "brightness(0.97) sepia(0.38) saturate(0.8)",
+  "brightness(0.90) sepia(0.68) saturate(0.55) hue-rotate(5deg)",
+  "brightness(0.80) sepia(0.88) saturate(0.38) hue-rotate(8deg)",
+];
 
 /* ── Helpers ─────────────────────────────────── */
 const lerp  = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -85,7 +93,8 @@ const ProblemDenial = () => {
 
   const ALL_DELIVERED = DIST_START + (PARTIES.length - 1) * DIST_LAG + DIST_DUR;
 
-  const buildGray  = phase >= 5 ? eio(clamp(ct / GRAY_END)) : 0;
+  const ageNorm   = phase >= 5 ? clamp(ct / GRAY_END) : 0;
+  const ageStage  = ageNorm < 0.28 ? 0 : ageNorm < 0.54 ? 1 : ageNorm < 0.78 ? 2 : 3;
   const pdfInProg  = clamp(ct / PDF_IN_END);
   const pdfInX     = lerp(E.cx + 44, PM.cx + 22, eio(pdfInProg));
   const pdfInY     = lerp(E.cy - 14, PM.cy - 70, eio(pdfInProg));
@@ -169,7 +178,7 @@ const ProblemDenial = () => {
         {phase >= 1 && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.5 }}
             style={{ position:"absolute", left:-30, top:B.cy-100, width:140, display:"flex", flexDirection:"column", alignItems:"center" }}>
-            <div style={{ fontSize:128, filter:`grayscale(${buildGray}) brightness(${1-buildGray*0.38})` }}>🏢</div>
+            <motion.div animate={{ filter: AGE_FILTERS[ageStage] }} transition={{ duration:0.9, ease:"easeInOut" }} style={{ fontSize:128 }}>🏢</motion.div>
             <div style={{ fontSize:30, margin:"6px 0 0", background:"#F1F5F9", borderRadius:20, padding:"3px 10px" }}>{clockEmoji}</div>
           </motion.div>
         )}
@@ -180,7 +189,7 @@ const ProblemDenial = () => {
             style={{ position:"absolute", left:E.cx-55, top:E.cy-40, width:110, textAlign:"center" }}>
             <div style={{ background:"white", border:"1px solid #E5E7EB", borderRadius:10, padding:"7px 0 6px", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
               <div style={{ fontSize:32 }}>📋</div>
-              <p style={{ fontSize:14, color:"#1E293B", fontWeight:700, margin:"3px 0 0", fontFamily:"'Inter', sans-serif" }}>Engineering<br/>Consultant</p>
+              <p style={{ fontSize:16, color:"#1E293B", fontWeight:700, margin:"3px 0 0", fontFamily:"'Inter', sans-serif" }}>Engineering<br/>Consultant</p>
             </div>
           </motion.div>
         )}
@@ -191,7 +200,7 @@ const ProblemDenial = () => {
             style={{ position:"absolute", left:PM.cx-PM.hw, top:PM.cy-PM.hh-16, width:PM.hw*2, textAlign:"center" }}>
             <div style={{ border:"2px dashed #340075", borderRadius:14, padding:"12px 14px", background:"white", boxShadow:"0 2px 16px rgba(0,0,0,0.07)" }}>
               <div style={{ fontSize:52 }}>👤</div>
-              <p style={{ fontSize:15, color:"#0F172A", fontWeight:800, lineHeight:1.4, margin:"4px 0 0", fontFamily:"'Inter', sans-serif" }}>Property<br/>Manager</p>
+              <p style={{ fontSize:16, color:"#0F172A", fontWeight:800, lineHeight:1.4, margin:"4px 0 0", fontFamily:"'Inter', sans-serif" }}>Property<br/>Manager</p>
             </div>
           </motion.div>
         )}
@@ -218,7 +227,7 @@ const ProblemDenial = () => {
                         p.label === "Insurer" ? "sepia(1) hue-rotate(185deg) saturate(4) brightness(0.65)" :
                         "none" }}>{p.emoji}</div>
                   }
-                  <p style={{ fontSize:14, color:"#1E293B", fontWeight:700, margin:"3px 0 0", fontFamily:"'Inter', sans-serif" }}>{p.label}</p>
+                  <p style={{ fontSize:16, color:"#1E293B", fontWeight:700, margin:"3px 0 0", fontFamily:"'Inter', sans-serif" }}>{p.label}</p>
                 </div>
                 <AnimatePresence>
                   {showBadge && (
@@ -258,7 +267,7 @@ const ProblemDenial = () => {
         {/* ── RED PDF settled on PM ── */}
         {showPdfPM && (
           <div style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1,
-            filter: `sepia(${1 - pmGrayProg}) saturate(${1 + (1 - pmGrayProg) * 7}) hue-rotate(-20deg) grayscale(${pmGrayProg}) opacity(${1 - pmGrayProg * 0.5})` }}>
+            filter: `sepia(${0.15 + pmGrayProg * 0.75}) saturate(${1 + (1 - pmGrayProg) * 7}) hue-rotate(${-20 + pmGrayProg * 30}deg) brightness(${1 - pmGrayProg * 0.2})` }}>
             📄
           </div>
         )}
@@ -270,11 +279,11 @@ const ProblemDenial = () => {
           if (progress <= 0) return null;
           const pos  = pdfPos(progress, p);
           const gray = eio(progress);
-          const redFilter = `sepia(1) saturate(8) hue-rotate(-20deg)`;
-          const grayFilter = `grayscale(1) opacity(0.6)`;
+          const redFilter  = `sepia(1) saturate(8) hue-rotate(-20deg)`;
+          const oldFilter  = `sepia(0.85) saturate(0.45) brightness(0.82) hue-rotate(8deg)`;
           const filter = gray < 0.01 ? redFilter
-            : gray > 0.99 ? grayFilter
-            : `sepia(${1-gray}) saturate(${1+(1-gray)*7}) hue-rotate(-20deg) grayscale(${gray}) opacity(${1 - gray*0.4})`;
+            : gray > 0.99 ? oldFilter
+            : `sepia(${0.15 + gray * 0.7}) saturate(${1 + (1-gray)*7}) hue-rotate(${-20 + gray*28}deg) brightness(${1 - gray*0.18})`;
           return (
             <div key={`pdf-${i}`}
               style={{ position:"absolute", left:pos.x, top:pos.y, fontSize:36, zIndex:10, pointerEvents:"none", lineHeight:1, filter }}>
