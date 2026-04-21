@@ -49,8 +49,9 @@ function pdfPos(progress: number, party: typeof PARTIES[0]) {
 
 /* ── Page ────────────────────────────────────── */
 const ProblemDenial = () => {
-  const [phase,   setPhase]   = useState(0);
-  const [elapsed, setElapsed] = useState(0);
+  const [phase,        setPhase]        = useState(0);
+  const [elapsed,      setElapsed]      = useState(0);
+  const [showControls, setShowControls] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -97,13 +98,13 @@ const ProblemDenial = () => {
   const clockEmoji  = phase >= 5 ? CLOCK_FACES[Math.floor(elapsed / 400) % 12] : "🕐";
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ position: "fixed", inset: 0, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ position: "relative", width: DW, height: DH }}>
 
         <svg width={DW} height={DH} style={{ position: "absolute", inset: 0, overflow: "visible", pointerEvents: "none" }}>
           <defs>
             <marker id="pd-ag" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-              <polygon points="0 0, 7 2.5, 0 5" fill="#CBD5E1" />
+              <polygon points="0 0, 7 2.5, 0 5" fill="#94A3B8" />
             </marker>
             <marker id="pd-dg" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
               <polygon points="0 0, 7 2.5, 0 5" fill="#374151" />
@@ -142,23 +143,23 @@ const ProblemDenial = () => {
 
           {phase >= 5 && (
             <motion.path d={`M ${PM_R},${PM.cy} L ${BRANCH_X},${PM.cy}`}
-              stroke="#E2E8F0" strokeWidth={1.5} fill="none"
+              stroke="#94A3B8" strokeWidth={1.5} fill="none"
               initial={{ pathLength:0, opacity:0 }} animate={{ pathLength:1, opacity:1 }} transition={{ duration:0.2 }} />
           )}
           {phase >= 5 && (
             <>
               <motion.path d={`M ${BRANCH_X},${PM.cy} L ${BRANCH_X},${PARTIES[0].cy}`}
-                stroke="#E2E8F0" strokeWidth={1.5} fill="none"
+                stroke="#94A3B8" strokeWidth={1.5} fill="none"
                 initial={{ pathLength:0, opacity:0 }} animate={{ pathLength:1, opacity:1 }} transition={{ duration:0.35 }} />
               <motion.path d={`M ${BRANCH_X},${PM.cy} L ${BRANCH_X},${PARTIES[4].cy}`}
-                stroke="#E2E8F0" strokeWidth={1.5} fill="none"
+                stroke="#94A3B8" strokeWidth={1.5} fill="none"
                 initial={{ pathLength:0, opacity:0 }} animate={{ pathLength:1, opacity:1 }} transition={{ duration:0.35 }} />
             </>
           )}
           {phase >= 5 && PARTIES.map((p, i) => (
             <motion.path key={p.label}
               d={`M ${BRANCH_X},${p.cy} L ${p.cx-P_HW},${p.cy}`}
-              stroke="#E2E8F0" strokeWidth={1.5} fill="none" markerEnd="url(#pd-ag)"
+              stroke="#94A3B8" strokeWidth={1.5} fill="none" markerEnd="url(#pd-ag)"
               initial={{ pathLength:0, opacity:0 }} animate={{ pathLength:1, opacity:1 }}
               transition={{ duration:0.25, delay:i*0.09 }} />
           ))}
@@ -179,7 +180,7 @@ const ProblemDenial = () => {
             style={{ position:"absolute", left:E.cx-55, top:E.cy-40, width:110, textAlign:"center" }}>
             <div style={{ background:"white", border:"1px solid #E5E7EB", borderRadius:10, padding:"7px 0 6px", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
               <div style={{ fontSize:32 }}>📋</div>
-              <p style={{ fontSize:14, color:"#475569", fontWeight:600, margin:"3px 0 0" }}>Engineering<br/>Consultant</p>
+              <p style={{ fontSize:14, color:"#1E293B", fontWeight:700, margin:"3px 0 0", fontFamily:"'Inter', sans-serif" }}>Engineering<br/>Consultant</p>
             </div>
           </motion.div>
         )}
@@ -190,7 +191,7 @@ const ProblemDenial = () => {
             style={{ position:"absolute", left:PM.cx-PM.hw, top:PM.cy-PM.hh-16, width:PM.hw*2, textAlign:"center" }}>
             <div style={{ border:"2px dashed #340075", borderRadius:14, padding:"12px 14px", background:"white", boxShadow:"0 2px 16px rgba(0,0,0,0.07)" }}>
               <div style={{ fontSize:52 }}>👤</div>
-              <p style={{ fontSize:15, color:"#1E293B", fontWeight:700, lineHeight:1.4, margin:"4px 0 0" }}>Property<br/>Manager</p>
+              <p style={{ fontSize:15, color:"#0F172A", fontWeight:800, lineHeight:1.4, margin:"4px 0 0", fontFamily:"'Inter', sans-serif" }}>Property<br/>Manager</p>
             </div>
           </motion.div>
         )}
@@ -217,7 +218,7 @@ const ProblemDenial = () => {
                         p.label === "Insurer" ? "sepia(1) hue-rotate(185deg) saturate(4) brightness(0.65)" :
                         "none" }}>{p.emoji}</div>
                   }
-                  <p style={{ fontSize:14, color:"#475569", fontWeight:600, margin:"3px 0 0" }}>{p.label}</p>
+                  <p style={{ fontSize:14, color:"#1E293B", fontWeight:700, margin:"3px 0 0", fontFamily:"'Inter', sans-serif" }}>{p.label}</p>
                 </div>
                 <AnimatePresence>
                   {showBadge && (
@@ -285,21 +286,30 @@ const ProblemDenial = () => {
       </div>
 
       {/* ── Controls ── */}
-      <AnimatePresence>
-        {phase >= 5 && (
-          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:2, duration:0.5 }}
-            style={{ position:"fixed", bottom:32, right:40, display:"flex", gap:10 }}>
-            <button onClick={restart}
-              style={{ padding:"10px 20px", borderRadius:8, border:"1px solid #E2E8F0", background:"white", fontSize:14, fontWeight:600, color:"#64748B", cursor:"pointer" }}>
-              ↺ Restart
-            </button>
-            <button onClick={() => navigate("/set1")}
-              style={{ padding:"10px 22px", borderRadius:8, border:"none", background:"#2E1A47", fontSize:14, fontWeight:600, color:"white", cursor:"pointer" }}>
-              See the Solution →
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {phase >= 5 && (
+        <div style={{ position:"fixed", bottom:20, right:20, display:"flex", flexDirection:"column", alignItems:"flex-end", gap:6 }}>
+          <AnimatePresence>
+            {showControls && (
+              <motion.div initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:6 }}
+                transition={{ duration:0.2 }}
+                style={{ display:"flex", gap:6 }}>
+                <button onClick={restart}
+                  style={{ padding:"5px 10px", borderRadius:6, border:"1px solid #E2E8F0", background:"white", fontSize:11, fontWeight:600, color:"#64748B", cursor:"pointer" }}>
+                  ↺ Restart
+                </button>
+                <button onClick={() => navigate("/set1")}
+                  style={{ padding:"5px 10px", borderRadius:6, border:"none", background:"#2E1A47", fontSize:11, fontWeight:600, color:"white", cursor:"pointer" }}>
+                  Solution →
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <button onClick={() => setShowControls(v => !v)}
+            style={{ padding:"3px 8px", borderRadius:20, border:"1px solid #E2E8F0", background:"white", fontSize:10, color:"#94A3B8", cursor:"pointer", opacity:0.5 }}>
+            {showControls ? "✕" : "⋯"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
