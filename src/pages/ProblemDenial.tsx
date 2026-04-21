@@ -272,14 +272,17 @@ const ProblemDenial = () => {
           </div>
         )}
 
-        {/* ── PDF settled on PM: synced with building age stages ── */}
-        {phase >= 5 && ct >= PDF_IN_END && (
-          <motion.div key={`pm-pdf-${ageStage}`}
-            initial={{ opacity: 0.4 }} animate={{ opacity: 1 }} transition={{ duration: 0.7 }}
-            style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1, filter: PDF_STAGES[ageStage] }}>
-            📄
-          </motion.div>
-        )}
+        {/* ── PDF settled on PM: fresh for 1 s, then synced with building age ── */}
+        {phase >= 5 && ct >= PDF_IN_END && (() => {
+          const si = ct < PDF_IN_END + 1000 ? 0 : ageStage;
+          return (
+            <motion.div key={`pm-pdf-${si}`}
+              initial={{ opacity: 0.4 }} animate={{ opacity: 1 }} transition={{ duration: 0.7 }}
+              style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1, filter: PDF_STAGES[si] }}>
+              📄
+            </motion.div>
+          );
+        })()}
 
         {/* ── PDFs traveling to parties ── */}
         {phase >= 5 && PARTIES.map((p, i) => {
