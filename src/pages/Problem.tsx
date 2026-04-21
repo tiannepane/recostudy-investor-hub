@@ -262,12 +262,18 @@ const Problem = () => {
         )}
 
         {/* ── RED PDF settled on PM ── */}
-        {showPdfPM && (
-          <div style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1,
-            filter: `sepia(${0.15 + pmGrayProg * 0.75}) saturate(${1 + (1 - pmGrayProg) * 7}) hue-rotate(${-20 + pmGrayProg * 30}deg) brightness(${1 - pmGrayProg * 0.2})` }}>
-            📄
-          </div>
-        )}
+        {showPdfPM && (() => {
+          const p1 = Math.min(pmGrayProg / 0.4, 1);
+          const p2 = Math.max(0, (pmGrayProg - 0.4) / 0.6);
+          const pmFilter = pmGrayProg < 0.01
+            ? `sepia(1) saturate(8) hue-rotate(-20deg)`
+            : `sepia(${p1 * (1 - p2)}) saturate(${1 + (1-p1)*7}) grayscale(${p2*0.78}) brightness(${1 - p2*0.14})`;
+          return (
+            <div style={{ position:"absolute", left:PM.cx+26, top:PM.cy-82, fontSize:36, zIndex:10, lineHeight:1, filter: pmFilter }}>
+              📄
+            </div>
+          );
+        })()}
 
         {/* ── GRAY PDFs following the 3-segment path per party ── */}
         {phase >= 5 && PARTIES.map((p, i) => {
@@ -276,11 +282,13 @@ const Problem = () => {
           if (progress <= 0) return null;
           const pos  = pdfPos(progress, p);
           const gray = eio(progress);
-          const redFilter  = `sepia(1) saturate(8) hue-rotate(-20deg)`;
-          const oldFilter  = `sepia(0.85) saturate(0.45) brightness(0.82) hue-rotate(8deg)`;
-          const filter = gray < 0.01 ? redFilter
-            : gray > 0.99 ? oldFilter
-            : `sepia(${0.15 + gray * 0.7}) saturate(${1 + (1-gray)*7}) hue-rotate(${-20 + gray*28}deg) brightness(${1 - gray*0.18})`;
+          const g1 = Math.min(gray / 0.4, 1);
+          const g2 = Math.max(0, (gray - 0.4) / 0.6);
+          const filter = gray < 0.01
+            ? `sepia(1) saturate(8) hue-rotate(-20deg)`
+            : gray > 0.99
+            ? `grayscale(0.78) brightness(0.86)`
+            : `sepia(${g1 * (1 - g2)}) saturate(${1 + (1-g1)*7}) grayscale(${g2*0.78}) brightness(${1 - g2*0.14})`;
           return (
             <div key={`pdf-${i}`}
               style={{ position:"absolute", left:pos.x, top:pos.y, fontSize:36, zIndex:10, pointerEvents:"none", lineHeight:1, filter }}>
