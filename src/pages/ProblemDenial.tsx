@@ -108,6 +108,11 @@ const ProblemDenial = () => {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      {phase >= 5 && (
+        <button onClick={restart} style={{ position:"fixed", top:12, left:12, padding:"3px 9px", borderRadius:20, border:"1px solid #E2E8F0", background:"white", fontSize:11, fontWeight:600, color:"#64748B", cursor:"pointer", opacity:0.55, zIndex:100 }}>
+          ↺
+        </button>
+      )}
       <div style={{ position: "relative", width: DW, height: DH }}>
 
         <svg width={DW} height={DH} style={{ position: "absolute", inset: 0, overflow: "visible", pointerEvents: "none" }}>
