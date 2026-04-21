@@ -9,18 +9,18 @@ const E  = { cx: 224, cy: 210 };
 const PM = { cx: 416, cy: 210, hw: 65, hh: 48 };
 const PM_R     = PM.cx + PM.hw;
 const BRANCH_X = 510;
-const L_CX = 638, R_CX = 772, P_HW = 42;
+const L_CX = 638, R_CX = 772, P_HW = 50;
 
 const PARTIES = [
   { cx: L_CX, cy: 66,  label: "Board",      emoji: "👥", method: "📠" },
-  { cx: R_CX, cy: 148, label: "Investor",   emoji: "💼", method: "📧" },
+  { cx: R_CX, cy: 148, label: "Investor",   emoji: "💰", method: "📧" },
   { cx: L_CX, cy: 228, label: "Contractor", emoji: "🔧", method: "☎️" },
   { cx: R_CX, cy: 308, label: "Lender",     emoji: "🏛️", method: "📟" },
   { cx: L_CX, cy: 388, label: "Insurer",    emoji: "🛡️", method: "📠" },
 ];
 
 /* ── Timing (ms) ─────────────────────────────── */
-const CYCLE      = 14000;
+const CYCLE      = 9800;
 const PDF_IN_END = 1800;
 const DIST_START = 2500;
 const DIST_LAG   = 800;
@@ -176,10 +176,10 @@ const ProblemDenial = () => {
         {/* ── ENGINEER ── */}
         {phase >= 2 && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.5 }}
-            style={{ position:"absolute", left:E.cx-46, top:E.cy-34, width:92, textAlign:"center" }}>
+            style={{ position:"absolute", left:E.cx-55, top:E.cy-40, width:110, textAlign:"center" }}>
             <div style={{ background:"white", border:"1px solid #E5E7EB", borderRadius:10, padding:"7px 0 6px", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
               <div style={{ fontSize:32 }}>📋</div>
-              <p style={{ fontSize:12, color:"#475569", fontWeight:600, margin:"3px 0 0" }}>Consultant</p>
+              <p style={{ fontSize:14, color:"#475569", fontWeight:600, margin:"3px 0 0" }}>Engineering<br/>Consultant</p>
             </div>
           </motion.div>
         )}
@@ -190,7 +190,7 @@ const ProblemDenial = () => {
             style={{ position:"absolute", left:PM.cx-PM.hw, top:PM.cy-PM.hh-16, width:PM.hw*2, textAlign:"center" }}>
             <div style={{ border:"2px dashed #340075", borderRadius:14, padding:"12px 14px", background:"white", boxShadow:"0 2px 16px rgba(0,0,0,0.07)" }}>
               <div style={{ fontSize:52 }}>👤</div>
-              <p style={{ fontSize:13, color:"#1E293B", fontWeight:700, lineHeight:1.4, margin:"4px 0 0" }}>Property<br/>Manager</p>
+              <p style={{ fontSize:15, color:"#1E293B", fontWeight:700, lineHeight:1.4, margin:"4px 0 0" }}>Property<br/>Manager</p>
             </div>
           </motion.div>
         )}
@@ -208,12 +208,16 @@ const ProblemDenial = () => {
               style={{ position:"absolute", left:p.cx-P_HW, top:p.cy-34, width:P_HW*2, textAlign:"center", zIndex:2 }}>
               <div style={{ position:"relative" }}>
                 <div style={{ background:"white", border:"1px solid #E5E7EB", borderRadius:10, padding:"7px 0 6px", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
-                  <div style={{ fontSize:32, filter:
-                    p.label === "Board"    ? "sepia(1) hue-rotate(145deg) saturate(6) brightness(0.52)" :
-                    p.label === "Insurer"  ? "sepia(1) hue-rotate(185deg) saturate(4) brightness(0.65)" :
-                    p.label === "Lender"   ? "sepia(1) hue-rotate(270deg) saturate(2) brightness(0.42)" :
-                    "none" }}>{p.emoji}</div>
-                  <p style={{ fontSize:12, color:"#475569", fontWeight:600, margin:"3px 0 0" }}>{p.label}</p>
+                  {p.label === "Investor"
+                    ? <div style={{ display:"flex", justifyContent:"center", alignItems:"center", height:38 }}><img src="/investor .png" alt="Investor" style={{ width:34, height:34, objectFit:"contain", display:"block" }} /></div>
+                    : p.label === "Lender"
+                    ? <div style={{ display:"flex", justifyContent:"center", alignItems:"center", height:38 }}><img src="/bank.png" alt="Lender" style={{ width:34, height:34, objectFit:"contain", display:"block" }} /></div>
+: <div style={{ fontSize:32, filter:
+                        p.label === "Board"   ? "sepia(1) hue-rotate(145deg) saturate(6) brightness(0.52)" :
+                        p.label === "Insurer" ? "sepia(1) hue-rotate(185deg) saturate(4) brightness(0.65)" :
+                        "none" }}>{p.emoji}</div>
+                  }
+                  <p style={{ fontSize:14, color:"#475569", fontWeight:600, margin:"3px 0 0" }}>{p.label}</p>
                 </div>
                 <AnimatePresence>
                   {showBadge && (
